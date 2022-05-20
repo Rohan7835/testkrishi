@@ -1,0 +1,917 @@
+/*@font-face {
+    
+    src: url('../fonts/Montserrat-UltraLight.woff') format('woff'), 
+	url('../fonts/Montserrat-UltraLight.otf') format('otf'), 
+	url('../fonts/Montserrat-UltraLight.ttf') format('ttf'); 
+}
+
+ @font-face {
+    
+    src: url('../fonts/Montserrat-Light.woff') format('woff'), 
+	url('../fonts/Montserrat-Light.otf') format('otf'), 
+	url('../fonts/Montserrat-Light.ttf') format('ttf');
+}
+
+@font-face {
+    
+    src: url('../fonts/Montserrat-Regular.woff') format('woff'), 
+	url('../fonts/Montserrat-Regular.otf') format('otf'), 
+	url('../fonts/Montserrat-Regular.ttf') format('ttf'); 
+}
+
+@font-face {
+    
+    src: url('../fonts/Montserrat-SemiBold.woff') format('woff'), 
+	url('../fonts/Montserrat-SemiBold.otf') format('otf'), 
+	url('../fonts/Montserrat-SemiBold.ttf') format('ttf'); 
+}
+ 
+@font-face {
+    
+    src: url('../fonts/Montserrat-Bold.woff') format('woff'),	
+	url('../fonts/Montserrat-Bold.otf') format('otf'), 
+	url('../fonts/Montserrat-Bold.ttf') format('ttf'); 
+}  
+@font-face {
+    font-family: "Montserrat-Black";
+    src: url('../fonts/Montserrat-Black.woff') format('woff'), 
+	url('../fonts/Montserrat-Black.otf') format('otf'), 
+	url('../fonts/Montserrat-Black.ttf') format('ttf'); 
+} 
+@font-face {
+    font-family: "Montserrat-ExtraBold";
+    src: url('../fonts/Montserrat-ExtraBold.woff') format('woff'), 
+	url('../fonts/Montserrat-ExtraBold.otf') format('otf'),
+	url('../fonts/Montserrat-ExtraBold.ttf') format('ttf'); 
+} */
+/*@import url('https://fonts.googleapis.com/css?family=Lato:300,400,700,900'); */
+/*@import url('https://fonts.googleapis.com/css?family=Montserrat-Light:300,400,700,900'); */
+
+   
+*
+{    margin:0px;padding:0px;font-size:16px;line-height:26px;}
+h1, h2, h3, h4, h5, h6{padding:0px;margin:0px;}
+
+
+
+.header-top{padding:15px 0px;transition: all 0.5s;
+    /*-webkit-transition: all 0.5s;
+    -ms-transition: all 0.5s;
+    -moz-transition: all 0.5s;*/
+    /*top-68px;*/
+}
+header{display:table;width:100%;}
+.co-logo{width:40%;display:table-cell;}
+.co-logo a {display: block;    width: 121px;}
+.co-logo a img{height:30px;}
+nav{width:30%;display:table-cell;    vertical-align: middle;}
+nav ul{margin-bottom: 0;}
+nav ul li{float:left;padding:0 10px;list-style:none;}
+.nav-active{color:#e74424;text-decoration:undeline;}
+.current-menu-item{color:#e74424;text-decoration:undeline;}
+nav ul li:first-child{padding-left:0px;}
+nav ul li:last-child{padding-right:0px;}
+nav ul li a{font-size:14px;color:#333333;text-transform:uppercase;transition: all 0.5s;}
+nav ul li a:hover, nav ul li a:active, nav ul li a:focus{color:#e74424;text-decoration:undeline;}
+.header-right{width:30%;display:table-cell;}
+.header-right ul{float: right;    margin-bottom: 0;}
+.header-right ul li{list-style:none;float:left;padding:0 10px;}
+.header-right ul li:last-child{padding-right:0px;}
+.header-right ul li a{font-size:12px;color:#333333;text-transform:uppercase;transition: all 0.5s;text-decoration:none;}
+
+
+/* header-fixed design */
+.header-top.fixed1{top:-68px; transition: all 0.5s;    -webkit-transition: all 0.5s;    -ms-transition: all 0.5s;    -moz-transition: all 0.5s;}
+.header-top.fixed{position: fixed;    background: #eaeaea;    width: 100%;    z-index: 16;    border-bottom: 1px solid #eee;    padding: 15px 0px;    transition: all 0.5s;    -webkit-transition: all 0.5s;    -ms-transition: all 0.5s;    -moz-transition: all 0.5s;    top: 0;    height: 68px;}
+
+
+
+.top-box{color:#fff;    width: 50%;	    padding: 100px 0;}
+
+
+
+.container{width:95%;margin:0 auto;}
+.header-box{background-image:url('./img/header-bg.jpg'); background-repeat:no-repeat;height:auto;background-position:top center;padding-top:35px;background-size: cover;}
+
+.top-box h2{ font-size:45px;padding-bottom:30px;}
+.top-box h2:after{width:170px;height:3px;background-color:#e74424;content:"";display:block;margin-top:30px;margin-bottom:50px;}
+.top-box p span{}
+.rdi-box{ display: -webkit-box;    display: -moz-box;    display: -ms-box;    align-items: top;justify-content: space-between;    flex-flow: wrap;    display: flex; display: -webkit-flex;    display: -moz-flex;    display: -ms-flex;}
+.rdi-column-bx{width:33.3%;text-align:center;color:#fff;padding:50px 15px;}
+.rdi-column-bx:nth-child(1){background-color:rgba(22,35,53, 0.7);}
+.rdi-column-bx:nth-child(2){background-color:rgba(22,35,53, 0.4);}
+.rdi-column-bx:nth-child(3){background-color:rgba(22,35,53, 0.7);}
+.rdi-column-bx h3{font-size:28px;text-transform:uppercase;}
+.rdi-column-bx h3 span{font-size:28px;text-transform:uppercase;}
+.rdi-column-bx p{margin:15px 0px 50px;line-height:normal;}
+.rdi-column-bx  a{ border: 3px solid #e74424;    color: #fff;    text-transform: uppercase;    font-size: 16px;    width: 40%;    margin: 0 auto;text-decoration:none; display: block;    height: 45px;    line-height: 45px;transition:all 0.5s;}
+.rdi-column-bx  a:hover, .rdi-column-bx  a:focus, .rdi-column-bx  a:active{background-color: #e74424;}
+
+.rdi-features-bx{background-color: #fff;    display: flex;    display: -webkit-flex;    display: -moz-flex;    display: -ms-flex;    display: -webkit-box;    justify-content: space-around;
+    align-items: center;    flex-wrap: wrap;    -webkit-flex-wrap: wrap;    -ms-flex-wrap: wrap;}
+	.rdi-feat-list{width:25%;}
+.rdi-feat-list a{width: 100%;    text-align: center;    text-transform: capitalize;padding:75px 50px 30px 50px;float:left;border-bottom:5px solid #fff;text-decoration:none;}
+.rdi-feat-list a img{margin-bottom:20px;}
+.rdi-feat-list a:hover{border-bottom:5px solid #e74424;text-decoration:none;}
+.rdi-feat-list a i{color:#e74424;font-size:34px;margin-bottom:25px;}
+.rdi-feat-list h6{color:#162335;font-size:18px;}
+.rdi-feat-list a.feat-active{border-bottom:5px solid #e74424;}
+
+.sevices-slider{position: relative;    padding: 80px 0px;    background: linear-gradient(-19deg, #fff 70%,#e74424 70%);    background: -webkit-linear-gradient(-19deg, #fff 70%,#e74424 70%);
+    background: -moz-linear-gradient(-19deg, #fff 70%,#e74424 70%);    background: -ms-linear-gradient(-19deg, #fff 70%,#e74424 70%);    height:650px;}
+	.ser-content-bx{width:100%;display:table;padding-top:80px;}
+	.ser-content-bx .slider-left{width:50%;display:table-cell;vertical-align:top;text-align:right;padding-right:50px;position:relative;}
+	.ser-content-bx .slider-left h2{font-size:45px;padding-bottom:30px;color:#162334;text-transform: capitalize;}
+	.ser-content-bx .slider-left h2:after{width:170px;height:2px;background-color:#e74424;content:"";display:block;margin-top:30px;margin-bottom:50px;position:absolute;right:50px;}
+	.ser-content-bx .slider-left p{padding-top:50px;color:#162334;}
+	.ser-content-bx .slider-right{width:50%;display:table-cell;vertical-align:top;}
+
+	.sevices-slider .carousel-control{background-image:none;}
+	.sevices-slider .left.carousel-control{position: relative;    width: 100%;    float: right;    z-index: 1;opacity:1;}
+	.sevices-slider .left.carousel-control span{position: absolute;    right: 50px;    top: 0;}
+	.sevices-slider .left.carousel-control span i{font-size:40px;}
+	.sevices-slider .right.carousel-control{position: relative;    width: 100%;    float: right;    z-index: 1;opacity:1}
+	.sevices-slider .right.carousel-control span{position: absolute;    right: 0;    top: 0;}
+	.sevices-slider .right.carousel-control span i{font-size:40px;}
+  
+  
+  /* quote box design start from here */
+.quote-bx{background-image:url('./img/quote-bg.jpg');background-repeat:no-repeat;background-position:left center;text-align:center;padding:120px 0px;background-size: cover;}
+.quote-bx h2{ font-size:45px;padding-bottom:30px;color:#fff;}
+.quote-bx h2:after{width: 10%;    height: 3px;    background-color: #e74424;    content: "";    display: block;    margin: 30px auto 15px auto;}
+.quote-content p{ font-size:18px;color:#fff;margin-bottom:50px;}
+.quote-content a{border: 3px solid #e74424;    color: #fff;    font-size: 16px;    width: 15%;    margin: 0 auto;    text-decoration: none;    display: block;    height: 45px;    line-height: 39px;    transition: all 0.5s;}
+.quote-content a:hover, .quote-content a:focus, .quote-content a:active{background-color: #e74424;}
+
+
+
+  
+  /* footer design start from here */
+ footer{background-color:#1e1f21;}
+ .footer-column:nth-child(1) {    width: 21.3%;}
+ .footer-column:nth-child(2) {    width: 33.3%;}
+ /*.footer-column:nth-child(3) {auto;}*/
+ 
+ .footer-content{display: -webkit-box;    display: -moz-box;    display: -ms-box;    align-items: top;    justify-content: space-between;    flex-flow: wrap;    display: flex;    display: -webkit-flex;    display: -moz-flex;    display: -ms-flex;align-items:center;padding:20px 0px;}
+.footer-column p{margin-bottom:0px;text-align:center;font-size:12px;color:#cacaca; }
+.footer-column ul{margin-bottom:0px;width:100%;text-align:right;}
+.footer-column ul li{    list-style: none;    float: left;    line-height: normal;}
+.footer-column ul li:last-child a{padding-right:0px;border-right:0px;}
+.footer-column ul li a{font-size: 12px;    color: #cacaca;        text-transform: capitalize;    border-right: 1px solid #cacaca;    padding: 0 15px;}
+.footer-column img{height:20px;}
+
+
+
+ 
+ /* About US RDI Page design */
+ 
+ .inner-top-banner-text{    text-align: center;    width: 60%;    margin: 0 auto;    padding: 200px 0px;}
+ .inner-top-banner-text p{font-size: 30px;    color: #fff;        line-height: normal;}
+ .inner-top-banner-text p span{    color: #fff;        font-size: 30px;}
+ .about-banner-bx{background-image:url('./img/about-banner.jpg');background-repeat:no-repeat;height:500px;background-position:top center;width:100%;position:relative;background-size:cover;}
+ .about-content{text-align:center;    width: 60%;    margin: 0 auto;    padding: 200px 0px;}
+ .footer-inner{background-color:#1e1f21;}
+  .footer-inner .footer-column p{color:#cacaca;}
+  .footer-inner .footer-column ul li:last-child a{padding-right:0px;border-right:0px;}
+.footer-inner .footer-column ul li a{font-size: 12px;    color: #cacaca;        text-transform: capitalize;    border-right: 1px solid #cacaca;    padding: 0 15px;}
+ 
+ .about-tab-section{padding:0px; width:100%;margin:0 auto;display:table;height:430px;}
+ .about-tab-section .tabs-left a{text-transform:uppercase;color:#333333;border-radius:0px;border:0px;padding:0px;font-size:14px;}
+ .about-tab-section .tabs-left a:hover{background-color:transparent;border-style:none;}
+ .about-tab-section .tabs-left li.active a{background-color:transparent;color:#e74424;border:0px;border-radius:0px;}
+ .about-tab-section .tabs-left li.active a:after{content:"";width:36px;height:2px;background-color:#e74424;display:block;position:absolute;margin-top:5px;}
+ .about-tab-section .tabs-left li{margin-bottom:20px;}
+ 
+ .about-left-col{width:35%;display:table-cell;padding-right:15px;padding-left:13%;vertical-align:top;padding-top:100px;padding-bottom:100px;}
+ .about-left-col .tabs-left{border-right:0px;}
+ 
+.about-right-col{width:65%;display:table-cell;padding-left:15px;vertical-align:top;}
+.about-right-col #about-rdi-bx, .about-right-col #physician{padding:0px 18% 0px 4%;margin:100px 0px;border-left:1px solid #e0e0e0;}
+
+
+.about-right-col p span{    padding-bottom: 10px;    display: block;}
+.about-right-col p {}
+.about-right-col h4{font-size:18px;}
+.about-ldership-bx{display: flex;display: -webkit-flex;display: -ms-flex;display: -moz-flex;display: -webkit-box;display: -ms-box;display: -moz-box;display: -ms-box;flex-wrap: wrap;
+    -webkit-flex-wrap: wrap; -ms-flex-wrap: wrap; align-items: normal;  justify-content: space-between;    display: -webkit-flex;    margin: 100px 0px;    padding-left: 3%;}
+ 
+ .leadership-list {    width: 50%;    text-align: center;margin-bottom:20px;}
+ .leadership-list  figure img{margin:0 auto 20px auto;}
+ .about-right-col #leadership{padding:0px 18% 0px 6%;margin:100px 0px;border-left:1px solid #e0e0e0;}
+ .about-right-col #pharmacetual-team{margin:100px 0px; border-left: 1px solid #e0e0e0;}
+ .about-right-col #leadership .about-leader-content p,  .about-right-col #pharmacetual-team .about-leader-content p {color:#e74424;text-transform:uppercase;margin-bottom:0px;}
+ .about-right-col #leadership .about-leader-content span, .about-right-col #pharmacetual-team .about-leader-content span {font-size:13px;display:block;color:#033333;margin-bottom:10px;}
+ .about-right-col #leadership .about-leader-content a,  .about-right-col #pharmacetual-team .about-leader-content a {font-size:13px;display:block;color:#6236b3;}
+ 
+.about-right-col #diagnostics-team{padding:0px 4% 0px 1%; border-left:1px solid #e0e0e0; margin:100px 0px;}
+ #diagnostics-team .leadership-list {    width: 16%;    text-align: center;margin-bottom:20px;}
+.about-right-col #diagnostics-team .about-leader-content p {color:#e74424;text-transform:uppercase;margin-bottom:0px;font-size:11px;}
+ .about-right-col #diagnostics-team .about-leader-content span {font-size:13px;display:block;color:#033333;margin-bottom:10px;font-size:11px;line-height:normal;}
+ .about-right-col #diagnostics-team .about-leader-content a {font-size:13px;display:block;color:#6236b3;font-size:11px;line-height:normal;}
+ 
+ 
+ .about-right-col .tab-content #leadership-slider{    position: relative;    padding: 80px 0px;    background: linear-gradient(-19deg, #fff 67%,#e74424 67%);    background: -webkit-linear-gradient(-19deg, #fff 67%,#e74424 67%);    background: -moz-linear-gradient(-19deg, #fff 67%,#e74424 67%);    background: -ms-linear-gradient(-19deg, #fff 67%,#e74424 67%);
+    height: 442px;}
+ 
+ .about-right-col .tab-content #leadership-slider #myCarousel-tab{margin-top:40px;border-left:1px solid #e0e0e0;padding-left:4%;}
+.about-right-col .tab-content #leadership-slider .carousel-tab-content {width:100%;display:table;}
+.about-right-col .tab-content #leadership-slider .carousel-tab-left {width:60%;display:table-cell;padding-right:50px;vertical-align:top;}
+.about-right-col .tab-content #leadership-slider .carousel-tab-left p {font-size:14px;color:#333;}
+.about-right-col .tab-content #leadership-slider .carousel-tab-right {width:40%;display:table-cell;padding-left:50px;vertical-align:top;}
+.about-right-col .tab-content #leadership-slider .carousel-tab-right figure img {margin-bottom:20px;}
+.about-right-col .tab-content #leadership-slider .carousel-tab-right p {text-transform:uppercase;color:#fff;margin-bottom:0px;padding-left:20px;}
+.about-right-col .tab-content #leadership-slider .carousel-tab-right span {font-size:13px; display:block;color:#fff;padding-left:20px;}
+.about-right-col .tab-content #leadership-slider .carousel-control{background-image:none;}
+.about-right-col .tab-content #leadership-slider .carousel-control {width: 100%;    float: right;    z-index: 1;    opacity: 1;}
+.about-right-col .tab-content #leadership-slider .carousel-control span {position: absolute;    right: 0;    top: 0;}
+.about-right-col .tab-content #leadership-slider .carousel-control span i {font-size: 40px;}
+ .about-right-col .tab-content #leadership-slider .left.carousel-control span{right: 10%;    top: -40px;}
+ .about-right-col .tab-content #leadership-slider .right.carousel-control span{right: 6%;    top: -40px;}
+ 
+ 
+.tabs-left{  border-bottom: none;  padding-top: 2px;}
+.tabs-left {  border-right: 1px solid #ddd;}
+
+.tabs-left>li {  float: none;  margin-bottom: 2px;}
+.tabs-left>li {  margin-right: -1px;}
+.tabs-right>li {  margin-left: -1px;}
+.tabs-left>li.active>a, .tabs-left>li.active>a:hover, .tabs-left>li.active>a:focus {   border-bottom-color: #ddd;  border-right-color: transparent;}
+
+
+.tabs-left>li>a {
+  border-radius: 4px 0 0 4px;
+  margin-right: 0;
+  display:block;
+}
+
+ 
+ .about-career-bx{background-image:url('./img/about-career-bg.jpg');background-repeat:no-repeat;background-position:left center; height:auto;background-size:cover;}
+ .about-career-con{padding:150px 0px;text-align:center;}
+ .about-career-con h4{font-size:28px;color:#fff;margin-bottom:40px;}
+ .about-career-con h4 span{font-size:28px;color:#fff;}
+ .about-career-con h4 span.sub-opportunity a{display:inline-block;border:0px;width:auto;    text-transform: capitalize;font-size:28px;color:#fff;}
+ .about-career-con h4 span.sub-opportunity a:hover, .about-career-con h4 span.sub-opportunity a:active, .about-career-con h4 span.sub-opportunity a:focus{background-color:transparent;color:#e74424;}
+ .about-career-con a{border: 3px solid #e74424;    color: #fff;    font-size: 16px;    width: 15%;    margin: 0 auto;    text-decoration: none;    display: block;    height: 45px;
+    line-height: 39px;    transition: all 0.5s;text-align:center;text-transform:uppercase;}
+.about-career-con a:hover, .about-career-con a:focus, .about-career-con a:active {    background-color: #e74424;}
+ 
+ 
+ 
+ 
+ 
+ /* Contact Us page design start from here */
+ .contact-main-box{background: linear-gradient(0deg, #293544 50%,#e64627 50%);
+    background: -webkit-linear-gradient(0deg, #293544 50%,#e64627 50%);
+    background: -moz-linear-gradient(0deg, #293544 50%,#e64627 50%);
+    background: -ms-linear-gradient(0deg, #293544 50%,#e64627 50%);
+    padding: 60px 0px;}
+	.contact-content{display: -webkit-box;    display: -moz-box;    display: -ms-box;    align-items: top;    justify-content: space-between;    flex-flow: wrap;    display: flex;
+    display: -webkit-flex;    display: -moz-flex;    display: -ms-flex;}
+ .contact-column{width:50%;text-align:center;}
+ .contact-column h4{font-size:28px; color:#fff;line-height:45px;}
+ .contact-column h4 span{font-size:28px; color:#fff;}
+ .contact-column input,  .contact-column select{height:31px;border:0px;width:300px;padding:0 15px;text-transform:capitalize;font-size:14px;}
+ .contact-column input:focus,  .contact-column select:focus,  .contact-column textarea{outline:none;box-shadow:none;}
+ .contact-column textarea{width:300px;resize:none;height:100px;padding:0 15px;text-transform:capitalize;font-size:14px;border:0px;}
+ .contact-left, .contact-right{margin-top:50px;}
+ .contact-column input#submit{border:1px solid;background-color:transparent;color:#fff;text-transform:uppercase;}
+ .contact-con{width:50%;margin:0 auto;display:table;}
+ .contact-list{display:table-cell;width:33.33%;text-align:center;padding:50px 0px;}
+ .contact-list span{display:block;height:80px;}
+ .contact-list  p,  .contact-list  a{color:#000;margin-bottom:0px;}
+ .contact-list img{margin:0 auto;}
+ .facilities-bx{height:550px;position:relative;background-image:url('./img/footer-map.jpg');background-repeat:no-repeat;background-size:cover;}
+ 
+ .facilities-bx h4{font-size:28px; color:#fff;line-height:45px;padding-top:80px;}
+ .facilities-bx h4:after{display:block;content:"";width:50px;height:3px;background-color:#fff;margin:30px 0 50px;}
+  .facilities-left{padding-left:3%;}
+ .facilities-left address{font-size:16px;color:#fff;padding-bottom:80px;}
+
+
+ 
+ 
+ 
+ 
+ /*------------------------------------------------------------ add researh page design start from here ----------------------------- */
+ 
+ .ad-research-bg{background-image:url('./img/addreaserch-bg.jpg');background-repeat:no-repeat;background-size:cover;}
+.left-fullbx{position:relative;float:left;width:100%;background-color:#132031;}
+.left-fullbx:last-child{position:relative;float:left;width:100%;background-color:#e74424;}
+ .left-col-benefit{float:left;width:50%;padding:6%;}
+ .right-col-breakthough{float:left;width:50%;background-image:url('./img/breakthought-right.jpg');background-repeat:no-repeat;background-size:cover;padding:6%;}
+ .left-fullbx h4{font-size:28px; color:#fff;margin-bottom:30px;}
+  .left-col-benefit p{color:#fff; }
+ .col-break-content{background-color:rgba(255,255,255,.5);padding:30px;}
+ .col-break-content h4{color:#000000;}
+ .col-break-content p{color:#000000; }
+ .full-width-col{position:relative;width:100%;float:left;}
+ .image-bs{position:absolute;left:0;top:100px;}
+ .image-bs img{height:180px;}
+ .col-bx-left{background-image:url('./img/patient-bg.jpg');background-size:cover;padding:6%;background-repeat:no-repeat;width:50%;float:left;}
+ .left-text-box{background-color:rgba(255,255,255,.5);padding:30px;}
+ .left-text-box p{    }
+ .left-text-box span{display:block;text-align:right;    }
+ .col-bx-right{background-color:#e74424;padding:6%;width:50%;float:left;}
+ .col-bx-right p{color:#fff;}
+ .patient-bg-box{position: absolute;    right: 0;    opacity: 0.3;    bottom: 0;}
+ 
+ /* 30th april  */
+ .sample-bx-col{width:100%;float:left;}
+ .sample-bx-col ul.nav-justified li.nav-item{background-color:#efefef;width:50%;float:left;padding:25px 0px;}
+ .sample-bx-col ul.nav-justified li.nav-item a{background-color:transparent;border:0px;color:#acacac;font-size:24px;}
+ .sample-bx-col ul.nav-justified li.nav-item.active{background-color:#dfdfdf;padding:25px;padding:25px;}
+ .sample-bx-col ul.nav-justified li.nav-item.active a{background-color:transparent;border:0px;font-size:24px;color:#4c4c4c;}
+  .life-cycle-bx{display: flex;    display: -webkit-flex;    display: -ms-flex;    display: -moz-flex;    display: -webkit-box;    display: -ms-box;    display: -moz-box;    display: -ms-box;    flex-wrap: wrap;    -webkit-flex-wrap: wrap;    -ms-flex-wrap: wrap;    align-items: normal;    justify-content: space-between;padding:90px 0px 90px;  display: -webkit-flex;}
+ .life-cycle-list figure{margin-bottom:80px;}
+ 
+ 
+ 
+ 
+ 
+ 
+ .sample-content-bx{width:100%;float:left;padding:40px 0px;}
+ .sample-left, .sample-right{width:50%;float:left;}
+ .sample-right{ text-align:center;}
+ .sample-left a{ font-size: 28px; color: #fff; color:#4c4c4c; text-decoration: none;}
+ .sample-right a{ font-size: 28px; color: #fff; color:#ababab; text-align:center; text-decoration: none;}
+ .service-bx-box{display: flex;    display: -webkit-flex;    display: -ms-flex;    display: -moz-flex;    display: -webkit-box;    display: -ms-box;    display: -moz-box;
+    display: -ms-box;    flex-wrap: wrap;    -webkit-flex-wrap: wrap;    -ms-flex-wrap: wrap;    align-items: normal;    justify-content: space-between;    padding:60px 0px 40px;
+    display: -webkit-flex;}
+.services-list{    width: 33.3%;    padding: 10px;  margin: 0 0 20px 0px;position:relative;}
+.services-list:nth-child(2):after,  .services-list:nth-child(5):after{content:"";display:block;width:30px;height:1px; background-color:#e74424;position:absolute;top:20%;right:0px;}
+.services-list:nth-child(2):before, .services-list:nth-child(5):before{content:"";display:block;width:30px;height:1px; background-color:#e74424;position:absolute;top:20%;left:0px;}
+.services-list:nth-child(3):after{content: "";    display: block;    width: 1px;    height: 30px;    background-color: #e74424;    position: absolute;    bottom: 0;    right: 50%;}
+.service-textarea{text-align:center;padding:60px;}
+.service-textarea img{margin-bottom:25px;}
+.service-textarea p{text-align:center;color:#121212;}
+.service-textarea  h6{font-size:16px;color:#000;	margin-bottom:50px;}
+.bottom-box-banner{background-image:url('./img/add-research-bottom.jpg');background-repeat:no-repeat;background-size:cover;} 
+.bottom-box-content{padding: 150px 0px;    text-align: center;}
+.bottom-box-content p{color:#fff;font-size:38px;line-height:normal;margin-bottom:50px;}
+.bottom-box-content p span{color:#fff;font-size:38px;}
+.bottom-box-content a{border: 3px solid #fff;    color: #fff;    font-size: 16px;    width: 15%;    margin: 0 auto;    text-decoration: none;    display: block;    height: 45px;
+    line-height: 39px;    transition: all 0.5s;    text-align: center;    text-transform: uppercase;    transition: all 0.5s}
+ .bottom-box-content a:hover{background-color:#fff;color:#e74424;}
+ 
+ 
+ /*------------------------------------------------------------ add researh life cycle page design start from here ----------------------------- */
+ 
+
+.life-cycle-list{width:16%;}
+
+.life-cycle-list h5{font-size:18px; margin-bottom:30px;}
+.life-cycle-list p{font-size:12px;margin-bottom:0px; }
+ 
+ 
+ /*  Pharmaceutical services page design start from here */
+ 
+ .pharmaceutical-bg{background-image:url('./img/pharmaceutical-bg.jpg');background-repeat:no-repeat;background-size:cover;}
+ .pharmaceutical-text h1{  font-size:60px;color:#fff;padding:100px 0px;text-align:center;}
+ .pharmaceutical-text h1:after{content:"";height:2px; width:210px;display:block;background-color:#e74424;margin:30px auto 0px  auto;}
+ .pharmaceutical-sponsors{padding:80px 0px; text-align:center;width:80%;margin:0 auto;}
+ .pharmaceutical-sponsors h3{font-size: 33px;    color: #454545;    line-height: normal;}
+ .pharmaceutical-sponsors h3 span{font-size:33px;color:#454545;line-height: normal;}
+ .pharmaceutical-top-full{float:left;width:100%;background-color:#e74424;height:450px;}
+ .pharmaceutical-top-left{width:50%;float:left;padding: 6% 6%;background-image:url('./img/pharmaceutical-top-left.jpg');background-repeat:no-repeat;background-size:cover;height:450px;}
+ .pharmaceutical-top-left h4{font-size: 28px;    color: #2b2b2b;        margin-bottom: 30px;}
+ .pharmaceutical-top-left p{color:#2b2b2b;}
+.pharmaceutical-top-right{width:50%;float:left;padding:6% 6% 6% 7%;background-color:#e74424;position:relative;}
+.pharmaceutical-top-right h4{font-size: 28px;    color: #fff;        margin-bottom: 30px;}
+.pharmaceutical-top-right p{color:#fdedea;}
+.pharmaceutical-top-right figure{    position: absolute;left:0px;top:40px;}
+.pharmaceutical-top-right figure img{height:300px;opacity: 0.3;}
+.pharmaceutical-bottom-full{width:100%;float:left;height:456px;;background-color:#132031;}
+.pharmaceutical-bottom-left{width:50%;float:left;padding: 6% 6%;background-color:#132031;position:relative;}
+.pharmaceutical-bottom-left h4{font-size: 28px;    color: #fff;        margin-bottom: 30px;}
+.pharmaceutical-bottom-left figure{    position: absolute;right:0px;top:40px;}
+.pharmaceutical-bottom-left p{color:#fff;}
+.pharmaceutical-bottom-right{background-image:url('./img/testimonial-bg.jpg');background-repeat:no-repeat;background-size:cover;padding:8%;width:50%;float:left;height:456px;}
+.pharmaceutical-testimonial-content{position:relative;height:190px;}
+.pharmaceutical-testimonial-content p{padding-top:50px; padding-left:50px;}
+.pharmaceutical-testimonial-content figure{position:absolute;left:0px;top:0px;}
+.pharmaceutical-box-banner{background-image:url('./img/pharmaceutical-submit-banner.jpg');background-repeat:no-repeat;background-size:cover;}
+
+
+/* Invitro Diagnostic page design start from here */
+
+.vitro-bg{background-image:url('./img/Invitro-bg.jpg');background-repeat:no-repeat;background-size:cover;}
+.vitro-diagnostic {    padding: 80px 0px;    text-align: center;    width: 80%;    margin: 0 auto;}
+.vitro-diagnostic h3{font-size: 33px;    color: #162335;    line-height: normal;}
+.vitro-diagnostic h3 span{font-size:33px;color:#162335;line-height: normal;}
+.vitro-full-bx{width:100%;float:left;background-color:#e74424;}
+.vitro-top-left{width:50%;float:left;padding:4%;}
+.vitro-top-left h4{font-size: 28px;    color: #fff;        margin-bottom: 30px;}
+.vitro-top-left p{color:#fff;}
+.vitro-top-left span{color:#fff; }
+.vitro-top-right{width:50%;float:left;}
+.vitro-top-right figure img{float:right;width:100%;}
+.vitro-middle-bx{width:100%;float:left;}
+.vitro-middle-left{width:50%;float:left;}
+.vitro-middle-left figure img{float:left;width:100%;}
+.vitro-middle-right{width:50%;float:left;padding:4%;}
+.vitro-middle-right h4{font-size: 28px;    color: #162335;        margin-bottom: 30px;}
+.vitro-middle-right  p{color:#162335;}
+.vitro-middle-right  span{color:#162335;}
+.assay-experience{background-color:#162335;padding:40px 0px;}
+.assay-content{width:50%;margin:0 auto;}
+.assay-content h3{color:#fff;font-size:38px;text-align:center;margin-bottom:30px;}
+.assay-content .assay-sub-content{color:#fff;}
+.assay-content .assay-sub-content span{color:#fff;}
+.industry-leading-top{width:80%;margin:0 auto;display:table;}
+.industry-list-left{width:70%;display:table-cell;padding-right:50px;}
+.industry-list-left .industry-content h4{font-size: 28px;    color: #000;        margin-bottom: 30px;}
+.industry-list-left .industry-content p{}
+.industry-list-left .industry-content:last-child{padding-top:50px;padding-bottom:0px;}
+.industry-list-left .industry-content:last-child h4{color:#162335;}
+.industry-list-left .industry-content:last-child p{color:#162335; }
+.industry-list-right{width:30%;display:table-cell;}
+.industry-list-right ul{padding-left:0px;}
+.industry-list-right ul li{font-size:18px;line-height:40px;}
+.assay-menu-heading{width:80%; margin:0 auto;}
+.assay-menu{display: -webkit-box; display: -moz-box; display: -ms-box; align-items: top; justify-content: space-between; flex-flow: wrap; display: flex; display: -webkit-flex;
+    display: -moz-flex;    display: -ms-flex;width:80%;margin:0 auto;}
+
+.assay-menu-column{width:19.5%;}
+ .assay-menu-column .dropdown button.btn-default.dropdown-toggle	{    background-color: #e74424;    width: 100%;    border-radius: 0;    border: 0;    margin-bottom: 5px;    color: #fff;padding: 20px;font-size:18px;width:100%;}
+ .assay-menu-column .dropdown button.btn-default.dropdown-toggle:active, .assay-menu-column .dropdown button.btn-default.dropdown-toggle:focus	{background-color:#e74424 !important;color:#fff !important;}
+ .assay-menu-column ul.dropdown-menu{margin: -5px 0  !important;    border-radius: 0 !important;    width: 100%  !important;background-color:#f45b3d  !important; padding:0px !important;}
+ .assay-menu-column ul.dropdown-menu li a{color:#fff !important;font-size:15px;padding:10px;}
+ .assay-menu-column ul.dropdown-menu li a:hover{background-color:#e74424 !important;font-size:15px;}
+
+.assay-bottom-box {width:80%;margin:30px auto 0px auto;}
+.assay-bottom-box h5{font-size:20px; margin-bottom:20px;color:#313131; text-align:left;}
+.assay-bottom-box .assay-menu-heading {width:100%;}
+ .assay-menu-heading h5, .assay-bottom-box h5{font-size:20px; margin-bottom:20px;color:#313131;}
+ .assay-bottom-main{width:100%;float:left;}
+.assay-bottom-left{float:left;width:40%;}
+.assay-bottom-left button.btn-default.dropdown-toggle{background-color: #e74424;    width: 100%;    border-radius: 0;    border: 0;    margin-bottom: 5px;    color: #fff;    padding: 20px;
+        font-size: 18px;width:49%;}
+.assay-bottom-left button.btn-default.dropdown-toggle:active, .assay-bottom-left button.btn-default.dropdown-toggle:focus{background-color:#e74424 !important;color:#fff !important;}
+
+.assay-bottom-left ul.dropdown-menu{margin: -5px 0  !important;    border-radius: 0 !important;    width: 100%  !important;background-color:#f45b3d  !important; padding:0px !important;    min-width: 229px;}
+.assay-bottom-left ul.dropdown-menu li a{color:#fff !important;font-size:15px;padding:10px;}
+.assay-bottom-left ul.dropdown-menu li a:hover{background-color:#e74424 !important;font-size:15px;}
+
+.assay-bottom-right ul.dropdown-menu{margin: -5px 0  !important;    border-radius: 0 !important;    width: 100%  !important;background-color:#f45b3d  !important; padding:0px !important;    min-width: 229px;}
+.assay-bottom-right ul.dropdown-menu li a{color:#fff !important;font-size:15px;padding:10px;}
+.assay-bottom-right ul.dropdown-menu li a:hover{background-color:#e74424 !important;font-size:15px;}
+.assay-bottom-right{float:left;width:60%;}
+.assay-bottom-list{width:100%;padding-right:8px;}
+.assay-right-col {    width: 33.33%;    float: left;}
+.assay-right-col .assay-bottom-list button.btn-default.dropdown-toggle	{    background-color: #e74424;    width: 100%;    border-radius: 0;    border: 0;    margin-bottom: 5px;    color: #fff;padding: 20px;font-size:18px;width:100%;}
+.assay-right-col .assay-bottom-list button.btn-default.dropdown-toggle:active, .assay-right-col .assay-bottom-list button.btn-default.dropdown-toggle:focus{background-color:#e74424 !important;color:#fff !important;}
+
+.partner-physicians-full{width:100%;float:left;}
+.partner-physicians-full-left{width:50%;float:left;}
+.partner-physicians-full-left img{width:100%;}
+.partner-physicians-full-right{width:50%;float:left;padding:7% 10%;}
+.partner-physicians-full-right h4{font-size: 28px;    color: #162335;        margin-bottom: 30px;}
+.partner-physicians-full-right p{  color: #162335;}
+.seeking-box-banner{background-image:url('./img/seeking-banner.jpg');background-repeat:no-repeat;background-size:cover;}
+.seeking-box-banner a{    text-transform: inherit;}
+.industry-inventro-bx-design{background-color:#f9f9f9; padding:80px 0px;}
+.assay-main-boxfull{background-color:#fff;padding:50px 0px;}
+.menu-box-equipemt{padding:50px;}
+.menu-box-equipemt button{padding: 35px; border-radius: 0; background: #e74424; border: 0; color: #fff; width:100%; white-space: normal;}
+.menu-box-equipemt button:focus, .menu-box-equipemt button:active, .menu-box-equipemt button:hover{background: #e74424 !important; color:#fff !important;}
+.menu-box-equipemt button.btn-default.active, .menu-box-equipemt button.btn-default:active, .menu-box-equipemt button.open>.dropdown-toggle.btn-default {
+    background: #e74424 !important; color:#fff !important;
+}
+.menu-box-equipemt button span.caret{margin-left:10px;}
+.menu-box-equipemt ul.dropdown-menu{ margin: 0px 0 !important; border-radius: 0 !important; width: 100% !important; background-color: #fff !important; padding: 0px !important;}
+.menu-box-equipemt ul.dropdown-menu li{ margin: 0 15px;}
+.menu-box-equipemt ul.dropdown-menu li a{ padding: 7px 0px; border-bottom: solid 1px #e5e5e5; font-weight: bold; color: #8d8d8d;}
+.menu-box-equipemt ul.dropdown-menu li:last-child a{ border-bottom: 0px;}
+.menu-box-equipemt .open>.dropdown-toggle.btn-default{ color: #f9f9f9; background-color: #e74424; border-color: #e74424;}
+.facilities-bottom-bx{ display:none;}
+#wpcf7-f34-o2 span.wpcf7-not-valid-tip { color: #000;}
+#mega-menu-wrap-top #mega-menu-top #mega-menu-item-118, #mega-menu-wrap-top #mega-menu-top #mega-menu-item-119, #mega-menu-wrap-top #mega-menu-top #mega-menu-item-120 { display: none;}
+.assay-menu-column .dropdown button.btn-default.dropdown-toggle+p, .assay-bottom-left button.btn-default.dropdown-toggle+p, .assay-right-col .assay-bottom-list button.btn-default.dropdown-toggle+p{ display: none;}
+
+
+ @media only screen and (max-width: 1464px)
+ {
+	/* home page responsive start here */
+	
+	.rdi-column-bx h3 span, .rdi-column-bx h3{font-size:21px;} 
+	.ser-content-bx .slider-left h2{font-size: 34px;}
+	.top-box{width:60%;}
+	.top-box h2, .quote-bx h2{font-size:40px;}
+	.top-box h2:after{margin-bottom: 30px;}
+	.rdi-column-bx a{width:50%;}
+	.quote-bx{padding:80px 0px;}
+	.quote-content p{padding-bottom:30px;}
+	.sevices-slider{height:560px; padding: 80px 0px 60px;}
+	.ser-content-bx .slider-left p{padding-top:30px;}
+	.ser-content-bx{padding-top:60px;}
+	 
+	 
+	/* Add Research page design  start from here */
+	.inner-top-banner-text{    padding: 150px 15px;width:80%;}
+	.left-fullbx h4{font-size:26px;    margin-bottom: 20px;line-height:normal;}
+	.left-fullbx h4 br{display:none;}
+	.sample-left h4, .sample-right h4{font-size:22px;}
+	.sample-content-bx{padding:30px 0px;}
+	.bottom-box-content{padding:100px 0px;}
+	.bottom-box-content p, .bottom-box-content p span{margin-bottom:30px;font-size: 30px;}
+	.service-textarea {    text-align: center;    padding: 60px 0px;}
+	
+	/* Pharmaceutical Services page design */
+	.pharmaceutical-bg{background-position:center;}
+	.pharmaceutical-text h1{font-size: 50px;    padding: 60px 0px;}
+	.pharmaceutical-sponsors h3 , .pharmaceutical-sponsors h3 span{font-size:32px;}
+	.pharmaceutical-sponsors{padding:60px 0px;width:100%;}
+	.pharmaceutical-top-left h4, .pharmaceutical-top-right h4, .pharmaceutical-bottom-left h4{font-size:26px;margin-bottom: 20px;}
+	
+	/* About us page design */
+	.about-left-col{padding-left:7%;}
+	#diagnostics-team .leadership-list{width:33.3%;}
+	
+	
+	/* Invitro-Diagnostic */
+	.partner-physicians-full-right{padding:4% 10%;}
+	
+	
+	
+ }
+ 
+ 
+ @media only screen and (max-width: 1349px)
+ {
+	 .vitro-top-left{padding: 2% 2% 0% 3%;}
+	 
+ }
+ 
+ 
+ @media only screen and (max-width: 1199px)
+ 
+ {
+	 .co-logo{width:20%;}
+	 
+	/* home page responsive start here */
+	.top-box h2, .quote-bx h2 {    font-size: 38px;}
+	.rdi-feat-list a{padding:30px;}
+	.rdi-feat-list a{font-size:28px;}
+	.ser-content-bx .slider-left h2 {    font-size: 28px;}
+	.rdi-column-bx h3 span, .rdi-column-bx h3{height:78px;}
+	.quote-content p{margin-bottom:0px;}
+	.quote-bx {    padding: 50px 0px;}
+	.top-box{padding:60px 0px;}
+	
+	/* Add Research page design  start from here */
+	 .service-textarea {    text-align: center;    padding: 30px 0px;}
+	.inner-top-banner-text {    padding: 100px 15px;    width: 100%;}
+	.inner-top-banner-text p, .inner-top-banner-text p span{font-size:28px;margin-bottom:0px;}
+	.service-textarea p br{display:none;}
+	.sample-left h4, .sample-right h4 {    font-size: 24px;}
+	.bottom-box-content {    padding: 80px 0px;}
+	.service-bx-box{padding:30px 0px 0px 0px;}
+	.left-fullbx h4{font-size:24px;    margin-bottom: 20px;line-height:normal;}
+	.left-fullbx h4 br{display:none;}
+	.life-cycle-list{    width: 32.2%;    margin-bottom: 30px;}
+	.life-cycle-list figure img{width:100%;}
+	
+	
+	/* Pharmaceutical Services page design */
+	.pharmaceutical-bg{background-position:center;}
+	.pharmaceutical-text h1{font-size: 35px;    padding: 50px 0px;}
+	.pharmaceutical-sponsors h3 , .pharmaceutical-sponsors h3 span{font-size:28px;}
+	.pharmaceutical-sponsors{padding:50px 0px;width:100%;}
+	.pharmaceutical-top-left h4, .pharmaceutical-top-right h4, .pharmaceutical-bottom-left h4{font-size:24px;margin-bottom: 20px;}
+	.pharmaceutical-top-left{padding:6% 4%;}
+	.pharmaceutical-top-right{padding: 6% 5% 6% 5%;}
+	
+	
+	/* About us page design */
+	.about-right-col .tab-content #leadership-slider .carousel-tab-right{padding-left:10px;}
+	.about-right-col .tab-content #leadership-slider .carousel-tab-right figure img{height:110px;margin:0 auto;}
+	.about-right-col .tab-content #leadership-slider{background: linear-gradient(-19deg, #fff 67%,#e74424 67%);
+    background: -webkit-linear-gradient(-19deg, #fff 62%,#e74424 62%);
+    background: -moz-linear-gradient(-19deg, #fff 62%,#e74424 62%);
+    background: -ms-linear-gradient(-19deg, #fff 62%,#e74424 62%);height:465px;}
+	
+	
+	/* Invitro-Diagnostic */
+	.vitro-diagnostic h3, .vitro-diagnostic h3 span{font-size:30px;}
+	.vitro-diagnostic{padding:60px 0px;width:90%;}
+	.vitro-top-left h4, .vitro-middle-right h4, .partner-physicians-full-right h4{font-size:24px;    margin-bottom: 15px;}
+	.vitro-top-left p, .vitro-top-left span, .vitro-middle-right p{line-height:20px;}
+	.assay-content{width:80%;}
+	.assay-content h3{font-size:30px;    margin-bottom: 20px;}
+	.industry-leading-top{width:100%;}
+	.assay-menu, .assay-bottom-box, .assay-menu-heading{width:100%;}
+	.bottom-box-content a{width:25%;}
+	.partner-physicians-full-right{padding:3% 7%;}
+	
+ }
+  
+  @media only screen and (max-width: 991px)
+  
+  {
+	  /* header responsive start here */
+	  .co-logo{width:20%;}
+	  nav ul li{padding:0px 5px;}
+	  nav ul li a{font-size:12px;}
+	  .header-right ul li a{font-size:10px;}
+
+	  
+	 /* home page responsive start here */
+	 
+	 .top-box {    width: 100%; padding:40px 0px;}
+	 .rdi-column-bx {padding:30px 10px;}
+	 .rdi-feat-list a {    padding:30px 10px;}
+	 .rdi-feat-list h6{font-size:16px;}
+	 .rdi-column-bx a {    width: 80%;}
+	 .quote-content a{width:30%;}
+	 .footer-column ul li a{padding:0px 5px;}
+	 
+	/* Contact us page design */
+	.contact-con{width:90%;}
+	.contact-list{padding:30px 0px;}
+	.contact-column h4 , .contact-column h4 span {font-size:20px;line-height: 24px;}
+	.facilities-bx h4{line-height: 34px;    padding-top: 40px;font-size:24px;}
+	.facilities-left address{padding-bottom:20px;}
+	.facilities-bx{height:480px;}
+	.facilities-bx h4:after{margin:20px 0 30px;}
+	
+	
+	/* Add Research page design  start from here */
+	
+	.ad-research-bg{    background-position: left center;}
+	.inner-top-banner-text{    padding: 47px 0px;}
+	.inner-top-banner-text p, .inner-top-banner-text p span {    font-size: 24px;    margin-bottom: 0;}
+	.right-col-breakthough{padding:5%;background-position:top center;}
+	.left-col-benefit{padding:4%;}
+	.col-break-content{padding:10px;}
+	.left-fullbx h4 {    font-size: 22px;    margin-bottom: 15px;}
+	.left-col-benefit p{margin-bottom:0px;}
+	.col-bx-left{padding:5% 4%;    background-position: top center;}
+	.left-text-box{padding:10px;}
+	.col-bx-right{padding:4%;}
+	.col-bx-right p{margin-bottom:0px;}
+	.bottom-box-content a{width:25%;}
+	.bottom-box-banner{background-position:top center;}
+	.bottom-box-content {    padding: 60px 0px;}
+	
+	
+	/* Pharmaceutical Services page design */
+	.pharmaceutical-bg{background-position:center;}
+	.pharmaceutical-text h1{font-size: 30px;    padding: 40px 0px;}
+	.pharmaceutical-sponsors h3 , .pharmaceutical-sponsors h3 span{font-size:26px;}
+	.pharmaceutical-sponsors{padding:40px 0px;width:100%;}
+	.pharmaceutical-top-left h4, .pharmaceutical-top-right h4, .pharmaceutical-bottom-left h4{font-size:22px;margin-bottom: 20px;}
+	.pharmaceutical-top-left{padding:6% 4%;height:480px;background-position:bottom center;}
+	.pharmaceutical-top-right{padding: 6% 5% 6% 5%;}
+	.pharmaceutical-top-full{height:480px;}
+	.pharmaceutical-testimonial-content{height:300px;}
+	.pharmaceutical-text h1:after{width:150px;    margin: 10px auto 0px auto;}
+	
+	/* about us page */
+	.about-career-con a{width:25%;}
+	.about-career-con{padding:60px 0px;}
+	.about-banner-bx{height:auto;}
+	#diagnostics-team .leadership-list{width:50%;}
+	.about-right-col .tab-content #leadership-slider{ background: linear-gradient(-19deg, #fff 59%,#e74424 67%);
+    background: -webkit-linear-gradient(-19deg, #fff 59%,#e74424 53%);
+    background: -moz-linear-gradient(-19deg, #fff 59%,#e74424 62%);
+    background: -ms-linear-gradient(-19deg, #fff 59%,#e74424 62%);
+    height: 540px;}
+	
+	
+	/* Invitro-Diagnostic */
+	.vitro-diagnostic h3, .vitro-diagnostic h3 span, .assay-content h3{font-size:24px;}
+	.industry-list-left .industry-content h4{font-size:24px; margin-bottom:20px;}
+	.vitro-diagnostic {    padding: 40px 0px;    width: 100%;}
+	.vitro-top-left, .vitro-middle-right, .partner-physicians-full-right{width:100%;padding:4%;}
+	.vitro-top-right, .vitro-middle-left, .partner-physicians-full-left{width:100%;}
+	.assay-menu-heading h5, .assay-bottom-box h5{font-size:16px;}
+	.assay-menu-column .dropdown button.btn-default.dropdown-toggle, .assay-bottom-left button.btn-default.dropdown-toggle, .assay-right-col .assay-bottom-list button.btn-default.dropdown-toggle{font-size:14px;}
+	.assay-content { width: 100%;}
+	.industry-inventro-bx-design { padding: 40px 0px;}
+	#mega-menu-wrap-top #mega-menu-top > li.mega-menu-item > a.mega-menu-link{ font-size: 12px !important; padding: 4px 10px 0px 0px !important; line-height: 21px !important;}
+	
+}
+  
+  
+@media only screen and (max-width: 767px)
+{
+	
+	*
+	   { margin:0px;padding:0px;font-size:14px;line-height:20px;}
+	.header-right{ display:none;}
+	#site-navigation{ width:65%;}
+	#site-navigation #mega-menu-wrap-top .mega-menu-toggle{ background-color:transparent;}
+	#mega-menu-wrap-top .mega-menu-toggle .mega-toggle-block-1:after{ color:#000 !important; margin: 10px 0 0 5px !important;}
+	#mega-menu-wrap-top #mega-menu-top > li.mega-menu-item > a.mega-menu-link{ padding: 0px 10px 0px 0px !important; text-align: right !important;    text-decoration: none;}
+	#mega-menu-wrap-top .mega-menu-toggle .mega-toggle-block-1 .mega-toggle-label .mega-toggle-label-closed {display:none !important; }
+	#mega-menu-wrap-top #mega-menu-top > li.mega-menu-item{ padding: 5px 0px !important;}
+	#mega-menu-wrap-top .mega-menu-toggle.mega-menu-open .mega-toggle-block-1 .mega-toggle-label-open{ display:none !important;}
+	.header-top.fixed{ height:auto;}
+	.rdi-column-bx{width:100%;}
+	.rdi-column-bx h3 span, .rdi-column-bx h3{height:auto;}
+	.rdi-column-bx a {    width: 30%;	}
+	.top-box h2, .quote-bx h2 {    font-size: 28px;padding-bottom:20px;}
+	.top-box h2:after {    margin-bottom: 0;}
+	.top-box{padding:0px 0px 30px 0px;}
+	.rdi-features-bx{display: flex;    flex-wrap: wrap;}
+	.rdi-feat-list {width:50%;}
+	.ser-content-bx .slider-left{display:block;width:100%;padding-right:0px;}
+	.ser-content-bx .slider-right{display:none;}
+	.ser-content-bx {height: 300px;    padding: 50px 0px 0px;}
+	.sevices-slider {    height: 340px;    padding: 20px 0px 20px; background: linear-gradient(-19deg, #fff 60%,#e74424 60%);
+    background: -webkit-linear-gradient(-19deg, #fff 60%,#e74424 60%);
+    background: -moz-linear-gradient(-19deg, #fff 60%,#e74424 60%);
+    background: -ms-linear-gradient(-19deg, #fff 60%,#e74424 60%);}
+	.footer-column:nth-child(1) {    width: 20.3%;}
+	.footer-column ul li a, .footer-column p{font-size:10px;}
+	.footer-column ul li:first-child a{padding-left:0px;}
+	
+	/* Contact us page design */
+	.contact-column h4, .contact-column h4 span {    font-size: 19px;    line-height: 26px;}
+	.contact-column:first-child{padding-right:15px;}
+	.contact-column:last-child{padding-left:15px;}
+	.contact-column:first-child .contact-left input, .contact-column:first-child .contact-left select, .contact-column:first-child .contact-left textarea, .contact-column:last-child .contact-right input, .contact-column:last-child .contact-right select, .contact-column:last-child .contact-right textarea{width:270px;}
+	.facilities-bx{ background-image: none; background-color: #e64627; height: auto; padding-bottom: 45px;}
+	
+	/* Add Research page design  start from here */
+	.inner-top-banner-text p, .inner-top-banner-text p span {    font-size: 20px;    margin-bottom: 0;}
+	.left-col-benefit{width:100%;    padding: 10% 5%;}
+	.right-col-breakthough{width:100%;    padding: 15% 5%;    background-position: left center;}
+	.col-bx-left{width:100%; padding: 15% 5%;    background-position: left center;}
+	.col-bx-right{width:100%;padding: 10% 5%;}
+	.sample-left, .sample-right {    width: 100%;    float: left;}
+	.bottom-box-content p span, .bottom-box-content p{font-size:24px;}
+	.sample-bx-col{background: linear-gradient(0deg, #efefef 50%,#efefef 50%);
+    background: -webkit-linear-gradient(0deg, #efefef 50%,#efefef 50%);
+    background: -moz-linear-gradient(0deg, #efefef 50%,#efefef 50%);
+    background: -ms-linear-gradient(0deg, #efefef 50%,#efefef 50%);}
+	
+	.sample-right{padding-top:30px;}
+	.sample-left h4, .sample-right h4{text-align:left;}
+	
+	
+	/* Pharmaceutical Services page design */
+	.pharmaceutical-bg{background-position:center;}
+	.pharmaceutical-text h1{font-size: 30px;    padding:30px 0px;}
+	.pharmaceutical-sponsors h3 , .pharmaceutical-sponsors h3 span{font-size:22px;}
+	.pharmaceutical-sponsors{padding:40px 0px;width:100%;}
+	.pharmaceutical-top-left h4, .pharmaceutical-top-right h4, .pharmaceutical-bottom-left h4{font-size:22px;margin-bottom: 20px;}
+	.pharmaceutical-top-left{padding:6% 4%;height:auto;background-position:bottom center;width:100%;}
+	.pharmaceutical-top-right{padding: 6% 5% 6% 5%;width:100%;}
+	.pharmaceutical-top-full{height:auto;}
+	.pharmaceutical-text h1:after{width:150px;    margin: 10px auto 0px auto;}
+	.pharmaceutical-top-left{width:100%;height:auto;}
+	.pharmaceutical-top-full{height:auto;width:100%;} 
+	.pharmaceutical-bottom-full{width:100%;height:auto;}
+	.pharmaceutical-bottom-left{width:100%;}
+	.pharmaceutical-bottom-right{width:100%;height:auto;background-position: top center;}
+	.pharmaceutical-testimonial-content {    height: auto;}
+	
+	/* inventro Diagnostic page */
+	
+	.vitro-diagnostic h3, .vitro-diagnostic h3 span, .assay-content h3{font-size:21px;}
+	.vitro-top-left h4, .vitro-middle-right h4, .partner-physicians-full-right h4 {    font-size: 22px;    margin-bottom: 10px;}
+	.industry-list-left, .industry-list-right{width:100%;display:block;padding-right:0px;}
+	.assay-menu-column{width:49.5%;}
+	.assay-menu-column .dropdown button.btn-default.dropdown-toggle, .assay-bottom-left button.btn-default.dropdown-toggle, .assay-right-col .assay-bottom-list button.btn-default.dropdown-toggle{font-size:16px;width:100%;}
+	.assay-bottom-left, .assay-bottom-right, .assay-right-col{width:50%;}
+	.bottom-box-content a{width:35%;}
+	.industry-inventro-bx-design{padding:40px 0px 0px;}
+	.industry-list-right ul{padding-left:20px;}
+	.facilities-bottom-bx{ display:block;}
+	.services-list{ width:50%;}
+	.services-list:nth-child(2):after, .services-list:nth-child(5):after, .services-list:nth-child(2):before, .services-list:nth-child(5):before, .services-list:nth-child(3):after{display:none;}
+	
+	.about-right-col .tab-content #leadership-slider { background: linear-gradient(-19deg, #fff 57%,#e74424 67%); background: -webkit-linear-gradient(-19deg, #fff 57%,#e74424 53%); background: -moz-linear-gradient(-19deg, #fff 57%,#e74424 62%); background: -ms-linear-gradient(-19deg, #fff 57%,#e74424 62%); height: 540px;}
+	#mega-menu-wrap-top{    background: rgba(51, 51, 51, 0);
+    background: -webkit-gradient(linear, left top, left bottom, from(rgba(255, 255, 255, 0)), to(rgba(51, 51, 51, 0)));
+    background: -moz-linear-gradient(top, rgba(255, 255, 255, 0), rgba(51, 51, 51, 0));
+    background: -ms-linear-gradient(top, rgba(255, 255, 255, 0), rgba(51, 51, 51, 0));
+    background: -o-linear-gradient(top, rgba(255, 255, 255, 0), rgba(51, 51, 51, 0));
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(51, 51, 51, 0));}
+	
+	#mega-menu-wrap-top #mega-menu-top > li.mega-menu-item a{ text-decoration:none !important;}
+	#mega-menu-wrap-top #mega-menu-top #mega-menu-item-118, #mega-menu-wrap-top #mega-menu-top #mega-menu-item-119, #mega-menu-wrap-top #mega-menu-top #mega-menu-item-120{ display:block; }
+	
+}
+   
+   
+   @media only screen and (max-width: 639px)
+   {
+	   
+	   .rdi-column-bx a, .quote-content a {    width: 50%;}
+	   .sevices-slider{height:400px;}
+	   .ser-content-bx{height:370px;}
+	   .ser-content-bx .slider-left h2 {    font-size: 24px;}
+		.footer-column:nth-child(1){width:100%;}
+		.footer-column img{margin:0 auto 10px auto;}
+		.footer-column:nth-child(2){order:3;width:100%;}
+		.footer-column:nth-child(3){width:80%;}
+		.footer-content{justify-content:center;}
+		.footer-content{padding:20px 0px 10px 0px;}
+		.footer-column ul{text-align:center;}
+		.footer-column ul li{float:none;display:inline-block;}
+		
+		/* Contact us page design */
+		.contact-main-box {
+		background: linear-gradient(90deg, #e64627 50%,#293544 50%);    background: -webkit-linear-gradient(90deg, #e64627 50%,#293544 50%);    background: -moz-linear-gradient(90deg, #e64627 50%,#293544 50%);    background: -ms-linear-gradient(90deg, #e64627 50%,#293544 50%);}
+		.contact-column:first-child{padding-right:0px;width:100%;padding-bottom:100px;}
+	.contact-column:last-child{padding-left:0px;width:100%;}
+	.contact-column:first-child .contact-left input, .contact-column:first-child .contact-left select, .contact-column:first-child .contact-left textarea, .contact-column:last-child .contact-right input, .contact-column:last-child .contact-right select, .contact-column:last-child .contact-right textarea{width:100%;}
+	.contact-left, .contact-right {    margin-top: 20px;}
+	.contact-con {    width: 100%;}
+	.contact-column h4, .contact-column h4 span {    font-size: 24px;    line-height: 30px;}
+	.facilities-bx h4 {    line-height: 30px;    padding-top: 40px;    font-size: 24px;}
+	.facilities-left address {    padding-bottom: 0px;font-size:14px;}
+	.facilities-bx {    height: 380px;}
+	
+	.life-cycle-list figure {    margin-bottom: 30px;}
+	.life-cycle-list {    width: 48%;}
+	.life-cycle-list h5{    margin-bottom: 10px;}
+	.bottom-box-content a {    width: 40%;}
+	.bottom-box-content p br{display:none;}
+	
+	/* Pharmaceutical Services page design */
+	.pharmaceutical-text h1 {    font-size: 24px;}
+	.pharmaceutical-sponsors h3, .pharmaceutical-sponsors h3 span {    font-size: 20px;}
+	.pharmaceutical-top-left h4, .pharmaceutical-top-right h4, .pharmaceutical-bottom-left h4{font-size: 20px;     margin-bottom: 20px;}
+	.menu-box-equipemt { padding: 50px 0;}
+	.about-right-col .tab-content #leadership-slider .carousel-tab-left{ width: 100%; display: block;}
+	.about-right-col .tab-content #leadership-slider .carousel-tab-right{ width: 100%; display: block;}
+	.about-right-col .tab-content #leadership-slider{ height:auto;}
+	
+	
+	
+   }
+  
+  
+  @media only screen and (max-width: 479px)
+  {
+	  .container{width:100%;}
+	  .rdi-column-bx a, .quote-content a {    width: 70%;}
+	  .rdi-feat-list {    width: 100%;    border-bottom: 1px solid #eae8e8;}
+	  .rdi-feat-list a {    padding: 20px;}
+	  .quote-bx{padding:30px 15px;}
+	  .top-box h2, .quote-bx h2  {    font-size: 20px;    padding-bottom: 10px;}
+	  .rdi-column-bx h3 span, .rdi-column-bx h3 {    font-size: 20px;}
+	  .ser-content-bx .slider-left h2 {    font-size: 20px;}
+	  .quote-content p {    padding-bottom: 20px;font-size:16px;}
+	  .quote-bx h2:after{    width: 30%;margin: 10px auto 15px auto;}
+	  .sevices-slider {    height: 400px;    padding: 20px 0px 20px; background: linear-gradient(-19deg, #fff 50%,#e74424 50%);
+    background: -webkit-linear-gradient(-19deg, #fff 50%,#e74424 50%);
+    background: -moz-linear-gradient(-19deg, #fff 50%,#e74424 50%);
+    background: -ms-linear-gradient(-19deg, #fff 50%,#e74424 50%);}
+	
+	/* contact us page design */
+	.contact-column h4, .contact-column h4 span {    font-size: 20px;    line-height: 24px;}
+	.facilities-bx h4 {    line-height: 24px;    padding-top: 40px;    font-size: 20px;}
+	.contact-main-box{padding:20px 0px;}
+	.contact-list{width:100%;display:block;padding:15px 0px;    border-bottom: 1px solid #eae8e8;}
+	.facilities-left {    padding-left: 15px;}
+	
+	/* Add Research page design  start from here */
+	.services-list{width:100%;border-bottom: 1px solid #eae8e8;padding:0px;}
+	.services-list:last-child{width:100%;border-bottom:0px;}
+	.service-textarea h6{margin-bottom:15px;}
+	.service-textarea{padding:10px 0px;}
+	.bottom-box-content a {    width: 50%;}
+	.left-fullbx h4, .sample-left h4, .sample-right h4{font-size:19px;}
+	
+	.bottom-box-content p span, .bottom-box-content p{font-size:20px;}
+	.bottom-box-content p br{display:none;}
+	.bottom-box-content{padding:20px 0px;}
+	
+	.life-cycle-list {width: 100%;}
+	.bottom-box-content a {    width: 50%;} 
+	
+
+	.about-career-con a {    width: 50%;}
+	.about-career-con h4 , .about-career-con h4 span{    font-size: 20px;    color: #fff;    margin-bottom: 20px;}
+	.about-career-con {    padding: 30px 0px;}
+	
+	
+	/* Invitro-Diagnostic */
+	.vitro-diagnostic h3, .vitro-diagnostic h3 span, .assay-content h3{font-size:20px;}
+	.vitro-diagnostic, .assay-experience, .industry-inventro-bx-design{padding:20px 0px;}
+	.vitro-top-left h4, .vitro-middle-right h4, .partner-physicians-full-right h4, .industry-list-left .industry-content h4{font-size:20px;    margin-bottom: 15px;}
+	.industry-list-left .industry-content:last-child{padding-top:20px;}
+	.industry-list-right ul li{    font-size: 16px;
+    line-height: 26px;}
+	.assay-bottom-left, .assay-bottom-right, .assay-right-col{width:100%;}
+	.assay-menu-heading h5, .assay-bottom-box h5 {    font-size: 16px;    margin-top: 20px;    margin-bottom: 10px;}
+	.bottom-box-content a{width:60%;}
+	
+	.about-left-col { padding-left: 0%; width: 100%; display: block; padding: 40px 15px;}
+	.about-right-col {width: 100%; display: block;  padding: 0 15px;}
+	.about-right-col .tab-content #leadership-slider{ padding:0px 0px 40px; background: linear-gradient(-34deg, #fff 57%,#e74424 67%);
+    background: -webkit-linear-gradient(-34deg, #fff 53%,#e74424 53%);
+    background: -moz-linear-gradient(-34deg, #fff 57%,#e74424 62%);
+    background: -ms-linear-gradient(-34deg, #fff 57%,#e74424 62%);}
+	.about-ldership-bx{ margin:10px 0px;}
+	.about-right-col #about-rdi-bx, .about-right-col #physician, .about-right-col #pharmacetual-team, .about-right-col #leadership, .about-right-col #diagnostics-team { padding: 0px 0% 0px 0%; margin: 40px 0px; border-left: 0px solid #e0e0e0;}
+	.pharmaceutical-testimonial-content p{ padding-left:20px; padding-top:30px;}
+	.pharmaceutical-testimonial-content figure img{ height:35px;}
+	
+  }
+  
+  
