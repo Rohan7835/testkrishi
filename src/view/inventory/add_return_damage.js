@@ -45,7 +45,7 @@ export default class returninventory extends Component {
     this.formHandler1 = this.formHandler1.bind(this);
   }
 
-  formHandler1(e, index, ind, type) {
+  formHandler1(e, index, ind = 0, type) {
     if (type === "variant") {
       MultipleArray[index].package[ind].variant = e.target.value;
     }
@@ -65,6 +65,7 @@ export default class returninventory extends Component {
     this.setState({
       loading: false,
     });
+    this.forceUpdate();
     console.log(MultipleArray);
   }
 
@@ -92,7 +93,7 @@ export default class returninventory extends Component {
         region: "",
         regionID: "",
         quantity: "",
-        availQuantity: "",
+        availableQuantity: "",
       });
     } else {
       data[ind].package.push({
@@ -100,7 +101,7 @@ export default class returninventory extends Component {
         regionID: "",
         quantity: "",
         variant: "",
-        availQuantity: "",
+        availableQuantity: "",
       });
     }
     MultipleArray = data;
@@ -214,6 +215,37 @@ export default class returninventory extends Component {
     });
   };
 
+  changeRegionOfProduct(valu, index) {
+    MultipleArray[index].AllPackages.forEach((pck) => {
+      if (pck.regionID === valu) {
+        if (MultipleArray[index].TypeOfProduct === "simple") {
+          MultipleArray[index].package = [
+            {
+              region: pck.region,
+              regionID: pck.regionID,
+              packageID: pck.packageID,
+              quantity: 0,
+              availableQuantity: pck.availableQuantity,
+            },
+          ];
+        } else {
+          MultipleArray[index].package = [
+            {
+              region: pck.region,
+              regionID: pck.regionID,
+              quantity: 0,
+              variant: pck.variant,
+              availableQuantity: pck.availableQuantity,
+            },
+          ];
+        }
+      }
+    });
+    setTimeout(() => {
+      this.forceUpdate();
+    }, 0);
+  }
+
   onChange112(valu, index) {
     const requestData = {};
     AdminApiRequest(requestData, "/admin/product/" + valu.value, "GET")
@@ -224,14 +256,15 @@ export default class returninventory extends Component {
           MultipleArray[index].TypeOfProduct = res.data.data.TypeOfProduct;
           var new_data = [];
           MultipleArray[index].package = [];
+          MultipleArray[index].AllPackages = [];
           res.data.data.TypeOfProduct === "simple"
             ? res.data.data.simpleData.forEach((item, ind) => {
-                MultipleArray[index].package.push({
+                MultipleArray[index].AllPackages.push({
                   region: item.region.name,
                   regionID: item.region._id,
                   packageID: item._id,
                   quantity: 0,
-                  availQuantity: item.availQuantity,
+                  availableQuantity: item.availableQuantity,
                 });
                 new_data.push({
                   value: item.region._id,
@@ -239,12 +272,12 @@ export default class returninventory extends Component {
                 });
               })
             : res.data.data.configurableData.map((item, ind) => {
-                MultipleArray[index].package.push({
+                MultipleArray[index].AllPackages.push({
                   region: item.region.name,
                   regionID: item.region._id,
                   quantity: 0,
                   variant: item.variant_name,
-                  availQuantity: item.availQuantity,
+                  availableQuantity: item.availableQuantity,
                 });
                 new_data.push({
                   value: item.region._id,
@@ -325,34 +358,37 @@ export default class returninventory extends Component {
         valueErr = document.getElementsByClassName("err_productsearch" + index);
         valueErr[0].innerText = "Search / Select Product";
       }
+      if (item.package.length === 0) {
+        status = true;
+        valueErr = document.getElementsByClassName("err_regionSelect" + index);
+        valueErr[0].innerText = "Search region";
+      }
       item.package.forEach((daat, indes) => {
-        if (+daat.quantity > +daat.availQuantity.$numberDecimal) {
+        if (+daat.quantity > +daat.availableQuantity) {
           status = true;
-          valueErr = document.getElementsByClassName(
-            "err_available" + index + indes
-          );
+          valueErr = document.getElementsByClassName("err_available" + index);
           valueErr[0].innerText =
             "Reduction Qty can not be greater than Available qty";
         }
         // if (daat.quantity > 0) {
         //   status = false;
         //   valueErr = document.getElementsByClassName(
-        //     "err_quantity" + index + indes
+        //     "err_available" + index + indes
         //   );
         //   valueErr[0].innerText = "";
         // }
         else if (isNaN(daat.quantity)) {
           status = true;
-          valueErr = document.getElementsByClassName(
-            "err_quantity" + index + indes
-          );
+          valueErr = document.getElementsByClassName("err_available" + index);
           valueErr[0].innerText = "Enter Numeric Digit";
-        } else if (+daat.quantity > +daat.availQuantity.$numberDecimal) {
+        } else if (+daat.quantity > +daat.availableQuantity) {
           status = true;
-          valueErr = document.getElementsByClassName(
-            "err_quantity" + index + indes
-          );
+          valueErr = document.getElementsByClassName("err_available" + index);
           valueErr[0].innerText = "Should be less than Available Quantity";
+        } else if (!daat.quantity) {
+          status = true;
+          valueErr = document.getElementsByClassName("err_available" + index);
+          valueErr[0].innerText = "This field is required";
         }
       });
     });
@@ -366,10 +402,20 @@ export default class returninventory extends Component {
       this.setState({
         loading: true,
       });
+      var product_data = [];
+      MultipleArray.forEach((ma) => {
+        product_data.push({
+          product_id: ma.product,
+          regionID: ma.package[0].regionID,
+          TotalQuantity: ma.total_qty,
+          unitMeasurement: ma.product_details.unitMeasurement.name,
+          TypeOfProduct: ma.TypeOfProduct,
+        });
+      });
       const data = {
         admin_id: adminId._id,
         voucherType: "return",
-        product_data: JSON.stringify(MultipleArray),
+        product_data: JSON.stringify(product_data),
       };
       AdminApiRequest(data, "/admin/add/voucherInventory", "POST", "")
         .then((res) => {
@@ -534,45 +580,66 @@ export default class returninventory extends Component {
                                 {/* <i className="fa fa-times" onClick={() =>this.removeproduct("Remove",  index)} aria-hidden="true"></i> */}
                               </div>
                               <div style={{ flex: 3 }}>
-                                {item.package.map((it, ind) => {
-                                  return (
-                                    <div
-                                      className="simple_single"
-                                      style={{
-                                        gridTemplateColumns: "repeat(3, 1fr)",
-                                      }}
-                                    >
-                                      <div className="form-group">
-                                        <div className="modal-left-bx">
-                                          <label>Region</label>
-                                        </div>
-                                        <div className="modal-right-bx">
-                                          <input
+                                {/* {item.package.map((it, ind) => {
+                                  return ( */}
+                                <div
+                                  className="simple_single"
+                                  style={{
+                                    gridTemplateColumns: "repeat(3, 1fr)",
+                                  }}
+                                >
+                                  <div className="form-group">
+                                    <div className="modal-left-bx">
+                                      <label>Region</label>
+                                    </div>
+                                    <div className="modal-right-bx">
+                                      <select
+                                        onChange={(e) =>
+                                          this.changeRegionOfProduct(
+                                            e.target.value,
+                                            index
+                                          )
+                                        }
+                                        value={item.package[0]?.regionID}
+                                      >
+                                        <option value="">Select Region</option>
+                                        {item.AllPackages?.map((pck) => {
+                                          return (
+                                            <option value={pck.regionID}>
+                                              {pck.region}
+                                            </option>
+                                          );
+                                        })}
+                                      </select>
+                                      {/* <input
                                             type="text"
                                             className="form-control"
                                             value={it.region}
                                             readOnly
                                             placeholder="Region"
-                                          />
-                                        </div>
+                                          /> */}
+                                    </div>
+                                    <span
+                                      className={"err err_regionSelect" + index}
+                                    ></span>
+                                  </div>
+                                  {item.TypeOfProduct === "configurable" ? (
+                                    <div className="form-group">
+                                      <div className="modal-left-bx">
+                                        <label>Variant</label>
                                       </div>
-                                      {item.TypeOfProduct === "configurable" ? (
-                                        <div className="form-group">
-                                          <div className="modal-left-bx">
-                                            <label>Variant</label>
-                                          </div>
-                                          <div className="modal-right-bx">
-                                            <input
-                                              type="text"
-                                              className="form-control"
-                                              value={it.variant}
-                                              readOnly
-                                              placeholder="Region"
-                                            />
-                                          </div>
-                                        </div>
-                                      ) : null}
-                                      {/* <div className="form-group">
+                                      <div className="modal-right-bx">
+                                        <input
+                                          type="text"
+                                          className="form-control"
+                                          value={item.package[0]?.variant}
+                                          readOnly
+                                          placeholder="Region"
+                                        />
+                                      </div>
+                                    </div>
+                                  ) : null}
+                                  {/* <div className="form-group">
                                         <div className="modal-left-bx">
                                           <label>Quantity</label>
                                         </div>
@@ -587,32 +654,31 @@ export default class returninventory extends Component {
                                           />
                                         </div>
                                       </div> */}
-                                      <div className="form-group">
-                                        <div className="modal-left-bx">
-                                          <label>
-                                            Available Quantity (
-                                            {item.product_details
-                                              .unitMeasurement
-                                              ? item.product_details
-                                                  .unitMeasurement.name
-                                              : ""}
-                                            )
-                                          </label>
-                                        </div>
-                                        <div className="modal-right-bx">
-                                          <input
-                                            type="text"
-                                            autoComplete="off"
-                                            className="form-control"
-                                            value={
-                                              it.availQuantity.$numberDecimal
-                                            }
-                                            readOnly
-                                            placeholder="Available Quantity"
-                                          />
-                                        </div>
-                                      </div>
-                                      {/* <div className="form-group">
+                                  <div className="form-group">
+                                    <div className="modal-left-bx">
+                                      <label>
+                                        Available Quantity (
+                                        {item.product_details.unitMeasurement
+                                          ? item.product_details.unitMeasurement
+                                              .name
+                                          : ""}
+                                        )
+                                      </label>
+                                    </div>
+                                    <div className="modal-right-bx">
+                                      <input
+                                        type="text"
+                                        autoComplete="off"
+                                        className="form-control"
+                                        value={
+                                          item.package[0]?.availableQuantity
+                                        }
+                                        readOnly
+                                        placeholder="Available Quantity"
+                                      />
+                                    </div>
+                                  </div>
+                                  {/* <div className="form-group">
                                         <div className="modal-left-bx">
                                           <label>Lost Quantity</label>
                                         </div>
@@ -627,7 +693,7 @@ export default class returninventory extends Component {
                                           />
                                         </div>
                                       </div> */}
-                                      {/* <div className="form-group">
+                                  {/* <div className="form-group">
                                         <div className="modal-left-bx">
                                           <label>Booking Quantity</label>
                                         </div>
@@ -642,39 +708,37 @@ export default class returninventory extends Component {
                                           />
                                         </div>
                                       </div> */}
-                                      <div className="form-group">
-                                        <div className="modal-left-bx">
-                                          <label> Quantity to Reduce</label>
-                                        </div>
-                                        <div className="modal-right-bx">
-                                          <input
-                                            type="number"
-                                            autoComplete="off"
-                                            name={"quantity" + index}
-                                            className="form-control"
-                                            value={it.quantity || ""}
-                                            onChange={(e) => {
-                                              if (+e.target.value >= 0) {
-                                                this.formHandler1(
-                                                  e,
-                                                  index,
-                                                  ind,
-                                                  "quantity"
-                                                );
-                                              }
-                                            }}
-                                            placeholder="Enter Quantity"
-                                          />
-                                          <span
-                                            className={
-                                              "err err_available" + index + ind
-                                            }
-                                          ></span>
-                                        </div>
-                                      </div>
+                                  <div className="form-group">
+                                    <div className="modal-left-bx">
+                                      <label> Quantity to Reduce</label>
                                     </div>
-                                  );
-                                })}
+                                    <div className="modal-right-bx">
+                                      <input
+                                        type="number"
+                                        autoComplete="off"
+                                        name={"quantity" + index}
+                                        className="form-control"
+                                        value={item.package[0]?.quantity || ""}
+                                        onChange={(e) => {
+                                          if (+e.target.value >= 0) {
+                                            this.formHandler1(
+                                              e,
+                                              index,
+                                              0,
+                                              "quantity"
+                                            );
+                                          }
+                                        }}
+                                        placeholder="Enter Quantity"
+                                      />
+                                      <span
+                                        className={"err err_available" + index}
+                                      ></span>
+                                    </div>
+                                  </div>
+                                </div>
+                                {/* );
+                                })} */}
                               </div>
                               <i
                                 className="fas fa-times"

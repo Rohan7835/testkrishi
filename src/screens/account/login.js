@@ -38,6 +38,7 @@ class Login extends React.Component {
       signupCompleted: false,
       showOtpForSignup: false,
       incompleteLogin: false,
+      discount_amount: "",
     };
   }
 
@@ -505,12 +506,10 @@ class Login extends React.Component {
                             __v: item.product_id.__v,
                             created_at: item.product_id.created_at,
                             status: item.product_id.status,
-                            BookingQuantity:
-                              +item.product_id.BookingQuantity.$numberDecimal,
-                            productQuantity:
-                              +item.product_id.productQuantity.$numberDecimal,
-                            AvailableQuantity:
-                              +item.product_id.AvailableQuantity.$numberDecimal,
+                            bookingQuantity: +item.product_id.bookingQuantity,
+                            productQuantity: +item.product_id.productQuantity,
+                            availableQuantity:
+                              +item.product_id.availableQuantity,
                             ProductRegion: item.product_id.ProductRegion,
                             relatedProduct: item.product_id.relatedProduct,
                             configurableData: [],
@@ -539,9 +538,9 @@ class Login extends React.Component {
                                             item.simpleItem.Retail_price,
                                         },
                                       ],
-                                      availQuantity:
+                                      availableQuantity:
                                         item.product_id.simpleData[0]
-                                          .availQuantity,
+                                          .availableQuantity,
                                     },
                                   ]
                                 : [
@@ -560,9 +559,9 @@ class Login extends React.Component {
                                       RegionRetailPrice:
                                         item.product_id.simpleData?.[0]
                                           .RegionRetailPrice,
-                                      availQuantity:
+                                      availableQuantity:
                                         item.product_id.simpleData?.[0]
-                                          .availQuantity,
+                                          .availableQuantity,
                                     },
                                   ]
                               : [],
@@ -718,6 +717,7 @@ class Login extends React.Component {
               this.setState({
                 showOtpForSignup: true,
                 user_id: res.data.data._id,
+                otttpp: res.data.data.otp,
               });
               if (this.props.dataInCart.length > 0) {
                 await sendCartDataToAPI(
@@ -875,7 +875,7 @@ class Login extends React.Component {
                       {this.state.verifymobilestatus == "semitrue" ? (
                         <>
                           <span className="check-name">
-                            Enter OTP {/*- {this.state.otttpp} */}
+                            Enter OTP - {this.state.otttpp}
                           </span>
                           <span className="check-mail modal-right-bx otp_design">
                             <input
@@ -980,7 +980,9 @@ class Login extends React.Component {
                         this.state.showOtpForSignup ? (
                           !this.state.signupCompleted && (
                             <>
-                              <span className="check-name">Enter OTP</span>
+                              <span className="check-name">
+                                Enter OTP - {this.state.otttpp}
+                              </span>
                               <span className="check-mail modal-right-bx otp_design">
                                 <input
                                   type="text"

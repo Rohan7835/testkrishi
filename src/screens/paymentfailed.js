@@ -49,11 +49,9 @@ class Thankyou extends React.PureComponent {
                     created_at: item.product_id.created_at,
                     status: item.product_id.status,
                     hsnCode: item.product_id.hsnCode,
-                    BookingQuantity:
-                      +item.product_id.BookingQuantity.$numberDecimal,
+                    bookingQuantity: +item.product_id.bookingQuantity,
                     productQuantity: item.product_id.productQuantity,
-                    AvailableQuantity:
-                      +item.product_id.AvailableQuantity.$numberDecimal,
+                    availableQuantity: +item.product_id.availableQuantity,
                     ProductRegion: item.product_id.ProductRegion,
                     relatedProduct: item.product_id.relatedProduct,
                     configurableData: [],
@@ -80,8 +78,8 @@ class Thankyou extends React.PureComponent {
                                 Retail_price: item.simpleItem.Retail_price,
                               },
                             ],
-                            availQuantity:
-                              item.product_id.simpleData[0].availQuantity,
+                            availableQuantity:
+                              item.product_id.simpleData[0].availableQuantity,
                           },
                         ]
                       : [
@@ -98,8 +96,8 @@ class Thankyou extends React.PureComponent {
                               item.product_id.simpleData[0].RegionB2BPrice,
                             RegionRetailPrice:
                               item.product_id.simpleData[0].RegionRetailPrice,
-                            availQuantity:
-                              item.product_id.simpleData[0].availQuantity,
+                            availableQuantity:
+                              item.product_id.simpleData[0].availableQuantity,
                           },
                         ],
                   });

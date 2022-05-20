@@ -909,10 +909,25 @@ export default class viewinventory extends Component {
                       ? this.state.allsingledata.paymentStatus
                       : ""}
                   </span>
-                </li>{" "}
+                </li>
+                <li>
+                  <span className="view-title">Added IP Address</span>
+                  <span className="view-status">
+                    {this.state.allsingledata.updateByIP
+                      ? this.state.allsingledata.updateByIP
+                      : ""}
+                  </span>
+                </li>
+                <li>
+                  <span className="view-title">Updated IP Address</span>
+                  <span className="view-status">
+                    {this.state.allsingledata.addedByIP
+                      ? this.state.allsingledata.addedByIP
+                      : ""}
+                  </span>
+                </li>
                 {this.state.allsingledata.paymentStatus === "Complete" ? (
                   <>
-                    {" "}
                     <li>
                       <span className="view-title">Payment Date</span>
                       <span className="view-status">
@@ -937,22 +952,22 @@ export default class viewinventory extends Component {
                 ) : (
                   ""
                 )}
-                {this.state.allsingledata.productData &&
-                  this.state.allsingledata.productData.map((ittm, indd) => (
+                {this.state.allsingledata.inventoryItems &&
+                  this.state.allsingledata.inventoryItems.map((ittm, indd) => (
                     <div className="latest_product_combine">
                       <li>
                         <span className="view-title">Product Name</span>
                         <span className="view-status">
-                          {ittm ? ittm.product_id.product_name : ""}
+                          {ittm ? ittm.product_name : ""}
                         </span>
                       </li>
-                      <li>
+                      {/* <li>
                         <span className="view-title">Cost Price</span>
                         <span className="view-status">
                           {ittm ? ittm.product_costPrice : ""}
                         </span>
-                      </li>
-                      <li>
+                      </li> */}
+                      {/* <li>
                         <span className="view-title">Expiration Date</span>
                         <span className="view-status">
                           {ittm.product_expiry ? (
@@ -963,9 +978,9 @@ export default class viewinventory extends Component {
                             "--"
                           )}
                         </span>
-                      </li>
+                      </li> */}
                       {console.log("our_product_data", ittm)}
-                      {ittm && ittm.configurableData.length > 0 ? (
+                      {ittm && ittm.configurableData?.length > 0 ? (
                         <table>
                           <tr>
                             <th>Region</th>
@@ -981,16 +996,16 @@ export default class viewinventory extends Component {
                                     <tr>
                                       <td> {item.region.name}</td>
                                       <td> {item.variant_name}</td>
-                                      <td> {+item.quantity.$numberDecimal}</td>
+                                      <td> {+item.quantity}</td>
                                       {/* <td>
                                       {" "}
                                       {item.costPrice ? item.costPrice : 0}
                                     </td> */}
                                       <td>
                                         {" "}
-                                        {+item.quantity.$numberDecimal &&
+                                        {+item.quantity &&
                                         ittm.product_costPrice
-                                          ? +item.quantity.$numberDecimal *
+                                          ? +item.quantity *
                                             ittm.product_costPrice
                                           : 0}
                                       </td>
@@ -1013,53 +1028,56 @@ export default class viewinventory extends Component {
                       ) : (
                         <></>
                       )}
-                      {ittm && ittm.simpleData.length > 0 ? (
-                        <table>
-                          <tr>
-                            <th>Region</th>
-                            <th>Quantity</th>
-                            {/* <th>Cost Price</th> */}
-                            <th>Total</th>
-                            {/* <th>Expiration Date</th> */}
-                          </tr>
-                          {ittm
-                            ? ittm.simpleData.map((item, index) => (
-                                <>
-                                  <tbody>
-                                    <tr>
-                                      <td> {item.region.name}</td>
-                                      <td> {+item.quantity.$numberDecimal}</td>
-                                      {/* <td>
-                                      {" "}
-                                      {item.costPrice ? item.costPrice : 0}
-                                    </td> */}
-                                      <td>
-                                        {" "}
-                                        {+item.quantity.$numberDecimal &&
-                                        ittm.product_costPrice
-                                          ? +item.quantity.$numberDecimal *
-                                            ittm.product_costPrice
-                                          : 0}
-                                      </td>
-                                      {/* <td>
-                                        {" "}
-                                        {item.ExpirationDate ? (
-                                          <Moment format="DD/MM/YYYY hh:mm:ss A">
-                                            {item.ExpirationDate}
-                                          </Moment>
-                                        ) : (
-                                          "--"
-                                        )}
-                                      </td> */}
-                                    </tr>
-                                  </tbody>
-                                </>
-                              ))
-                            : ""}
-                        </table>
-                      ) : (
-                        <></>
-                      )}
+                      {/* {ittm.product_region && ittm.product_region.length > 0 ? ( */}
+                      <table>
+                        <tr>
+                          <th>Region</th>
+                          <th>Quantity</th>
+                          <th>Cost Price</th>
+                          <th>Total</th>
+                          {/* <th>Expiration Date</th> */}
+                        </tr>
+                        {/* {ittm
+                            ? ittm.product_region.map((item, index) => ( */}
+                        <>
+                          <tbody>
+                            <tr>
+                              <td> {ittm.region?.name}</td>
+                              <td> {+ittm.productQuantity}</td>
+                              <td>
+                                {" "}
+                                {ittm.product_costPrice
+                                  ? ittm.product_costPrice
+                                  : 0}
+                              </td>
+                              <td>
+                                {" "}
+                                {+ittm.productQuantity && ittm.product_costPrice
+                                  ? +ittm.productQuantity *
+                                    ittm.product_costPrice
+                                  : 0}
+                              </td>
+                              {/* 
+                                <td>
+                                  {" "}
+                                  {item.ExpirationDate ? (
+                                    <Moment format="DD/MM/YYYY hh:mm:ss A">
+                                      {item.ExpirationDate}
+                                    </Moment>
+                                  ) : (
+                                    "--"
+                                  )}
+                                </td> 
+                              */}
+                            </tr>
+                          </tbody>
+                        </>
+                        {/* ))
+                            : ""} */}
+                      </table>
+                      {/* // ) : (
+                      //   <></>
+                      // )} */}
                     </div>
                   ))}
               </ul>

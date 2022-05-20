@@ -63,24 +63,24 @@ class Cart extends React.PureComponent {
               return {
                 inhouseQuantity:
                   typeof a.inhouseQuantity === "object"
-                    ? +a.inhouseQuantity?.$numberDecimal
+                    ? +a.inhouseQuantity
                     : +a.inhouseQuantity,
                 lostQuantity:
                   typeof a.lostQuantity === "object"
-                    ? +a.lostQuantity?.$numberDecimal
+                    ? +a.lostQuantity
                     : +a.lostQuantity,
-                BookingQuantity:
-                  typeof a.BookingQuantity === "object"
-                    ? +a.BookingQuantity?.$numberDecimal
-                    : +a.BookingQuantity,
+                bookingQuantity:
+                  typeof a.bookingQuantity === "object"
+                    ? +a.bookingQuantity
+                    : +a.bookingQuantity,
                 productQuantity:
                   typeof a.productQuantity === "object"
-                    ? +a.productQuantity?.$numberDecimal
+                    ? +a.productQuantity
                     : +a.productQuantity,
-                AvailableQuantity:
-                  typeof a.AvailableQuantity === "object"
-                    ? +a.AvailableQuantity?.$numberDecimal
-                    : +a.AvailableQuantity,
+                availableQuantity:
+                  typeof a.availableQuantity === "object"
+                    ? +a.availableQuantity
+                    : +a.availableQuantity,
                 ...a,
               };
             })
@@ -177,12 +177,15 @@ class Cart extends React.PureComponent {
             }
             localStorage.setItem("status", Boolean(res.data.data.subscribe));
             res.data.data.cartDetail.map((item) => {
+              if (item.product_id.preOrder) {
+                localStorage.setItem("status", true);
+              }
               cartDatabyAPI.push({
                 _id: item.product_id._id,
                 product_name: item.product_id.product_name,
                 preOrderEndDate: item.product_id.preOrderEndDate,
                 longDesc: item.product_id.longDesc,
-                preOrder: item.preOrder,
+                preOrder: item.product_id.preOrder,
                 shortDesc: item.product_id.shortDesc,
                 preOrderRemainQty: item.preOrderRemainQty,
                 attachment: item.product_id.attachment,
@@ -196,22 +199,19 @@ class Cart extends React.PureComponent {
                 purchaseTax: item.product_id.purchaseTax,
                 hsnCode: item.product_id.hsnCode,
                 priceAfterDiscount: "",
-                unitMeasurement: item.unitMeasurement,
+                unitMeasurement:
+                  item.unitMeasurement || item.product_id.unitMeasurement,
                 TypeOfProduct: item.product_id.TypeOfProduct,
                 SKUCode: item.product_id.SKUCode,
                 __v: item.product_id.__v,
                 created_at: item.product_id.created_at,
                 status: item.product_id.status,
                 hsnCode: item.product_id.hsnCode,
-                inhouseQuantity:
-                  +item.product_id.inhouseQuantity?.$numberDecimal,
-                lostQuantity: +item.product_id.lostQuantity?.$numberDecimal,
-                BookingQuantity:
-                  +item.product_id.BookingQuantity?.$numberDecimal,
-                productQuantity:
-                  +item.product_id.productQuantity?.$numberDecimal,
-                AvailableQuantity:
-                  +item.product_id.AvailableQuantity?.$numberDecimal,
+                inhouseQuantity: +item.product_id.inhouseQuantity,
+                lostQuantity: +item.product_id.lostQuantity,
+                bookingQuantity: +item.product_id.bookingQuantity,
+                productQuantity: +item.product_id.productQuantity,
+                availableQuantity: +item.product_id.availableQuantity,
                 slug: item.slug,
                 ProductRegion: item.product_id.ProductRegion,
                 relatedProduct: item.product_id.relatedProduct,
@@ -223,6 +223,7 @@ class Cart extends React.PureComponent {
                     ? item.product_categories
                     : item.product_id.product_categories,
                 qty: item.qty,
+                unique_id: item.unique_id || null,
                 price: item.price ? item.price : 0,
                 totalprice: item.totalprice ? item.totalprice : 0,
                 unitQuantity: item.unitQuantity,
@@ -246,8 +247,8 @@ class Cart extends React.PureComponent {
                                 Retail_price: item.simpleItem.Retail_price,
                               },
                             ],
-                            availQuantity:
-                              item.product_id.simpleData[0].availQuantity,
+                            availableQuantity:
+                              item.product_id.simpleData[0].availableQuantity,
                           },
                         ]
                       : [
@@ -264,8 +265,8 @@ class Cart extends React.PureComponent {
                               item.product_id.simpleData[0].RegionB2BPrice,
                             RegionRetailPrice:
                               item.product_id.simpleData[0].RegionRetailPrice,
-                            availQuantity:
-                              item.product_id.simpleData[0].availQuantity,
+                            availableQuantity:
+                              item.product_id.simpleData[0].availableQuantity,
                           },
                         ]
                     : [],
@@ -413,24 +414,24 @@ class Cart extends React.PureComponent {
             return {
               inhouseQuantity:
                 typeof a.inhouseQuantity === "object"
-                  ? +a.inhouseQuantity?.$numberDecimal
+                  ? +a.inhouseQuantity
                   : +a.inhouseQuantity,
               lostQuantity:
                 typeof a.lostQuantity === "object"
-                  ? +a.lostQuantity?.$numberDecimal
+                  ? +a.lostQuantity
                   : +a.lostQuantity,
-              BookingQuantity:
-                typeof a.BookingQuantity === "object"
-                  ? +a.BookingQuantity?.$numberDecimal
-                  : +a.BookingQuantity,
+              bookingQuantity:
+                typeof a.bookingQuantity === "object"
+                  ? +a.bookingQuantity
+                  : +a.bookingQuantity,
               productQuantity:
                 typeof a.productQuantity === "object"
-                  ? +a.productQuantity?.$numberDecimal
+                  ? +a.productQuantity
                   : +a.productQuantity,
-              AvailableQuantity:
-                typeof a.AvailableQuantity === "object"
-                  ? +a.AvailableQuantity?.$numberDecimal
-                  : +a.AvailableQuantity,
+              availableQuantity:
+                typeof a.availableQuantity === "object"
+                  ? +a.availableQuantity
+                  : +a.availableQuantity,
               ...a,
             };
           }),
@@ -440,8 +441,11 @@ class Cart extends React.PureComponent {
   }
 
   increaseQuantity = async (i) => {
-    this.setState({ loading: true });
+    if (document.querySelector(".quantity-error-cart")) {
+      document.querySelector(".quantity-error-cart").innerHTML = "";
+    }
     let err;
+    let errorsPresent = false;
     if (i.TypeOfProduct !== "group") {
       if (i.simpleData[0].package) {
         let selLabel = i.simpleData[0].package.filter((a) => a.selected);
@@ -461,15 +465,16 @@ class Cart extends React.PureComponent {
     }
     // var newarray = this.props.dataInCart;
     var newarray = [...this.state.cart_data];
+    let selectedItem = {};
     newarray.map((itm) => {
       var avai = itm.simpleData[0]
-        ? itm.simpleData[0].availQuantity
-          ? typeof itm.simpleData[0].availQuantity === "object"
-            ? +itm.simpleData[0].availQuantity.$numberDecimal
-            : +itm.simpleData[0].availQuantity
-          : typeof itm.AvailableQuantity === "object"
-          ? +itm.AvailableQuantity.$numberDecimal
-          : +itm.AvailableQuantity
+        ? itm.simpleData[0].availableQuantity
+          ? typeof itm.simpleData[0].availableQuantity === "object"
+            ? +itm.simpleData[0].availableQuantity
+            : +itm.simpleData[0].availableQuantity
+          : typeof itm.availableQuantity === "object"
+          ? +itm.availableQuantity
+          : +itm.availableQuantity
         : 0;
       if (itm === i) {
         itm.TypeOfProduct === "simple"
@@ -480,9 +485,13 @@ class Cart extends React.PureComponent {
                   if (avai >= +pck.quantity + 1) {
                     pck.quantity = pck.quantity + 1;
                   } else {
-                    err.innerHTML = `${avai} Units currently in
-                    stock`;
+                    err.innerHTML = `You can not add ${
+                      itm.product_name
+                    } more than ${+itm.simpleData[0]?.availableQuantity} ${
+                      itm.unitMeasurement?.name
+                    }`;
                     err.style.display = "block";
+                    errorsPresent = true;
                   }
                 }
               })
@@ -490,62 +499,83 @@ class Cart extends React.PureComponent {
             ? (itm.simpleData[0].userQuantity += 1)
             : (err.style.display = "block")
           : (itm.qty = itm.qty + 1);
+        selectedItem = itm;
       }
     });
     var data = newarray;
+    if (!errorsPresent) {
+      this.setState({ loading: true });
+      await sendCartDataToAPI(
+        [selectedItem],
+        this.props.user_details,
+        this.props.addToCart
+      )
+        .then((res) => {
+          if (res.status === 200 || res.status === 201) {
+            this.setState({
+              coupon_code: "",
+              couponStatus: 2,
+              discount_amount: 0,
+              coupon: "",
+            });
+            this.props.addToCart([]);
+            this.props.addToCart(data);
+            this.setState({
+              cart_data: data,
+            });
+            localStorage.setItem("cartItem", JSON.stringify(data));
+            localStorage.setItem("coupon_code", "");
+            localStorage.setItem("freepackage", "");
+            localStorage.setItem("freeproduct", "");
+            localStorage.setItem("couponStatus", 2);
+            localStorage.setItem("discount_amount", "");
 
-    await sendCartDataToAPI(data, this.props.user_details, this.props.addToCart)
-      .then((res) => {
-        if (res.status === 200 || res.status === 201) {
-          this.setState({
-            coupon_code: "",
-            couponStatus: 2,
-            discount_amount: 0,
-            coupon: "",
-          });
-          this.props.addToCart([]);
-          this.props.addToCart(data);
-          this.setState({
-            cart_data: data,
-          });
-          localStorage.setItem("cartItem", JSON.stringify(data));
-          localStorage.setItem("coupon_code", "");
-          localStorage.setItem("freepackage", "");
-          localStorage.setItem("freeproduct", "");
-          localStorage.setItem("couponStatus", 2);
-          localStorage.setItem("discount_amount", "");
-
-          this.setState({
-            cartItems: data,
-          });
-          setTimeout(() => {
-            this.calculate_summry1(this.state.cart_data);
-          }, 50);
-        } else {
-          swal({
-            title: "Error",
-            text: res.data.data,
-            icon: "warning",
-          });
-          if (i.TypeOfProduct === "group") {
-            this.state.cart_data.map((itm) => {
-              if (itm === i) {
-                itm.TypeOfProduct !== "simple" && (itm.qty = itm.qty - 1);
-              }
+            this.setState({
+              cartItems: data,
             });
             setTimeout(() => {
               this.calculate_summry1(this.state.cart_data);
             }, 50);
-            this.forceUpdate();
+          } else {
+            if (document.querySelector(".quantity-error-cart")) {
+              document.querySelector(".quantity-error-cart").innerHTML =
+                "You can not add " + res.data.data.join("");
+            }
+            if (i.TypeOfProduct === "group") {
+              this.state.cart_data.map((itm) => {
+                if (itm === i) {
+                  itm.TypeOfProduct !== "simple" && (itm.qty = itm.qty - 1);
+                }
+              });
+
+              this.forceUpdate();
+            } else if (i.TypeOfProduct === "simple") {
+              this.state.cart_data.map((itm) => {
+                if (itm === i) {
+                  itm.TypeOfProduct === "simple"
+                    ? itm.simpleData[0].package[0]
+                      ? itm.simpleData[0].package.forEach((pck) => {
+                          if (pck.selected) {
+                            pck.quantity = pck.quantity - 1;
+                          }
+                        })
+                      : (itm.simpleData[0].userQuantity = 1)
+                    : (itm.qty = itm.qty);
+                }
+              });
+            }
+            setTimeout(() => {
+              this.calculate_summry1(this.state.cart_data);
+            }, 50);
           }
-        }
-      })
-      .then(() => {
-        this.setState({ loading: false });
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+        })
+        .then(() => {
+          this.setState({ loading: false });
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
     this.forceUpdate();
 
     // setTimeout(() => {
@@ -554,9 +584,13 @@ class Cart extends React.PureComponent {
   };
 
   decreaseQuantity = async (i) => {
+    if (document.querySelector(".quantity-error-cart")) {
+      document.querySelector(".quantity-error-cart").innerHTML = "";
+    }
     this.setState({ loading: true });
     // var newarray = this.props.dataInCart;
     var newarray = this.state.cart_data;
+    let selectedItem = {};
     newarray.map((itm) => {
       if (itm === i) {
         if (itm.TypeOfProduct === "simple") {
@@ -572,10 +606,9 @@ class Cart extends React.PureComponent {
             : itm.simpleData[0].userQuantity !== 1 &&
               (itm.simpleData[0].userQuantity -= 1);
         } else {
-          if (itm.qty !== 1) {
-            return (itm.qty = itm.qty - 1);
-          }
+          if (+itm.qty > 1) itm.qty = itm.qty - 1;
         }
+        selectedItem = itm;
       }
     });
     var data = newarray;
@@ -597,7 +630,8 @@ class Cart extends React.PureComponent {
       coupon: "",
     });
     await sendCartDataToAPI(
-      this.props.dataInCart,
+      // this.props.dataInCart,
+      [selectedItem],
       this.props.user_details,
       this.props.addToCart
     )
@@ -1718,52 +1752,56 @@ class Cart extends React.PureComponent {
       this.props.user_details,
       this.props.addToCart
     )
-      .then((res) => {
+      .then(async (res) => {
         if (res.status === 200 || res.status === 201) {
+          let dtaa = {};
+          ApiRequest(
+            dtaa,
+            "/get/addtocart/" + this.props.user_details._id,
+            "GET"
+          )
+            .then((res1) => {
+              if (res1.status === 201 || res1.status === 200) {
+                if (res1.data.data.priceChanged) {
+                  swal({
+                    title: "Price Changed!",
+                    text: "Prices of items are changed. Your cart will be refreshed.",
+                    icon: "warning",
+                  }).then(() => {
+                    window.location.reload();
+                  });
+                } else {
+                  localStorage.setItem(
+                    "discount_amount",
+                    this.state.discount_amount
+                  );
+                  localStorage.setItem(
+                    "discount_percentage",
+                    this.state.discount_percentage
+                  );
+                  setTimeout(() => {
+                    this.props.history.push("checkout");
+                  }, 0);
+                }
+              }
+            })
+            .catch((error) => {
+              console.log(error);
+            });
+        } else if (res.status === 400) {
           this.setState({ allDataLoaded: true });
-          this.props.history.push("checkout");
-          localStorage.setItem("discount_amount", this.state.discount_amount);
-          localStorage.setItem(
-            "discount_percentage",
-            this.state.discount_percentage
-          );
+          if (res.data.message === "errror") {
+            if (document.querySelector(".quantity-error-cart")) {
+              document.querySelector(".quantity-error-cart").innerHTML =
+                "You can not add " + res.data.data?.join("");
+            }
+          }
         } else {
-          this.getCartData().then(() => {
-            // swal({
-            //   title: "Error",
-            //   text:
-            //     res.data.data +
-            //     ". Your cart is modified because of unavailability of items.Do you want to proceed with your modified cart.",
-            //   buttons: {
-            //     confirm: {
-            //       text: "Proceed",
-            //       value: true,
-            //       visible: true,
-            //       className: "",
-            //       closeModal: true,
-            //     },
-            //     cancel: {
-            //       text: "Review cart",
-            //       value: false,
-            //       visible: true,
-            //       className: "back-swal-btn",
-            //       closeModal: true,
-            //     },
-            //   },
-            // }).then((status) => {
-            //   if (status) {
-            this.setState({ allDataLoaded: true });
-            this.props.history.push("checkout");
-            localStorage.setItem("discount_amount", this.state.discount_amount);
-            localStorage.setItem(
-              "discount_percentage",
-              this.state.discount_percentage
-            );
-            //   }
-            // });
+          this.setState({ allDataLoaded: true });
+          swal({
+            title: "Network Error",
           });
         }
-        // }
       })
       .catch((error) => {
         console.log(error);
@@ -2145,12 +2183,10 @@ class Cart extends React.PureComponent {
                             created_at: item.product_id.created_at,
                             status: item.product_id.status,
                             hsnCode: item.product_id.hsnCode,
-                            BookingQuantity:
-                              +item.product_id.BookingQuantity.$numberDecimal,
-                            productQuantity:
-                              +item.product_id.productQuantity.$numberDecimal,
-                            AvailableQuantity:
-                              +item.product_id.AvailableQuantity.$numberDecimal,
+                            bookingQuantity: +item.product_id.bookingQuantity,
+                            productQuantity: +item.product_id.productQuantity,
+                            availableQuantity:
+                              +item.product_id.availableQuantity,
                             ProductRegion: item.product_id.ProductRegion,
                             relatedProduct: item.product_id.relatedProduct,
                             configurableData: [],
@@ -2178,9 +2214,9 @@ class Cart extends React.PureComponent {
                                           item.simpleItem.Retail_price,
                                       },
                                     ],
-                                    availQuantity:
+                                    availableQuantity:
                                       item.product_id.simpleData[0]
-                                        .availQuantity,
+                                        .availableQuantity,
                                   },
                                 ]
                               : [
@@ -2199,9 +2235,9 @@ class Cart extends React.PureComponent {
                                     RegionRetailPrice:
                                       item.product_id.simpleData[0]
                                         .RegionRetailPrice,
-                                    availQuantity:
+                                    availableQuantity:
                                       item.product_id.simpleData[0]
-                                        .availQuantity,
+                                        .availableQuantity,
                                   },
                                 ],
                           });
@@ -2300,24 +2336,24 @@ class Cart extends React.PureComponent {
               cart_data_dt.push({
                 inhouseQuantity:
                   typeof item.inhouseQuantity === "object"
-                    ? +item.inhouseQuantity?.$numberDecimal
+                    ? +item.inhouseQuantity
                     : +item.inhouseQuantity,
                 lostQuantity:
                   typeof item.lostQuantity === "object"
-                    ? +item.lostQuantity?.$numberDecimal
+                    ? +item.lostQuantity
                     : +item.lostQuantity,
-                BookingQuantity:
-                  typeof item.BookingQuantity === "object"
-                    ? +item.BookingQuantity?.$numberDecimal
-                    : +item.BookingQuantity,
+                bookingQuantity:
+                  typeof item.bookingQuantity === "object"
+                    ? +item.bookingQuantity
+                    : +item.bookingQuantity,
                 productQuantity:
                   typeof item.productQuantity === "object"
-                    ? +item.productQuantity?.$numberDecimal
+                    ? +item.productQuantity
                     : +item.productQuantity,
-                AvailableQuantity:
-                  typeof item.AvailableQuantity === "object"
-                    ? +item.AvailableQuantity?.$numberDecimal
-                    : +item.AvailableQuantity,
+                availableQuantity:
+                  typeof item.availableQuantity === "object"
+                    ? +item.availableQuantity
+                    : +item.availableQuantity,
                 product_categories:
                   item.product_categories?.length > 0
                     ? item.product_categories
@@ -2374,24 +2410,24 @@ class Cart extends React.PureComponent {
               cart_data_dt.push({
                 inhouseQuantity:
                   typeof item.inhouseQuantity === "object"
-                    ? +item.inhouseQuantity?.$numberDecimal
+                    ? +item.inhouseQuantity
                     : +item.inhouseQuantity,
                 lostQuantity:
                   typeof item.lostQuantity === "object"
-                    ? +item.lostQuantity?.$numberDecimal
+                    ? +item.lostQuantity
                     : +item.lostQuantity,
-                BookingQuantity:
-                  typeof item.BookingQuantity === "object"
-                    ? +item.BookingQuantity?.$numberDecimal
-                    : +item.BookingQuantity,
+                bookingQuantity:
+                  typeof item.bookingQuantity === "object"
+                    ? +item.bookingQuantity
+                    : +item.bookingQuantity,
                 productQuantity:
                   typeof item.productQuantity === "object"
-                    ? +item.productQuantity?.$numberDecimal
+                    ? +item.productQuantity
                     : +item.productQuantity,
-                AvailableQuantity:
-                  typeof item.AvailableQuantity === "object"
-                    ? +item.AvailableQuantity?.$numberDecimal
-                    : +item.AvailableQuantity,
+                availableQuantity:
+                  typeof item.availableQuantity === "object"
+                    ? +item.availableQuantity
+                    : +item.availableQuantity,
                 product_categories: item.product_categories || [],
                 ...item,
                 product_cat_id: item.product_cat_id
@@ -2867,7 +2903,30 @@ class Cart extends React.PureComponent {
 
   //removing deleted item from items state
   async removeItemFromCart(removedItem) {
+    if (document.querySelector(".quantity-error-cart")) {
+      document.querySelector(".quantity-error-cart").innerHTML = "";
+    }
     this.setState({ loading: true });
+    let selectedItem = {};
+    this.state.cart_data.map((itm) => {
+      if (itm === removedItem) {
+        if (itm.TypeOfProduct === "simple") {
+          itm.simpleData[0].package[0]
+            ? itm.simpleData[0].package.map((pck) => {
+                if (pck.selected) {
+                  pck.quantity = 0;
+                }
+              })
+            : (itm.simpleData[0].userQuantity = 0);
+        } else {
+          if (+itm.qty) {
+            itm.qty = 0;
+          }
+        }
+        selectedItem = itm;
+      }
+    });
+
     const newItemsArray = this.state.cart_data.filter((itm) => {
       if (itm !== removedItem) {
         return itm;
@@ -2892,7 +2951,7 @@ class Cart extends React.PureComponent {
       coupon: "",
     });
     await sendCartDataToAPI(
-      newItemsArray,
+      [selectedItem],
       this.props.user_details,
       this.props.addToCart
     )
@@ -3013,6 +3072,7 @@ class Cart extends React.PureComponent {
               this.setState({
                 showOtpForSignup: true,
                 user_id: res.data.data._id,
+                otttpp: res.data.data.otp,
               });
               swal({
                 title: "OTP sent on email and SMS.",
@@ -3336,11 +3396,10 @@ class Cart extends React.PureComponent {
                                                     color: "red",
                                                   }}
                                                 >
-                                                  {typeof item.AvailableQuantity ===
+                                                  {typeof item.availableQuantity ===
                                                   "object"
-                                                    ? item.AvailableQuantity
-                                                        .$numberDecimal
-                                                    : item.AvailableQuantity}{" "}
+                                                    ? item.availableQuantity
+                                                    : item.availableQuantity}{" "}
                                                   Units currently in stock
                                                 </span>
                                               </td>
@@ -3485,11 +3544,10 @@ class Cart extends React.PureComponent {
                                               color: "red",
                                             }}
                                           >
-                                            {typeof item.AvailableQuantity ===
+                                            {typeof item.availableQuantity ===
                                             "object"
-                                              ? item.AvailableQuantity
-                                                  .$numberDecimal
-                                              : item.AvailableQuantity}{" "}
+                                              ? item.availableQuantity
+                                              : item.availableQuantity}{" "}
                                             Units currently in stock
                                           </span>
                                         </td>
@@ -3645,11 +3703,10 @@ class Cart extends React.PureComponent {
                                             color: "red",
                                           }}
                                         >
-                                          {typeof item.AvailableQuantity ===
+                                          {typeof item.availableQuantity ===
                                           "object"
-                                            ? item.AvailableQuantity
-                                                .$numberDecimal
-                                            : item.AvailableQuantity}{" "}
+                                            ? item.availableQuantity
+                                            : item.availableQuantity}{" "}
                                           Units currently in stock
                                         </span>
                                       </td>
@@ -3662,7 +3719,7 @@ class Cart extends React.PureComponent {
                               <tr>
                                 <td className="pointer">
                                   <div className="cart_itm_image">
-                                    {/* {JSON.parse(localStorage.getItem("freeproduct")).BookingQuantity} */}
+                                    {/* {JSON.parse(localStorage.getItem("freeproduct")).bookingQuantity} */}
                                     <img
                                       src={
                                         imageUrl +
@@ -3984,6 +4041,10 @@ class Cart extends React.PureComponent {
                         ) : (
                           ""
                         )}
+                        <p
+                          className="quantity-error-cart mt-3"
+                          style={{ color: "red" }}
+                        ></p>
                       </div>
                     </div>
                   ) : (
@@ -4062,7 +4123,7 @@ class Cart extends React.PureComponent {
                     {this.state.verifymobilestatus == "semitrue" ? (
                       <>
                         <span className="check-name">
-                          Enter OTP {/*- {this.state.otttpp} */}
+                          Enter OTP - {this.state.otttpp}
                         </span>
                         <span className="check-mail modal-right-bx otp_design">
                           <input
@@ -4138,7 +4199,9 @@ class Cart extends React.PureComponent {
                       this.state.showOtpForSignup ? (
                         !this.state.signupCompleted && (
                           <>
-                            <span className="check-name">Enter OTP</span>
+                            <span className="check-name">
+                              Enter OTP- {this.state.otttpp}
+                            </span>
                             <span className="check-mail modal-right-bx otp_design">
                               <input
                                 type="text"

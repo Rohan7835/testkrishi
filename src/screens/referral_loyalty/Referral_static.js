@@ -22,6 +22,7 @@ class Loyalty_static extends React.Component {
       copied: false,
     };
   }
+
   componentDidMount() {
     this.setState({
       // name: this.props.user_details.name,
@@ -30,12 +31,14 @@ class Loyalty_static extends React.Component {
       referal_code: this.props.user_details.myRefferalCode,
     });
   }
+
   textCopied = () => {
     this.setState({ copied: true });
     setTimeout(() => {
       this.setState({ copied: false });
     }, 2000);
   };
+
   render() {
     return (
       <>

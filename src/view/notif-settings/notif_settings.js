@@ -1863,6 +1863,37 @@ export default class Notifications_setting extends React.Component {
                           </div>
                         </div>
                       </div>
+
+                      <div className="my-3 border-top">
+                        <h4 className="card-title my-3">Supplier Mail</h4>
+                        <div className="row mb-5">
+                          <div className="col-md-6">
+                            <h5>Add</h5>
+                            <Switch
+                              checked={this.state.supplier_inventory_add}
+                              onChange={(e) =>
+                                this.setState({
+                                  supplier_inventory_add: e,
+                                })
+                              }
+                              id="normal-switch"
+                            />
+                          </div>
+                          <div className="col-md-6">
+                            <h5>Edit</h5>
+                            <Switch
+                              checked={this.state.supplier_inventory_update}
+                              onChange={(e) =>
+                                this.setState({
+                                  supplier_inventory_update: e,
+                                })
+                              }
+                              id="normal-switch"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
                       <div className="form-group">
                         <button
                           type="button"

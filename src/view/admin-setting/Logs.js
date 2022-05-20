@@ -25,7 +25,7 @@ class Logs extends React.Component {
               <div className="setting-page">
                 <h3>Logs</h3>
                 <div className="Default_icon setting-first-default p-5">
-                  <div className="form-group w-100">
+                  {/* <div className="form-group w-100">
                     <div className="modal-left-bx">
                       <label>Product Logs</label>
                     </div>
@@ -35,15 +35,8 @@ class Logs extends React.Component {
                         title="Logs"
                         style={{ width: "100%", minHeight: "400px" }}
                       ></iframe>
-                      {/* <a
-                        className="btn btn-primary"
-                        target="_blank"
-                        href={DynamicUrl + "app_logs/product_quantity.log"}
-                      >
-                        View
-                      </a> */}
-                    </div>{" "}
-                  </div>
+                    </div>
+                  </div> */}
                   <div className="form-group w-100 mt-5">
                     <div className="modal-left-bx">
                       <label>Inventory Logs</label>

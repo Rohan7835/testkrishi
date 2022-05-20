@@ -112,18 +112,17 @@ class HOME extends React.Component {
                   salesTaxWithIn: item.product_id.salesTaxWithIn,
                   purchaseTax: item.product_id.purchaseTax,
                   hsnCode: item.product_id.hsnCode,
-                  unitMeasurement: item.unitMeasurement,
+                  unitMeasurement:
+                    item.unitMeasurement || item.product_id.unitMeasurement,
                   TypeOfProduct: item.product_id.TypeOfProduct,
                   SKUCode: item.product_id.SKUCode,
                   __v: item.product_id.__v,
                   created_at: item.product_id.created_at,
                   status: item.product_id.status,
                   hsnCode: item.product_id.hsnCode,
-                  BookingQuantity:
-                    +item.product_id.BookingQuantity.$numberDecimal,
+                  bookingQuantity: +item.product_id.bookingQuantity,
                   productQuantity: item.product_id.productQuantity,
-                  AvailableQuantity:
-                    +item.product_id.AvailableQuantity.$numberDecimal,
+                  availableQuantity: +item.product_id.availableQuantity,
                   ProductRegion: item.product_id.ProductRegion,
                   relatedProduct: item.product_id.relatedProduct,
                   configurableData: [],
@@ -135,6 +134,7 @@ class HOME extends React.Component {
                   unitQuantity: item.unitQuantity,
                   slug: item.slug,
                   configurableItem: item.configurableItem,
+                  unique_id: item.unique_id || null,
                   simpleData: item.simpleItem.packet_size
                     ? [
                         {
@@ -151,8 +151,8 @@ class HOME extends React.Component {
                               Retail_price: item.simpleItem.Retail_price,
                             },
                           ],
-                          availQuantity:
-                            item.product_id.simpleData[0].availQuantity,
+                          availableQuantity:
+                            item.product_id.simpleData[0].availableQuantity,
                         },
                       ]
                     : [
@@ -169,8 +169,8 @@ class HOME extends React.Component {
                             item.product_id.simpleData[0].RegionB2BPrice,
                           RegionRetailPrice:
                             item.product_id.simpleData[0].RegionRetailPrice,
-                          availQuantity:
-                            item.product_id.simpleData[0].availQuantity,
+                          availableQuantity:
+                            item.product_id.simpleData[0].availableQuantity,
                         },
                       ],
                 });
@@ -577,9 +577,7 @@ class HOME extends React.Component {
       intervalSearch: setTimeout(() => {
         if (this.state.searchKey.length >= 1) {
           let requestData = {
-            // product_categories: sessionStorage.getItem("catId"),
             product_name: e.target.value,
-            // product_name: this.state.searchKey,
             RegionId: JSON.parse(localStorage.getItem("selectedRegionId")),
             subscribe: localStorage.getItem("status")
               ? localStorage.getItem("status")
@@ -1178,6 +1176,7 @@ class HOME extends React.Component {
                       this.filteredProducts();
                       this.setState({ searchKey: "" });
                     }}
+                    productCount={(e) => this.setState({ productCount: e })}
                     // callbackAgain={this.callbackAgain}
                     renderer={this.state.renderer}
                     topTenListOpen={(e) => this.topTenListOpen(e)}
@@ -1200,6 +1199,7 @@ class HOME extends React.Component {
                       this.filteredProducts();
                       this.setState({ searchKey: "" });
                     }}
+                    productCount={(e) => this.setState({ productCount: e })}
                     topTenListOpen={(e) => this.topTenListOpen(e)}
                     // callbackAgain={this.callbackAgain}
                     startProgressBar={() =>
@@ -1327,6 +1327,7 @@ class HOME extends React.Component {
                   {" "}
                   <Product
                     search={this.state.searchItem}
+                    productCount={this.state.productCount}
                     openCart={() => {
                       //not to open cart ,it is to update cart value
                       this.setState({
@@ -1340,7 +1341,6 @@ class HOME extends React.Component {
                       this.setState({ status: true });
                     }}
                     showTopTenList={this.state.showTopTenList}
-                    // changeSubscribeTrueWithoutCartEmpty={() => this.setState({ status: true })}
                     allRegion={this.state.allRegion}
                     openRegionPopup={this.state.regionPopup}
                     closeRegionPopup={() => {

@@ -1,12 +1,5 @@
 import moment from "moment";
 import React, { Component } from "react";
-import {
-  Accordion,
-  AccordionItem,
-  AccordionItemButton,
-  AccordionItemHeading,
-  AccordionItemPanel
-} from "react-accessible-accordion";
 import "react-accessible-accordion/dist/fancy-example.css";
 import Pagination from "react-js-pagination";
 import ReactLoading from "react-loading";
@@ -54,7 +47,7 @@ export default class viewproduct extends Component {
       customer_data: [],
       dropdownColor: [],
       dropdownSize: [],
-      all_product: [],
+      // all_product: [],
       options: [
         { name: "Swedish", value: "sv" },
         { name: "English", value: "en" },
@@ -222,6 +215,7 @@ export default class viewproduct extends Component {
         console.log(error);
       });
   }
+
   _handleSameDayDeliveryStatus(data, status) {
     const requestData = {
       _id: data._id,
@@ -279,6 +273,7 @@ export default class viewproduct extends Component {
         console.log(error);
       });
   }
+
   _handleFarmPickupStatus(data, status) {
     const requestData = {
       _id: data._id,
@@ -336,6 +331,7 @@ export default class viewproduct extends Component {
         console.log(error);
       });
   }
+
   _handleCatelogStatus(data, status) {
     const requestData = {
       _id: data._id,
@@ -393,6 +389,7 @@ export default class viewproduct extends Component {
         console.log(error);
       });
   }
+
   selectonchnhe = (ev) => {
     this.setState({ [ev.target.name]: ev.target.value });
   };
@@ -470,24 +467,25 @@ export default class viewproduct extends Component {
   componentDidMount() {
     this.setState({ loading: true });
     const requestData = {};
-    AdminApiRequest(requestData, "/admin/product/allActiveProducts", "GET")
-      .then((res) => {
-        if (res.status === 201 || res.status === 200) {
-          res.data.data.forEach((item) => {
-            this.state.all_product.push({
-              value: item._id,
-              name: item.product_name,
-            });
-          });
-          this.setState({
-            loading: false,
-          });
-        } else {
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    // AdminApiRequest(requestData, "/admin/product/allActiveProducts", "GET")
+    //   .then((res) => {
+    //     if (res.status === 201 || res.status === 200) {
+    //       res.data.data.forEach((item) => {
+    //         this.state.all_product.push({
+    //           value: item._id,
+    //           name: item.product_name,
+    //         });
+    //       });
+    //       this.setState({
+    //         loading: false,
+    //       });
+    //     } else {
+    //     }
+    //   })
+    //   .catch((error) => {
+    //     console.log(error);
+    //   });
+
     const data1 = {
       skip: this.state.skip,
       limit: this.state.limit,
@@ -546,6 +544,7 @@ export default class viewproduct extends Component {
   formHandler1(ev) {
     this.setState({ [ev.target.name]: ev.target.value });
   }
+
   getcustomerfilter = (skipParam) => {
     this.setState({ loading: true });
     const requestData = {
@@ -578,6 +577,7 @@ export default class viewproduct extends Component {
         console.log(error);
       });
   };
+
   resetFilters() {
     this.setState({
       status_search: "",
@@ -611,6 +611,7 @@ export default class viewproduct extends Component {
       selectedSearchCat_id: "",
     });
   }
+
   render() {
     return (
       <div className="wrapper ">
@@ -758,29 +759,23 @@ export default class viewproduct extends Component {
                                           )}
                                       </td>
                                       <td>
-                                        {(+item.productQuantity
-                                          .$numberDecimal).toFixed(2)}
+                                        {(+item.productQuantity).toFixed(2)}
                                       </td>
                                       <td>
                                         {" "}
-                                        {(+item.AvailableQuantity
-                                          .$numberDecimal).toFixed(2)}{" "}
+                                        {(+item.availableQuantity).toFixed(
+                                          2
+                                        )}{" "}
                                       </td>
                                       <td>
-                                        {(+item.BookingQuantity
-                                          .$numberDecimal).toFixed(2)}
+                                        {(+item.bookingQuantity).toFixed(2)}
+                                      </td>
+                                      <td>{(+item.lostQuantity).toFixed(2)}</td>
+                                      <td>
+                                        {(+item.returnQuantity).toFixed(2)}
                                       </td>
                                       <td>
-                                        {(+item.lostQuantity
-                                          .$numberDecimal).toFixed(2)}
-                                      </td>
-                                      <td>
-                                        {(+item.returnQuantity
-                                          .$numberDecimal).toFixed(2)}
-                                      </td>
-                                      <td>
-                                        {(+item.inhouseQuantity
-                                          .$numberDecimal).toFixed(2)}
+                                        {(+item.inhouseQuantity).toFixed(2)}
                                       </td>
                                       <td>
                                         <Switch
@@ -1080,7 +1075,7 @@ export default class viewproduct extends Component {
                                     <span className="err err_selectedunit"></span>
                                   </div>
                                 </div>
-                                
+
                                 <div className="form-group">
                                   <div className="modal-left-bx">
                                     <label>Quantity / Unit Measurement</label>
@@ -1094,7 +1089,40 @@ export default class viewproduct extends Component {
                                     <span className="err err_quantity_unit"></span>
                                   </div>
                                 </div>
-
+                                <div className="form-group">
+                                  <div className="modal-left-bx">
+                                    <label>Pre Order</label>
+                                  </div>
+                                  <div className="modal-right-bx">
+                                    <span className="view-prod-same-des">
+                                      {this.state.allsingledata.preOrder
+                                        ? "Yes"
+                                        : "No"}
+                                    </span>
+                                    <span className="err err_quantity_unit"></span>
+                                  </div>
+                                </div>
+                                {this.state.allsingledata.preOrder ? (
+                                  <div className="form-group">
+                                    <div className="modal-left-bx">
+                                      <label>Pre Order End Date</label>
+                                    </div>
+                                    <div className="modal-right-bx">
+                                      <span className="view-prod-same-des">
+                                        {this.state.allsingledata
+                                          .preOrderEndDate
+                                          ? moment(
+                                              this.state.allsingledata
+                                                .preOrderEndDate
+                                            ).format("LLL")
+                                          : ""}
+                                      </span>
+                                      <span className="err err_quantity_unit"></span>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  ""
+                                )}
                                 <div className="form-group">
                                   <div className="modal-left-bx">
                                     <label>Barcode</label>
@@ -1102,13 +1130,14 @@ export default class viewproduct extends Component {
                                   <div className="modal-right-bx">
                                     <span className="view-prod-same-des">
                                       {this.state.allsingledata.barcode
-                                        ? this.state.allsingledata.barcode.join(", ")
+                                        ? this.state.allsingledata.barcode.join(
+                                            ", "
+                                          )
                                         : ""}
                                     </span>
                                     <span className="err err_quantity_unit"></span>
                                   </div>
                                 </div>
-
                               </div>
                             </div>
 
@@ -1252,7 +1281,7 @@ export default class viewproduct extends Component {
                                     <span className="view-prod-same-des">
                                       <p>
                                         {this.state.allsingledata
-                                          .relatedRecipes[0]
+                                          .relatedRecipes?.[0]
                                           ? this.state.allsingledata.relatedRecipes.map(
                                               (prd, idx) => {
                                                 return (
@@ -1418,16 +1447,13 @@ export default class viewproduct extends Component {
                                                     className="modal-left-bx"
                                                     style={displayBlock}
                                                   >
-                                                    <label>
+                                                    <label> 
                                                       Available Quantity
                                                     </label>
                                                   </div>
                                                   <div className="modal-right-bx">
                                                     <span className="view-prod-same-des">
-                                                      {
-                                                        item.availQuantity
-                                                          .$numberDecimal
-                                                      }
+                                                      {item.availableQuantity}
                                                     </span>
                                                   </div>
                                                 </div>
@@ -1442,10 +1468,7 @@ export default class viewproduct extends Component {
                                                   </div>
                                                   <div className="modal-right-bx">
                                                     <span className="view-prod-same-des">
-                                                      {
-                                                        item.availQuantity
-                                                          .$numberDecimal
-                                                      }
+                                                      {item.inhouseQuantity}
                                                     </span>
                                                   </div>
                                                 </div>
@@ -1458,14 +1481,26 @@ export default class viewproduct extends Component {
                                                   </div>
                                                   <div className="modal-right-bx">
                                                     <span className="view-prod-same-des">
-                                                      {
-                                                        item.availQuantity
-                                                          .$numberDecimal
-                                                      }
+                                                      {item.lostQuantity}
                                                     </span>
                                                   </div>
                                                 </div>
                                                 <div className="form-group">
+                                                  <div
+                                                    className="modal-left-bx"
+                                                    style={displayBlock}
+                                                  >
+                                                    <label>
+                                                      Return Quantity
+                                                    </label>
+                                                  </div>
+                                                  <div className="modal-right-bx">
+                                                    <span className="view-prod-same-des">
+                                                      {item.returnQuantity}
+                                                    </span>
+                                                  </div>
+                                                </div>
+                                                {/* <div className="form-group">
                                                   <div
                                                     className="modal-left-bx"
                                                     style={displayBlock}
@@ -1477,9 +1512,9 @@ export default class viewproduct extends Component {
                                                       {item.RegionSellingPrice}
                                                     </span>
                                                   </div>
-                                                </div>
+                                                </div> */}
 
-                                                <div className="form-group">
+                                                {/* <div className="form-group">
                                                   <div
                                                     className="modal-left-bx"
                                                     style={displayBlock}
@@ -1491,9 +1526,9 @@ export default class viewproduct extends Component {
                                                       {item.RegionB2BPrice}
                                                     </span>
                                                   </div>
-                                                </div>
+                                                </div> */}
 
-                                                <div className="form-group">
+                                                {/* <div className="form-group">
                                                   <div
                                                     className="modal-left-bx"
                                                     style={displayBlock}
@@ -1505,9 +1540,9 @@ export default class viewproduct extends Component {
                                                       {item.RegionRetailPrice}
                                                     </span>
                                                   </div>
-                                                </div>
+                                                </div> */}
 
-                                                <div className="form-group">
+                                                {/* <div className="form-group">
                                                   <div
                                                     className="modal-left-bx"
                                                     style={displayBlock}
@@ -1519,7 +1554,7 @@ export default class viewproduct extends Component {
                                                       {item.mrp}
                                                     </span>
                                                   </div>
-                                                </div>
+                                                </div> */}
                                               </div>
                                               {item.package.length > 0 ? (
                                                 <>
@@ -1530,6 +1565,10 @@ export default class viewproduct extends Component {
                                                         <div
                                                           className="simple_package new_6_rowing"
                                                           key={ix}
+                                                          style={{
+                                                            gridTemplateColumns:
+                                                              "repeat(7, minmax(0, 1fr))",
+                                                          }}
                                                         >
                                                           <div className="form-group">
                                                             <div
@@ -1644,6 +1683,26 @@ export default class viewproduct extends Component {
                                                             <div className="modal-right-bx">
                                                               <span className="view-prod-same-des">
                                                                 {pck.packetmrp}
+                                                              </span>
+                                                            </div>
+                                                          </div>
+
+                                                          <div className="form-group">
+                                                            <div
+                                                              className="modal-left-bx"
+                                                              style={
+                                                                displayBlock
+                                                              }
+                                                            >
+                                                              <label>
+                                                                Status
+                                                              </label>
+                                                            </div>
+                                                            <div className="modal-right-bx">
+                                                              <span className="view-prod-same-des">
+                                                                {pck.status
+                                                                  ? "Active"
+                                                                  : "Inactive"}
                                                               </span>
                                                             </div>
                                                           </div>
@@ -2016,10 +2075,10 @@ export default class viewproduct extends Component {
                                                       </span>
                                                     </div>
                                                     <div className="modal-right-bx">
-                                                      {console.log(
+                                                      {/* {console.log(
                                                         "allllproduct",
                                                         this.state.all_product
-                                                      )}
+                                                      )} */}
                                                       {/* <SelectSearch
                                                       placeholder="Search Product"
                                                       options={
@@ -2029,16 +2088,10 @@ export default class viewproduct extends Component {
                                                       value={itm21.product}
                                                     /> */}
                                                       <span>
-                                                        {this.state.all_product.map(
-                                                          (prd) => {
-                                                            if (
-                                                              prd.value ===
-                                                              itm21.product._id
-                                                            ) {
-                                                              return prd.name;
-                                                            }
-                                                          }
-                                                        )}
+                                                        {
+                                                          itm21.product
+                                                            .product_name
+                                                        }
                                                       </span>
                                                     </div>
                                                   </div>
@@ -2062,11 +2115,6 @@ export default class viewproduct extends Component {
                                                       <label>Min Qty</label>
                                                     </div>
                                                     <div className="modal-right-bx">
-                                                      {/* <input
-                                                        type="number"
-                                                        value={itm21.setminqty}
-                                                        className="form-control"
-                                                      /> */}
                                                       <span>
                                                         {itm21.setminqty}
                                                       </span>
@@ -2081,13 +2129,37 @@ export default class viewproduct extends Component {
                                                       </span>
                                                     </div>
                                                     <div className="modal-right-bx">
-                                                      {/* <input
-                                                        type="number"
-                                                        value={itm21.setmaxqty}
-                                                        className="form-control"
-                                                      /> */}
                                                       <span>
                                                         {itm21.setmaxqty}
+                                                      </span>
+                                                    </div>
+                                                  </div>
+
+                                                  <div className="form-group">
+                                                    <div className="modal-left-bx">
+                                                      <label>Pre-Set Qty</label>
+                                                      <span className="asterisk">
+                                                        *
+                                                      </span>
+                                                    </div>
+                                                    <div className="modal-right-bx">
+                                                      <span>
+                                                        {itm21.preset}
+                                                      </span>
+                                                    </div>
+                                                  </div>
+
+                                                  <div className="form-group">
+                                                    <div className="modal-left-bx">
+                                                      <label>Priority</label>
+                                                      <span className="asterisk">
+                                                        *
+                                                      </span>
+                                                    </div>
+                                                    <div className="modal-right-bx">
+                                                      <span>
+                                                        {itm21.priority ||
+                                                          "unset"}
                                                       </span>
                                                     </div>
                                                   </div>
@@ -2186,105 +2258,113 @@ export default class viewproduct extends Component {
                             Product
                           </button>
                         </div>
-                        <Accordion>
+                        <div className="view-inven-product-card-section">
                           {this.state.inventory_data.map((item, index) => {
                             return (
-                              <AccordionItem>
-                                <AccordionItemHeading>
-                                  <AccordionItemButton>
-                                    {moment(item.created_at).format(
-                                      "MMMM Do YYYY, h:mm:ss a"
-                                    )}
-                                    {" - "}
-                                    {item.supplier_id?.name}
+                              <div>
+                                <div>
+                                  <div className="view-inven-product-card">
+                                    <div className="inven-heading">
+                                      {moment(item.created_at).format(
+                                        "MMMM Do YYYY, h:mm:ss A"
+                                      )}
+                                      {}
+                                      {item.supplier
+                                        ? " - " + item.supplier
+                                        : ""}
+                                    </div>
                                     <ul>
                                       <li>
                                         <span className="view-title">
                                           {" "}
-                                          product_quantity{" "}
+                                          Region{" "}
                                         </span>
                                         <span className="view-status">
                                           {" "}
-                                          {
-                                            item.productData[0].product_quantity
-                                              .$numberDecimal
-                                          }{" "}
+                                          {item.region}{" "}
+                                        </span>
+                                      </li>
+                                      {item.variant_name && (
+                                        <li>
+                                          <span className="view-title">
+                                            {" "}
+                                            Variant{" "}
+                                          </span>
+                                          <span className="view-status">
+                                            {" "}
+                                            {item.variant_name}{" "}
+                                          </span>
+                                        </li>
+                                      )}
+                                      <li>
+                                        <span className="view-title">
+                                          {" "}
+                                          product quantity{" "}
+                                        </span>
+                                        <span className="view-status">
+                                          {" "}
+                                          {item.productQuantity || 0}{" "}
                                         </span>
                                       </li>
 
                                       <li>
                                         <span className="view-title">
                                           {" "}
-                                          AvailableQuantity{" "}
+                                          available Quantity{" "}
                                         </span>
                                         <span className="view-status">
                                           {" "}
-                                          {
-                                            item.productData[0]
-                                              .AvailableQuantity.$numberDecimal
-                                          }{" "}
+                                          {item.availableQuantity || 0}{" "}
                                         </span>
                                       </li>
                                       <li>
                                         <span className="view-title">
                                           {" "}
-                                          BookingQuantity{" "}
+                                          booking Quantity{" "}
                                         </span>
                                         <span className="view-status">
                                           {" "}
-                                          {
-                                            item.productData[0].BookingQuantity
-                                              .$numberDecimal
-                                          }{" "}
+                                          {item.bookingQuantity || 0}{" "}
                                         </span>
                                       </li>
                                       <li>
                                         <span className="view-title">
                                           {" "}
-                                          returnQuantity{" "}
+                                          return Quantity{" "}
                                         </span>
                                         <span className="view-status">
                                           {" "}
-                                          {
-                                            item.productData[0].returnQuantity
-                                              .$numberDecimal
-                                          }{" "}
+                                          {item.returnQuantity || 0}{" "}
                                         </span>
                                       </li>
                                       <li>
                                         <span className="view-title">
                                           {" "}
-                                          lostQuantity{" "}
+                                          lost Quantity{" "}
                                         </span>
                                         <span className="view-status">
                                           {" "}
-                                          {
-                                            item.productData[0].lostQuantity
-                                              .$numberDecimal
-                                          }{" "}
+                                          {item.lostQuantity || 0}{" "}
                                         </span>
                                       </li>
                                       <li>
                                         <span className="view-title">
                                           {" "}
-                                          inhouseQuantity{" "}
+                                          inhouse Quantity{" "}
                                         </span>
                                         <span className="view-status">
                                           {" "}
-                                          {
-                                            item.productData[0].inhouseQuantity
-                                              .$numberDecimal
-                                          }{" "}
+                                          {item.inhouseQuantity || 0}{" "}
                                         </span>
                                       </li>
 
                                       {/* filds to be shown on developnment environment */}
                                     </ul>
-                                  </AccordionItemButton>
-                                </AccordionItemHeading>
+                                  </div>
+                                </div>
 
-                                <AccordionItemPanel>
-                                  {item.productData[0].simpleData.map(
+                                {/* <AccordionItemPanel>
+                                  {item.simpleData.map(
                                     (data, index) => {
                                       return (
                                         <div className="view-box" key={index}>
@@ -2307,7 +2387,7 @@ export default class viewproduct extends Component {
                                               <span className="view-status">
                                                 {" "}
                                                 {
-                                                  data.quantity.$numberDecimal
+                                                  data.quantity
                                                 }{" "}
                                               </span>
                                             </li>
@@ -2320,7 +2400,7 @@ export default class viewproduct extends Component {
                                                 {" "}
                                                 {
                                                   data.bookingQuantity
-                                                    .$numberDecimal
+                                                    
                                                 }{" "}
                                               </span>
                                             </li>
@@ -2332,8 +2412,8 @@ export default class viewproduct extends Component {
                                               <span className="view-status">
                                                 {" "}
                                                 {
-                                                  data.availQuantity
-                                                    .$numberDecimal
+                                                  data.availableQuantity
+                                                    
                                                 }{" "}
                                               </span>
                                             </li>
@@ -2346,7 +2426,7 @@ export default class viewproduct extends Component {
                                                 {" "}
                                                 {
                                                   data.inhouseQuantity
-                                                    .$numberDecimal
+                                                    
                                                 }{" "}
                                               </span>
                                             </li>
@@ -2359,7 +2439,7 @@ export default class viewproduct extends Component {
                                                 {" "}
                                                 {
                                                   data.lostQuantity
-                                                    .$numberDecimal
+                                                    
                                                 }{" "}
                                               </span>
                                             </li>
@@ -2372,7 +2452,7 @@ export default class viewproduct extends Component {
                                                 {" "}
                                                 {
                                                   data.returnQuantity
-                                                    .$numberDecimal
+                                                    
                                                 }{" "}
                                               </span>
                                             </li>
@@ -2402,17 +2482,16 @@ export default class viewproduct extends Component {
                                               </span>
                                             </li>
 
-                                            {/* filds to be shown on developnment environment */}
                                           </ul>
                                         </div>
                                       );
                                     }
                                   )}
-                                </AccordionItemPanel>
-                              </AccordionItem>
+                                </AccordionItemPanel> */}
+                              </div>
                             );
                           })}
-                        </Accordion>
+                        </div>
                       </div>
                     </div>
                   </div>

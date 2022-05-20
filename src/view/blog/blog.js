@@ -1249,7 +1249,7 @@ export default class blogmaster extends Component {
                             </div>
                             <div className="modal-right-bx">
                               <input
-                                type="text"
+                                type="number"
                                 name="edit_noOfServe"
                                 value={this.state.edit_noOfServe}
                                 className="form-control"
@@ -1731,7 +1731,7 @@ export default class blogmaster extends Component {
                             </div>
                             <div className="modal-right-bx">
                               <input
-                                type="text"
+                                type="number"
                                 name="noOfServe"
                                 className="form-control"
                                 placeholder="Enter No. of Serve"

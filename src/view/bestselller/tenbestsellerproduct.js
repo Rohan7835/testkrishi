@@ -154,7 +154,7 @@ export default class tenbestseller extends Component {
                             <tr>
                               <th scope="col">Product Name</th>
                               {/* <th scope="col">Sales of Product</th> */}
-                              <th scope="col">Available Quantity</th>
+                              {/* <th scope="col">Available Quantity</th> */}
                               <th scope="col">Purchased Quantity</th>
                               <th scope="col">Unit Quantity/Measurement</th>
                               {/* <th scope="col">Action</th> */}
@@ -175,22 +175,17 @@ export default class tenbestseller extends Component {
                                       : ""}
                                   </td>
                                   {/* <td>{item.NoOfSaleofProduct}</td> */}
-                                  <td>
+                                  {/* <td>
                                     {item.productDetail
                                       ? typeof item.productDetail
-                                          .AvailableQuantity === "object"
-                                        ? item.productDetail.AvailableQuantity
-                                            .$numberDecimal
-                                        : item.productDetail.AvailableQuantity
+                                          .availableQuantity === "object"
+                                        ? item.productDetail.availableQuantity
+                                        : item.productDetail.availableQuantity
                                       : ""}
-                                  </td>
+                                  </td> */}
                                   <td>
                                     {item.productDetail
-                                      ? typeof item.productDetail
-                                          .BookingQuantity === "object"
-                                        ? item.productDetail.BookingQuantity
-                                            .$numberDecimal
-                                        : item.productDetail.BookingQuantity
+                                      ? item.NoOfSaleofProduct || 0
                                       : ""}
                                   </td>
                                   <td>

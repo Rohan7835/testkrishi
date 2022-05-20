@@ -608,18 +608,18 @@ export default class lostanddamagelisting extends Component {
                     <th>Region</th>
                     <th>Quantity</th>
                   </tr>
-                  {this.state.allsingledata
-                    ? this.state.allsingledata.simpleData.map((item, index) => (
-                        <>
-                          <tbody>
-                            <tr>
-                              <td> {item.regionID.name}</td>
-                              <td> {item.quantity}</td>
-                            </tr>
-                          </tbody>
-                        </>
-                      ))
-                    : ""}
+                  {/* {this.state.allsingledata
+                    ? this.state.allsingledata.simpleData.map((item, index) => ( */}
+                  <>
+                    <tbody>
+                      <tr>
+                        <td> {this.state.allsingledata.regionID?.name}</td>
+                        <td> {this.state.allsingledata.TotalQuantity}</td>
+                      </tr>
+                    </tbody>
+                  </>
+                  {/* ))
+                    : ""} */}
                 </table>
               </ul>
             </div>

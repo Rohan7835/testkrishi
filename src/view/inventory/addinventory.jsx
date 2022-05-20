@@ -14,8 +14,7 @@ var MultipleArray = [];
 
 export default class AddInventory extends Component {
   constructor() {
-
-    MultipleArray = []
+    MultipleArray = [];
     super();
     var dt = localStorage.getItem("adminInfo");
     if (dt) {
@@ -55,7 +54,7 @@ export default class AddInventory extends Component {
       newproductlength: 0,
       newproduct: [],
       loading: true,
-      delivery_charges:0,
+      delivery_charges: 0,
     };
 
     this.handleChangeStatus = this.handleChangeStatus.bind(this);
@@ -68,8 +67,8 @@ export default class AddInventory extends Component {
   }
 
   formHandler1(e, index, ind, type) {
-    console.log(e, index, ind, type)
-    if (type === "product_costPrice") { 
+    console.log(e, index, ind, type);
+    if (type === "product_costPrice") {
       MultipleArray[index].product_costPrice = +e.target.value;
       // total calculation
       MultipleArray[index].product_quantity = 0;
@@ -77,21 +76,37 @@ export default class AddInventory extends Component {
         (item) =>
           (MultipleArray[index].product_quantity =
             MultipleArray[index].product_quantity + +item.quantity)
-      );     
-      if(MultipleArray[index].regionalData[ind]){
+      );
+      if (MultipleArray[index].regionalData[ind]) {
+        MultipleArray[index].regionalData.forEach((m, i) => {
+          MultipleArray[index].regionalData[i].total_amount =
+            e.target.value === ""
+              ? 0
+              : +e.target.value *
+                +MultipleArray[index].regionalData[i].quantity;
+        });
 
-        MultipleArray[index].regionalData[ind].total_amount =
-        e.target.value === ""
-        ? 0
-        : +e.target.value * MultipleArray[index].product_quantity;
-      } 
+        // MultipleArray[index].regionalData[ind].total_amount =
+        // e.target.value === ""
+        // ? 0
+        // : +e.target.value * MultipleArray[index].product_quantity;
+      }
       // total calculation
-     var cpgst =
-       +e.target.value * (100 / (100 + MultipleArray[index].gst_percentage));
-        MultipleArray[index].singlepricewithoutgst =cpgst;
-    MultipleArray[index].gst = (+MultipleArray[index].product_costPrice * MultipleArray[index].product_quantity) - [(+MultipleArray[index].product_costPrice * MultipleArray[index].product_quantity) * (100/(100+ MultipleArray[index].gst_percentage))] 
-    MultipleArray[index].invoice_without_gst = (+MultipleArray[index].product_costPrice * MultipleArray[index].product_quantity) - MultipleArray[index].gst
-
+      var cpgst =
+        +e.target.value * (100 / (100 + MultipleArray[index].gst_percentage));
+      MultipleArray[index].singlepricewithoutgst = cpgst;
+      MultipleArray[index].gst =
+        +MultipleArray[index].product_costPrice *
+          MultipleArray[index].product_quantity -
+        [
+          +MultipleArray[index].product_costPrice *
+            MultipleArray[index].product_quantity *
+            (100 / (100 + MultipleArray[index].gst_percentage)),
+        ];
+      MultipleArray[index].invoice_without_gst =
+        +MultipleArray[index].product_costPrice *
+          MultipleArray[index].product_quantity -
+        MultipleArray[index].gst;
     }
     if (type === "variant_name") {
       MultipleArray[index].regionalData[ind].variant_name = e.target.value;
@@ -101,8 +116,8 @@ export default class AddInventory extends Component {
       MultipleArray[index].product_quantity = 0;
       MultipleArray[index].regionalData.map(
         (item) =>
-          MultipleArray[index].product_quantity =
-            MultipleArray[index].product_quantity + +item.quantity
+          (MultipleArray[index].product_quantity =
+            MultipleArray[index].product_quantity + +item.quantity)
       );
       var a =
         MultipleArray[index].product_costPrice ||
@@ -112,14 +127,34 @@ export default class AddInventory extends Component {
           : 0;
       MultipleArray[index].regionalData[ind].total_amount =
         e.target.value === "" ? 0 : a * +e.target.value;
-          MultipleArray[index].gst = (+MultipleArray[index].product_costPrice * MultipleArray[index].product_quantity) - [(+MultipleArray[index].product_costPrice * MultipleArray[index].product_quantity) * (100/(100+ MultipleArray[index].gst_percentage))] 
-    MultipleArray[index].invoice_without_gst = (+MultipleArray[index].product_costPrice * MultipleArray[index].product_quantity) - MultipleArray[index].gst
+      MultipleArray[index].gst =
+        +MultipleArray[index].product_costPrice *
+          MultipleArray[index].product_quantity -
+        [
+          +MultipleArray[index].product_costPrice *
+            MultipleArray[index].product_quantity *
+            (100 / (100 + MultipleArray[index].gst_percentage)),
+        ];
+      MultipleArray[index].invoice_without_gst =
+        +MultipleArray[index].product_costPrice *
+          MultipleArray[index].product_quantity -
+        MultipleArray[index].gst;
     }
-    
+
     if (type === "total_amount") {
       MultipleArray[index].regionalData[ind].total_amount = e.target.value;
-        MultipleArray[index].gst = (+MultipleArray[index].product_costPrice * MultipleArray[index].product_quantity) - [(+MultipleArray[index].product_costPrice * MultipleArray[index].product_quantity) * (100/(100+ MultipleArray[index].gst_percentage))] 
-    MultipleArray[index].invoice_without_gst = (+MultipleArray[index].product_costPrice * MultipleArray[index].product_quantity) - MultipleArray[index].gst
+      MultipleArray[index].gst =
+        +MultipleArray[index].product_costPrice *
+          MultipleArray[index].product_quantity -
+        [
+          +MultipleArray[index].product_costPrice *
+            MultipleArray[index].product_quantity *
+            (100 / (100 + MultipleArray[index].gst_percentage)),
+        ];
+      MultipleArray[index].invoice_without_gst =
+        +MultipleArray[index].product_costPrice *
+          MultipleArray[index].product_quantity -
+        MultipleArray[index].gst;
     }
     var total_invoice = 0;
     MultipleArray.forEach((item, index) => {
@@ -141,14 +176,14 @@ export default class AddInventory extends Component {
         product: "",
         product_name: "",
         variants: [],
-        unit_quantity:"",
+        unit_quantity: "",
         product_costPrice: 0,
         product_quantity: 0,
-        gst_percentage:0,
+        gst_percentage: 0,
         gst: 0,
-        singlepricewithoutgst:0,
+        singlepricewithoutgst: 0,
         invoice_without_gst: 0,
-        AvailableQuantity: 0,
+        availableQuantity: 0,
         product_expiry: "",
         prodType: "",
         product_measurment: "",
@@ -169,7 +204,7 @@ export default class AddInventory extends Component {
       data[ind].regionalData.push({
         region: "",
         quantity: "",
-        cost_price: 0,        
+        cost_price: 0,
         total_amount: 0,
         expiration: "",
       });
@@ -203,9 +238,9 @@ export default class AddInventory extends Component {
     this.setState({
       loading: true,
     });
-    let dt = []
-    dt= MultipleArray.filter((m,i) => i !== index)
-    MultipleArray = dt
+    let dt = [];
+    dt = MultipleArray.filter((m, i) => i !== index);
+    MultipleArray = dt;
     this.setState({
       loading: false,
     });
@@ -215,14 +250,24 @@ export default class AddInventory extends Component {
     this.setState({ account_head: valu.value });
   };
 
-  onChangeregion = (valu, index, ind,prod_id) => {
+  onChangeregion = (valu, index, ind, prod_id) => {
     // variant_data
     this.setState({
       loading: true,
     });
     let data = MultipleArray;
     data[index].regionalData[ind].region = valu.value;
-    var data_to_filer = MultipleArray.filter((itm)=>itm.product == prod_id)
+    if(data[index].configurableData?.length > 0){
+      let newVariants = []
+      data[index].configurableData.forEach(a => {
+        if(a.region._id === valu.value){
+          newVariants.push({value: a.variant_name,
+            name: a.variant_name,})
+        }
+      })
+      data[index].variants = newVariants
+    }
+    var data_to_filer = MultipleArray.filter((itm) => itm.product == prod_id);
     this.setState({
       loading: false,
     });
@@ -254,7 +299,7 @@ export default class AddInventory extends Component {
     });
     const data = {
       _id: this.state.supplier,
-      bill_date:date
+      bill_date: date,
     };
     AdminApiRequest(data, "/admin/GetInvoiceDueDate", "POST", "")
       .then((res) => {
@@ -290,53 +335,85 @@ export default class AddInventory extends Component {
 
   onChange112(valu, index) {
     const requestData = {};
-    this.setState({loading:true})
+    this.setState({ loading: true });
     AdminApiRequest(requestData, "/admin/product/" + valu.value, "GET")
       .then((res) => {
-        console.log("produts_data",res.data.data)
         if (res.status === 201 || res.status === 200) {
           MultipleArray[index].product = res.data.data._id;
           MultipleArray[index].product_name = res.data.data.product_name;
           MultipleArray[index].slug = res.data.data.slug;
-          MultipleArray[index].AvailableQuantity =
-            +res.data.data.AvailableQuantity.$numberDecimal;
+          MultipleArray[index].availableQuantity =
+            +res.data.data.availableQuantity ;
+          MultipleArray[index].regionalData =
+            res.data.data.TypeOfProduct === "simple"
+              ? [
+                  {
+                    region: "",
+                    quantity: "",
+                    cost_price: 0,
+                    total_amount: 0,
+                    expiration: "",
+                  },
+                ]
+              : [
+                  {
+                    region: "",
+                    quantity: "",
+                    variant_name: "",
+                    seleted_variant: "",
+                    variant_data: [],
+                    cost_price: 0,
+                    total_amount: 0,
+                    expiration: "",
+                  },
+                ];
           MultipleArray[index].totalAvailableQuantity =
-          +res.data.data.AvailableQuantity.$numberDecimal;
+            +res.data.data.availableQuantity ;
           MultipleArray[index].prodType = res.data.data.TypeOfProduct;
           MultipleArray[index].unit_quantity =
-            res.data.data.unitMeasurement?.name ;
+            res.data.data.unitMeasurement?.name;
           MultipleArray[index].gst_percentage =
             res.data.data.purchaseTax && +res.data.data.purchaseTax.totalTax
               ? +res.data.data.purchaseTax.totalTax
               : 0;
           MultipleArray[index].batchID = res.data.data.batchID;
-          
+
           MultipleArray[index].singlepricewithoutgst = 0;
           MultipleArray[index].product_measurment =
             res.data.data.unitMeasurement?.name;
+          MultipleArray[index].configurableData = res.data.data.configurableData;
 
           var new_data = [];
           var variant_data = [];
-          res.data.data.TypeOfProduct === 'simple'
+          res.data.data.TypeOfProduct === "simple"
             ? res.data.data.simpleData.forEach((item) => {
-                new_data.push({
-                  value: item.region._id,
-                  name: item.region.name,
-                });
+                if (
+                  new_data.filter((a) => a.value === item.region._id).length > 0
+                ) {
+                } else {
+                  new_data.push({
+                    value: item.region._id,
+                    name: item.region.name,
+                  });
+                }
               })
             : res.data.data.configurableData.forEach((item) => {
-                new_data.push({
-                  value: item.region._id,
-                  name: item.region.name,
-                });
+                if (
+                  new_data.filter((a) => a.value === item.region._id).length > 0
+                ) {
+                } else {
+                  new_data.push({
+                    value: item.region._id,
+                    name: item.region.name,
+                  });
+                }
 
-                variant_data.push({
-                  value: item.variant_name,
-                  name: item.variant_name,
-                });
-
+                // variant_data.push({
+                //   value: item.variant_name,
+                //   name: item.variant_name,
+                // });
               });
-              MultipleArray[index].variants = variant_data;
+          MultipleArray[index].variants = variant_data;
           let a = "single_product" + index;
           let abab = "regiondata" + res.data.data.slug;
           this.setState({
@@ -352,9 +429,9 @@ export default class AddInventory extends Component {
             dangerMode: true,
           });
         }
-      }).then(() => {
-        
-    this.setState({loading:false})
+      })
+      .then(() => {
+        this.setState({ loading: false });
       })
       .catch((error) => {
         console.log(error);
@@ -368,7 +445,7 @@ export default class AddInventory extends Component {
     });
     const data = {
       _id: valu.value,
-      bill_date: this.state.invoice_date ? this.state.invoice_date:  new Date()
+      bill_date: this.state.invoice_date ? this.state.invoice_date : new Date(),
     };
     AdminApiRequest(data, "/admin/GetInvoiceDueDate", "POST", "")
       .then((res) => {
@@ -393,7 +470,6 @@ export default class AddInventory extends Component {
       loading: false,
     });
   }
-
 
   formHandler(ev) {
     this.setState({ [ev.target.name]: ev.target.value });
@@ -488,8 +564,9 @@ export default class AddInventory extends Component {
           );
           valueErr[0].innerText = "Number Should be greater than 0";
         }
-        if (daat.prodType === "configurable") {
+        if (item.prodType === "configurable") {
           if (!daat.variant_name) {
+            status = true;
             valueErr = document.getElementsByClassName(
               "err_variant" + index + indes
             );
@@ -532,14 +609,13 @@ export default class AddInventory extends Component {
       this.setState({
         loading: true,
       });
-      var total_gst =0
-      var InvoiceAmountWithoutGST =0
-      MultipleArray.map((item, index) =>  
-     { 
-       total_gst = total_gst + item.gst;
-      InvoiceAmountWithoutGST = InvoiceAmountWithoutGST + item.invoice_without_gst
-    })
-      
+      var total_gst = 0;
+      var InvoiceAmountWithoutGST = 0;
+      MultipleArray.map((item, index) => {
+        total_gst = total_gst + item.gst;
+        InvoiceAmountWithoutGST =
+          InvoiceAmountWithoutGST + item.invoice_without_gst;
+      });
       const data = {
         admin_id: this.state.admin_data._id,
         Date: this.state.startDate ? this.state.startDate : "",
@@ -565,7 +641,7 @@ export default class AddInventory extends Component {
         ChequeNumber: this.state.cheque_number ? this.state.cheque_number : "",
         TypeOfProduct: this.state.single_product
           ? this.state.single_product.TypeOfProduct
-          : "", 
+          : "",
         total_gst: total_gst,
         AmountWithoutGSTandDelivery: InvoiceAmountWithoutGST,
         Bank: this.state.bank ? this.state.bank : "",
@@ -583,11 +659,11 @@ export default class AddInventory extends Component {
               icon: "success",
               successMode: true,
             });
-            MultipleArray = []
+            MultipleArray = [];
             this.setState({
-              all_product:[],
-              activ_supplier:[]
-            })
+              all_product: [],
+              activ_supplier: [],
+            });
             this.props.history.push("admin-view-inventory");
           } else if (res.status === 400) {
             this.setState({
@@ -625,18 +701,18 @@ export default class AddInventory extends Component {
         });
     }
   }
-  
+
   async componentDidMount() {
     const requestData = {};
     var activesupplier = [];
-    MultipleArray = []
+    MultipleArray = [];
     await AdminApiRequest(requestData, "/admin/product/active", "GET")
       .then((res) => {
         if (res.status === 201 || res.status === 200) {
-          let data = []
-          if(res.data.data && res.data.data.length > 0){
+          let data = [];
+          if (res.data.data && res.data.data.length > 0) {
             res.data.data.forEach((item) => {
-              if(item.TypeOfProduct !== "group"){
+              if (item.TypeOfProduct !== "group") {
                 data.push({
                   value: item._id,
                   name: item.product_name,
@@ -647,9 +723,9 @@ export default class AddInventory extends Component {
           setTimeout(() => {
             this.setState({
               loading: false,
-              all_product:data || []
+              all_product: data || [],
             });
-          },0) 
+          }, 0);
         } else {
           swal({
             title: "Network Issue",
@@ -663,24 +739,24 @@ export default class AddInventory extends Component {
         console.log(error);
       });
 
-      await AdminApiRequest(requestData, "/admin/GetNewBillNo ", "GET")
-        .then((res) => {
-          if (res.status === 201 || res.status === 200) {
-            this.setState({
-              bill_kcNumber: res.data.data,
-            });
-          } else {
-            swal({
-              title: "Network Issue",
-              // text: "Are you sure that you want to leave this page?",
-              icon: "warning",
-              dangerMode: true,
-            });
-          }
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+    await AdminApiRequest(requestData, "/admin/GetNewBillNo ", "GET")
+      .then((res) => {
+        if (res.status === 201 || res.status === 200) {
+          this.setState({
+            bill_kcNumber: res.data.data,
+          });
+        } else {
+          swal({
+            title: "Network Issue",
+            // text: "Are you sure that you want to leave this page?",
+            icon: "warning",
+            dangerMode: true,
+          });
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
 
     await AdminApiRequest(requestData, "/admin/supplier_master", "GET")
       .then((res) => {
@@ -717,7 +793,7 @@ export default class AddInventory extends Component {
   }
 
   render() {
-    console.log("MultipleArrayMultipleArray",MultipleArray)
+    console.log("MultipleArrayMultipleArray", MultipleArray);
     return (
       <div className="wrapper ">
         <Adminsiderbar />
@@ -906,40 +982,42 @@ export default class AddInventory extends Component {
                             </div>
                           </div>
                         </div>
-                        {MultipleArray.length > 0 && MultipleArray.map((item, index) => {
-                          console.log("sdfdfdsf",item)
-                          return (  
-                            <div className="productvariant" key={index}>
-                              <div className="form-group inventory_three">
-                                <div className="form-group">
-                                  <div className="modal-left-bx">
-                                    <label>
-                                      {" "}
-                                      Product<span className="asterisk">*</span>
-                                    </label>
-                                  </div>
-                                  <div className="modal-right-bx">
-                                    <SelectSearch
-                                      placeholder="Search Product"
-                                      options={this.state.all_product}
-                                      onChange={(e) =>
-                                        this.onChange112(e, index)
-                                      }
-                                      className="select-search"
-                                      value={item.product}
-                                      name={"selected_product" + index}
-                                    />
-                                    {/* <input type="text" autoComplete="off" name={"product" + index} className="form-control" value={item.product} onChange={(e) => this.formHandler1(e, index, "product")} placeholder="Enter Product" /> */}
+                        {MultipleArray.length > 0 &&
+                          MultipleArray.map((item, index) => {
+                            console.log("sdfdfdsf", item);
+                            return (
+                              <div className="productvariant" key={index}>
+                                <div className="form-group inventory_three">
+                                  <div className="form-group">
+                                    <div className="modal-left-bx">
+                                      <label>
+                                        {" "}
+                                        Product
+                                        <span className="asterisk">*</span>
+                                      </label>
+                                    </div>
+                                    <div className="modal-right-bx">
+                                      <SelectSearch
+                                        placeholder="Search Product"
+                                        options={this.state.all_product}
+                                        onChange={(e) =>
+                                          this.onChange112(e, index)
+                                        }
+                                        className="select-search"
+                                        value={item.product}
+                                        name={"selected_product" + index}
+                                      />
+                                      {/* <input type="text" autoComplete="off" name={"product" + index} className="form-control" value={item.product} onChange={(e) => this.formHandler1(e, index, "product")} placeholder="Enter Product" /> */}
 
-                                    <span
-                                      className={
-                                        "err err_productsearch" + index
-                                      }
-                                    ></span>
+                                      <span
+                                        className={
+                                          "err err_productsearch" + index
+                                        }
+                                      ></span>
+                                    </div>
                                   </div>
-                                </div>
 
-                                {/* <div className="form-group">
+                                  {/* <div className="form-group">
                                   <div className="modal-left-bx">
                                     <label> Unit Quantity</label>
                                   </div>
@@ -961,170 +1039,184 @@ export default class AddInventory extends Component {
                                   </div>
                                 </div> */}
 
-                                <div className="form-group">
-                                  <div className="modal-left-bx">
-                                    <label> Cost Price</label>
+                                  <div className="form-group">
+                                    <div className="modal-left-bx">
+                                      <label> Cost Price</label>
+                                    </div>
+                                    <div className="modal-right-bx">
+                                      <input
+                                        type="text"
+                                        autoComplete="off"
+                                        name={"product_costPrice" + index}
+                                        className="form-control"
+                                        value={item.product_costPrice}
+                                        onChange={(e) =>
+                                          this.formHandler1(
+                                            e,
+                                            index,
+                                            0,
+                                            "product_costPrice"
+                                          )
+                                        }
+                                        placeholder="Enter Cost Price"
+                                      />
+                                      <span
+                                        className={
+                                          "err err_product_costPrice" + index
+                                        }
+                                      ></span>
+                                    </div>
                                   </div>
-                                  <div className="modal-right-bx">
-                                    <input
-                                      type="text"
-                                      autoComplete="off"
-                                      name={"product_costPrice" + index}
-                                      className="form-control"
-                                      value={item.product_costPrice}
-                                      onChange={(e) =>
-                                        this.formHandler1(
-                                          e,
-                                          index,
-                                          0,
-                                          "product_costPrice"
-                                        )
-                                      }
-                                      placeholder="Enter Cost Price"
-                                    />
-                                    <span
-                                      className={
-                                        "err err_product_costPrice" + index
-                                      }
-                                    ></span>
+                                  <div className="form-group">
+                                    <div className="modal-left-bx">
+                                      <label> Expiration</label>
+                                    </div>
+                                    <div className="modal-right-bx">
+                                      <DatePicker
+                                        selected={item.product_expiry}
+                                        dateFormat="dd/MM/yyyy"
+                                        onChange={(date) =>
+                                          this.setexpdate11(date, index)
+                                        }
+                                        minDate={new Date()}
+                                      />
+                                      <span
+                                        className={
+                                          "err err_product_expiry" + index
+                                        }
+                                      ></span>
+                                    </div>
                                   </div>
+                                  <i
+                                    className="fa fa-times"
+                                    onClick={() => this.removeproduct(index)}
+                                    aria-hidden="true"
+                                  ></i>
                                 </div>
-                                <div className="form-group">
-                                  <div className="modal-left-bx">
-                                    <label> Expiration</label>
-                                  </div>
-                                  <div className="modal-right-bx">
-                                    <DatePicker
-                                      selected={item.product_expiry}
-                                      dateFormat="dd/MM/yyyy"
-                                      onChange={(date) =>
-                                        this.setexpdate11(date, index)
-                                      }
-                                      minDate={new Date()}
-                                    />
-                                    <span
-                                      className={
-                                        "err err_product_expiry" + index
-                                      }
-                                    ></span>
-                                  </div>
-                                </div>
-                                <i
-                                  className="fa fa-times"
-                                  onClick={() =>
-                                    this.removeproduct(index)
-                                  }
-                                  aria-hidden="true"
-                                ></i>
-                              </div>
-                              <div>
-                                {item.regionalData.map((it, ind) => {
-                                  return (
-                                    <div className="simple_single">
-                                      <div className="form-group">
-                                        <div className="modal-left-bx">
-                                          <label>
-                                            {" "}
-                                            Region
-                                            <span className="asterisk">*</span>
-                                          </label>
-                                        </div>
-                                        <div className="modal-right-bx">
-                                          <SelectSearch
-                                            placeholder="Search Region"
-                                            options={
-                                              this.state["regiondata" + item.slug] 
-                                            }
-                                            onChange={(e) =>
-                                              this.onChangeregion(e, index, ind,item.product)
-                                            }
-                                            className="select-search"
-                                            value={it.region}
-                                            autoComplete={false}
-                                          />
-                                          <span
-                                            className={
-                                              "err err_region" + index + ind
-                                            }
-                                          ></span>
-                                        </div>
-                                      </div>
-                                      {item.prodType === "configurable" ? (
+                                <div>
+                                  {item.regionalData.map((it, ind) => {
+                                    return (
+                                      <div className="simple_single">
                                         <div className="form-group">
                                           <div className="modal-left-bx">
                                             <label>
                                               {" "}
-                                              Variant name
+                                              Region
                                               <span className="asterisk">
                                                 *
                                               </span>
                                             </label>
                                           </div>
                                           <div className="modal-right-bx">
-                                            <select
-                                              name="variant_name"
+                                            <SelectSearch
+                                              placeholder="Search Region"
+                                              options={
+                                                this.state[
+                                                  "regiondata" + item.slug
+                                                ]
+                                              }
+                                              onChange={(e) =>
+                                                this.onChangeregion(
+                                                  e,
+                                                  index,
+                                                  ind,
+                                                  item.product
+                                                )
+                                              }
+                                              className="select-search"
+                                              value={it.region}
+                                              autoComplete="off"
+                                            />
+                                            <span
+                                              className={
+                                                "err err_region" + index + ind
+                                              }
+                                            ></span>
+                                          </div>
+                                        </div>
+                                        {item.prodType === "configurable" ? (
+                                          <div className="form-group">
+                                            <div className="modal-left-bx">
+                                              <label>
+                                                {" "}
+                                                Variant name
+                                                <span className="asterisk">
+                                                  *
+                                                </span>
+                                              </label>
+                                            </div>
+                                            <div className="modal-right-bx">
+                                              <select
+                                                name="variant_name"
+                                                className="form-control"
+                                                onChange={(e) =>
+                                                  this.formHandler1(
+                                                    e,
+                                                    index,
+                                                    ind,
+                                                    "variant_name"
+                                                  )
+                                                }
+                                              >
+                                                <option value="">
+                                                  Select variant name
+                                                </option>
+                                                {item.variants.map((dta) => {
+                                                  return (
+                                                    <option value={dta.value}>
+                                                      {dta.name}
+                                                    </option>
+                                                  );
+                                                })}
+                                              </select>
+                                              <span
+                                                className={
+                                                  "err err_variant" +
+                                                  index +
+                                                  ind
+                                                }
+                                              ></span>
+                                            </div>
+                                          </div>
+                                        ) : null}
+                                        <div className="form-group">
+                                          <div className="modal-left-bx">
+                                            <label>
+                                              {" "}
+                                              Quantity{" "}
+                                              {" (in " +
+                                                item.unit_quantity +
+                                                ")"}
+                                              <span className="asterisk">
+                                                *
+                                              </span>
+                                            </label>
+                                          </div>
+                                          <div className="modal-right-bx">
+                                            <input
+                                              type="number"
+                                              autoComplete="off"
+                                              name={"quantity" + index}
                                               className="form-control"
+                                              value={it.quantity || ""}
                                               onChange={(e) =>
                                                 this.formHandler1(
                                                   e,
                                                   index,
                                                   ind,
-                                                  "variant_name"
+                                                  "quantity"
                                                 )
                                               }
-                                            >
-                                              <option value="">
-                                                Select variant name
-                                              </option>
-                                              {item.variants.map((dta) => {
-                                                return (
-                                                  <option value={dta.value}>
-                                                    {dta.name}
-                                                  </option>
-                                                );
-                                              })}
-                                            </select>                                            
+                                              placeholder="Enter Quantity"
+                                            />
                                             <span
                                               className={
-                                                "err err_variant" + index + ind
+                                                "err err_quantity" + index + ind
                                               }
                                             ></span>
                                           </div>
                                         </div>
-                                      ) : null}
-                                      <div className="form-group">
-                                        <div className="modal-left-bx">
-                                          <label>
-                                            {" "}
-                                            Quantity {" (in " + item.unit_quantity + ")"}
-                                            <span className="asterisk">*</span>
-                                          </label>
-                                        </div>
-                                        <div className="modal-right-bx">
-                                          <input
-                                            type="number"
-                                            autoComplete="off"
-                                            name={"quantity" + index}
-                                            className="form-control"
-                                            value={it.quantity || ""}
-                                            onChange={(e) =>
-                                              this.formHandler1(
-                                                e,
-                                                index,
-                                                ind,
-                                                "quantity"
-                                              )
-                                            }
-                                            placeholder="Enter Quantity"
-                                          />
-                                          <span
-                                            className={
-                                              "err err_quantity" + index + ind
-                                            }
-                                          ></span>
-                                        </div>
-                                      </div>
-                                      {/* <div className="form-group">
+                                        {/* <div className="form-group">
                                         <div className="modal-left-bx">
                                           <label>
                                             {" "}
@@ -1156,38 +1248,38 @@ export default class AddInventory extends Component {
                                           ></span>
                                         </div>
                                       </div> */}
-                                      <div className="form-group">
-                                        <div className="modal-left-bx">
-                                          <label> Total Amount</label>
+                                        <div className="form-group">
+                                          <div className="modal-left-bx">
+                                            <label> Total Amount</label>
+                                          </div>
+                                          <div className="modal-right-bx">
+                                            <input
+                                              type="text"
+                                              autoComplete="off"
+                                              name={"total_amount" + index}
+                                              className="form-control"
+                                              value={it.total_amount}
+                                              onChange={(e) =>
+                                                this.formHandler1(
+                                                  e,
+                                                  index,
+                                                  ind,
+                                                  "total_amount"
+                                                )
+                                              }
+                                              placeholder="Enter total_amount"
+                                              readOnly
+                                            />
+                                            <span
+                                              className={
+                                                "err err_total_amount" +
+                                                index +
+                                                ind
+                                              }
+                                            ></span>
+                                          </div>
                                         </div>
-                                        <div className="modal-right-bx">
-                                          <input
-                                            type="text"
-                                            autoComplete="off"
-                                            name={"total_amount" + index}
-                                            className="form-control"
-                                            value={it.total_amount}
-                                            onChange={(e) =>
-                                              this.formHandler1(
-                                                e,
-                                                index,
-                                                ind,
-                                                "total_amount"
-                                              )
-                                            }
-                                            placeholder="Enter total_amount"
-                                            readOnly
-                                          />
-                                          <span
-                                            className={
-                                              "err err_total_amount" +
-                                              index +
-                                              ind
-                                            }
-                                          ></span>
-                                        </div>
-                                      </div>
-                                      {/* <div className="form-group">
+                                        {/* <div className="form-group">
                                         <div className="modal-left-bx">
                                           <label> Expiration</label>
                                         </div>
@@ -1203,7 +1295,7 @@ export default class AddInventory extends Component {
                                           <span className={"err err_expiration" + index + ind}></span>
                                         </div>
                                       </div> */}
-                                      <i
+                                        {/* <i
                                         className="fa fa-times"
                                         onClick={() =>
                                           this.removeregion(
@@ -1213,12 +1305,12 @@ export default class AddInventory extends Component {
                                           )
                                         }
                                         aria-hidden="true"
-                                      ></i>
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                              {item.product ? (
+                                      ></i> */}
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                                {/* {item.product ? (
                                 <>
                                   <button
                                     type="button"
@@ -1239,10 +1331,10 @@ export default class AddInventory extends Component {
                                 </>
                               ) : (
                                 ""
-                              )}
-                            </div>
-                          );
-                        })}
+                              )} */}
+                              </div>
+                            );
+                          })}
                         <div className="form-group single-col">
                           <div className="modal-bottom">
                             <button

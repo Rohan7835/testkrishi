@@ -291,6 +291,7 @@ export default class Delivery extends Component {
                                   {/* <th scope="col">Date</th> */}
                                   <th scope="col">Pincode</th>
                                   <th scope="col">Region</th>
+                                  <th scope="col">Region ID</th>
                                   <th scope="col">Status</th>
                                   <th scope="col">Message</th>
                                   <th scope="col">COD</th>
@@ -335,6 +336,11 @@ export default class Delivery extends Component {
                                         <td>
                                           {data.Region_ID
                                             ? data.Region_ID.name
+                                            : ""}
+                                        </td>
+                                        <td>
+                                          {data.Region_ID
+                                            ? data.Region_ID._id
                                             : ""}
                                         </td>
                                         <td

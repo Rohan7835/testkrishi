@@ -129,7 +129,7 @@ export default class Editproduct extends Component {
                 ExpirationDate: item.ExpirationDate,
                 RegionSKUcode: item.RegionSKUcode,
                 RegionSellingPrice: item.RegionSellingPrice,
-                availQuantity: item.availQuantity,
+                availableQuantity: item.availableQuantity,
                 bookingQuantity: item.bookingQuantity,
                 costPrice: item.costPrice,
                 lostQuantity: item.lostQuantity,
@@ -227,7 +227,7 @@ export default class Editproduct extends Component {
             edit_salesTaxOutSide: res.data.data.salesTaxOutSide
               ? res.data.data.salesTaxOutSide._id
               : "",
-            productQuantity: +res.data.data.productQuantity.$numberDecimal,
+            productQuantity: +res.data.data.productQuantity,
             edit_productSubscription: res.data.data.productSubscription,
             edit_hsn: res.data.data.hsnCode,
             edit_sku: res.data.data.SKUCode,
@@ -242,15 +242,15 @@ export default class Editproduct extends Component {
               ? res.data.data.unitMeasurement._id
               : null,
             status: res.data.data.status,
-            AvailableQuantity: +res.data.data.AvailableQuantity.$numberDecimal,
-            BookingQuantity: +res.data.data.BookingQuantity.$numberDecimal,
+            availableQuantity: +res.data.data.availableQuantity,
+            bookingQuantity: +res.data.data.bookingQuantity,
             ProductRegion: res.data.data.ProductRegion,
             batchID: res.data.data.batchID,
-            lostQuantity: +res.data.data.lostQuantity.$numberDecimal,
-            inhouseQuantity: +res.data.data.inhouseQuantity.$numberDecimal,
-            returnQuantity: +res.data.data.returnQuantity.$numberDecimal,
+            lostQuantity: +res.data.data.lostQuantity,
+            inhouseQuantity: +res.data.data.inhouseQuantity,
+            returnQuantity: +res.data.data.returnQuantity,
             preOrderBookQty: res.data.data.preOrderBookQty,
-            farmpickup: res.data.data.farmPickup,
+            farmpickup: res.data.data.farmPickup || false,
             samedaydelivery: res.data.data.sameDayDelivery,
             preOrderQty: res.data.data.preOrderQty,
             product_cat_id: res.data.data.product_cat_id,
@@ -282,6 +282,7 @@ export default class Editproduct extends Component {
         console.log(error);
       });
   }
+
   removeset = (type = "remove", index, ind) => {
     this.setState({
       loading: true,
@@ -575,8 +576,8 @@ export default class Editproduct extends Component {
     this.setState({ loading: false });
   };
 
-  deleteregion = (index, availQuantity) => {
-    if (!availQuantity || availQuantity === 0) {
+  deleteregion = (index, availableQuantity) => {
+    if (!availableQuantity || availableQuantity === 0) {
       MultipleArray.splice(index, 1);
     } else {
       swal({
@@ -800,9 +801,6 @@ export default class Editproduct extends Component {
   }
 
   async add() {
-    this.setState({
-      loading: true,
-    });
     var simple_status = true;
     var valueErr = document.getElementsByClassName("err");
     for (var i = 0; i < valueErr.length; i++) {
@@ -971,6 +969,34 @@ export default class Editproduct extends Component {
         valueErr = document.getElementsByClassName("err_simple_region");
         valueErr[0].innerText = "Please add a region.";
       }
+    } else if (this.state.edit_TypeOfProduct === "group") {
+      console.log(grouparray);
+      grouparray.forEach((grp, index) => {
+        grp.sets.forEach((grpset, ind) => {
+          if (!grpset.product) {
+            simple_status = false;
+            valueErr = document.getElementsByClassName(
+              "err_product_group" + index + ind
+            );
+            valueErr[0].innerText = "This Field is Required.";
+          }
+          if (!grpset.package) {
+            simple_status = false;
+            valueErr = document.getElementsByClassName(
+              "err_package_group" + index + ind
+            );
+            valueErr[0].innerText = "This Field is Required.";
+          }
+          if (+grpset.setminqty > +grpset.setmaxqty) {
+            simple_status = false;
+            valueErr = document.getElementsByClassName(
+              "err_qty_group" + index + ind
+            );
+            valueErr[0].innerText =
+              "Minimum quantity should not be greater than maximum quantity.";
+          }
+        });
+      });
     }
     if (
       simple_status === true &&
@@ -1054,7 +1080,11 @@ export default class Editproduct extends Component {
       data.append("productThreshold", productThreshold ? productThreshold : "");
       data.append(
         "productSubscription",
-        productSubscription ? productSubscription : ""
+        productSubscription
+          ? this.state.preorderstatus
+            ? "yes"
+            : productSubscription
+          : ""
       );
       data.append("RegionTax", RegionTax ? JSON.stringify(RegionTax) : "");
       data.append("groupRegions", grp_arry ? JSON.stringify(grp_arry) : "");
@@ -1086,7 +1116,7 @@ export default class Editproduct extends Component {
       data.append("preOrderStartDate", this.state.preOrderStartDate || "");
       data.append("preOrderEndDate", this.state.preOrderEndDate || "");
       data.append("AvailableQuqantity", this.state.AvailableQuqantity);
-      data.append("BookingQuantity", this.state.BookingQuantity);
+      data.append("bookingQuantity", this.state.bookingQuantity);
       data.append("ProductRegion", this.state.ProductRegion);
       data.append("farmPickup", this.state.farmpickup);
       data.append("sameDayDelivery", this.state.samedaydelivery);
@@ -1178,6 +1208,7 @@ export default class Editproduct extends Component {
       .catch((error) => {
         console.log(error);
       });
+
     await AdminApiRequest(requestData, "/admin/getAllBlog", "POST")
       .then((res) => {
         if (res.status === 201 || res.status === 200) {
@@ -1256,42 +1287,41 @@ export default class Editproduct extends Component {
         console.log(error);
       });
 
-    await AdminApiRequest(requestData, "/admin/allproductCategory", "GET")
-      .then((res) => {
-        if (res.status === 201 || res.status === 200) {
-          maincategory = [];
-          this.setState({ allactivedata: res.data.data });
-          let actdata = res.data.data[0].filter((item) => item.status === true);
-          actdata.forEach((item, index) => {
-            maincategory.push({ value: item._id, name: item.category_name });
-          });
+    // await AdminApiRequest(requestData, "/admin/allproductCategory", "GET")
+    //   .then((res) => {
+    //     if (res.status === 201 || res.status === 200) {
+    //       maincategory = [];
+    //       this.setState({ allactivedata: res.data.data });
+    //       let actdata = res.data.data[0].filter((item) => item.status === true);
+    //       actdata.forEach((item, index) => {
+    //         maincategory.push({ value: item._id, name: item.category_name });
+    //       });
 
-          let subData = res.data.data[1].filter(
-            (item) => item.parentCat_id === this.state.edit_parentCat_id
-          );
-          subData.forEach((item, index) => {
-            subcategory.push({ value: item._id, name: item.category_name });
-          });
-        } else {
-          swal({
-            title: "Network Issue",
-            // text: "Are you sure that you want to leave this page?",
-            icon: "warning",
-            dangerMode: true,
-          });
-        }
-      })
-      .then(() => {
-        this.setState({
-          progress: 80,
-        });
-        this.forceUpdate();
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    //       let subData = res.data.data[1].filter(
+    //         (item) => item.parentCat_id === this.state.edit_parentCat_id
+    //       );
+    //       subData.forEach((item, index) => {
+    //         subcategory.push({ value: item._id, name: item.category_name });
+    //       });
+    //     } else {
+    //       swal({
+    //         title: "Network Issue",
+    //         // text: "Are you sure that you want to leave this page?",
+    //         icon: "warning",
+    //         dangerMode: true,
+    //       });
+    //     }
+    //   })
+    //   .then(() => {
+    //     this.setState({
+    //       progress: 80,
+    //     });
+    //     this.forceUpdate();
+    //   })
+    //   .catch((error) => {
+    //     console.log(error);
+    //   });
 
-    activeproduct = [];
     await AdminApiRequest(requestData, "/admin/product/active", "GET")
       .then((res) => {
         if (res.status === 201 || res.status === 200) {
@@ -2215,7 +2245,7 @@ export default class Editproduct extends Component {
                                             )}
                                             <span
                                               className={
-                                                "err err_product" +
+                                                "err err_product_group" +
                                                 index2 +
                                                 ind21
                                               }
@@ -2227,7 +2257,6 @@ export default class Editproduct extends Component {
                                             <label>Package</label>
                                           </div>
                                           <div className="modal-right-bx">
-                                            {console.log(itm21.package)}
                                             <select
                                               value={
                                                 itm21.package !== null
@@ -2263,6 +2292,13 @@ export default class Editproduct extends Component {
                                                   )
                                                 )}
                                             </select>
+                                            <span
+                                              className={
+                                                "err err_package_group" +
+                                                index2 +
+                                                ind21
+                                              }
+                                            ></span>
                                           </div>
                                         </div>
                                         <div className="form-group">
@@ -2391,6 +2427,11 @@ export default class Editproduct extends Component {
                                           }
                                           aria-hidden="true"
                                         ></i>
+                                        <div
+                                          className={
+                                            "err err_qty_group" + index2 + ind21
+                                          }
+                                        ></div>
                                       </div>
                                     ))}
                                   <div className="form-group">
@@ -2584,7 +2625,7 @@ export default class Editproduct extends Component {
                                           onClick={() =>
                                             this.deleteregion(
                                               index,
-                                              item.availQuantity
+                                              item.availableQuantity
                                             )
                                           }
                                           className="fa fa-trash"

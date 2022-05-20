@@ -211,7 +211,7 @@ export default class Region extends Component {
                           <thead>
                             <tr>
                               <th scope="col">Region Name</th>
-                              {/* <th scope="col">Region ID</th> */}
+                              <th scope="col">Region ID</th>
                               <th scope="col">States Inc.</th>
                               <th scope="col">Status</th>
                               <th scope="col">Action</th>
@@ -225,9 +225,9 @@ export default class Region extends Component {
                                     <td style={{ textTransform: "capitalize" }}>
                                       {data.name}
                                     </td>
-                                    {/* <td style={{ textTransform: "capitalize" }}>
+                                    <td style={{ textTransform: "capitalize" }}>
                                       {data._id}
-                                    </td> */}
+                                    </td>
                                     <td style={{ textTransform: "capitalize" }}>
                                       {data.stateData[0]
                                         ? data.stateData.map((i, index) => {

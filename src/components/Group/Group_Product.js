@@ -9,7 +9,7 @@ import { imageUrl } from "../../imageUrl";
 import {
   addGroupData,
   addToCart,
-  changeAddToCartPopup
+  changeAddToCartPopup,
 } from "../../redux/actions/actions";
 import GroupCategory from "./GroupCategory";
 
@@ -139,13 +139,10 @@ function Group_Product({
         localStorage.setItem("groupCart", JSON.stringify(cartToBeSent));
         setTimeout(() => {
           if (cartStatus && item.base_price && cartToBeSent.length > 0) {
-            console.log("in")
             if (orderType === "offline") {
               setFullPageLoading(false);
-              console.log("in1")
             } else {
               addGroupToCart(cartToBeSent);
-              console.log("in2")
             }
           } else {
             setFullPageLoading(false);
@@ -199,7 +196,9 @@ function Group_Product({
     }
 
     setTimeout(() => {
-      realTimeCart.push(passData);
+      let unique_id = +new Date()
+      realTimeCart.push({...passData,
+        unique_id: unique_id});
       //manipulating data to send in API
       realTimeCart.map((item, index) =>
         item.simpleData &&
@@ -316,6 +315,8 @@ function Group_Product({
             qty: item.qty,
             totalprice: item.qty * item.price,
             without_package: true,
+            newlyAdded:true,
+            unique_id:item.unique_id,
           });
         }
       });
@@ -324,7 +325,19 @@ function Group_Product({
         setLoading(true);
         const requestData1 = {
           user_id: user_details._id,
-          CartDetail: cart_data_dt,
+          CartDetail: [
+            {
+              product_categories: passData.product_categories || [],
+              ...passData,
+              product_id: passData._id,
+              qty: passData.qty,
+              totalprice: passData.qty * passData.price,
+              without_package: true,
+              newlyAdded:true,
+              unique_id:unique_id,
+            },
+          ],
+          // CartDetail: cart_data_dt,
           regionID: localStorage.getItem("selectedRegionId")
             ? JSON.parse(localStorage.getItem("selectedRegionId"))
             : "",
@@ -348,15 +361,14 @@ function Group_Product({
                 localStorage.setItem("cartItem", JSON.stringify(realTimeCart));
                 closeGroup();
               } else {
-                if (res.data.message === "error") {
-                  swal({
-                    // title: ,
-                    text:
-                      res.data.data || "This Item is currently out of stock",
-                    icon: "warning",
-                    dangerMode: true,
-                  });
-                }
+                swal({
+                  // title: ,
+                  text: res.data.data
+                    ? "You can not add " + res.data.data.join("")
+                    : "This Item is currently out of stock",
+                  icon: "warning",
+                  dangerMode: true,
+                });
               }
             }
           })

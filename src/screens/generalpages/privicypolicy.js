@@ -32,21 +32,8 @@ class about_us extends React.PureComponent {
           <section className="page-banner">
             <div className="banner-figure" style={{ textAlign: "center" }}>
               <img src="img/PP-32.jpg" />
-              {/* <img src={imageUrl + localStorage.getItem("banner")} /> */}
             </div>
-            <div className="banner-top-text">
-              {/* <h1>Privacy Policy</h1> */}
-              {/* <h1>
-                {product_data && product_data.product_subCat1_id
-                  ? product_data.product_subCat1_id.category_name
-                  : ""}
-              </h1> */}
-              {/* <p>
-                <div
-                  dangerouslySetInnerHTML={{ __html: product_data.longDesc }}
-                ></div>
-              </p> */}
-            </div>
+            <div className="banner-top-text"></div>
             <div className="banner-overlay"></div>
           </section>
           <div className="content-text-part">

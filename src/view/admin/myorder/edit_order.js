@@ -367,6 +367,7 @@ export default class Editorder extends Component {
     } else {
       let localPackage;
       packages.map((pck) => {
+        console.log(e.target.value, pck);
         if (e.target.value === pck._id) {
           localPackage = pck;
         }
@@ -385,7 +386,6 @@ export default class Editorder extends Component {
           prd.packet_size = localPackage.packet_size;
           prd.qty = "";
           prd.price = +localPrice;
-          // prd.packet_id = e.target.value;
           prd.packet_id = localPackage._id;
           prd.without_package = false;
           prd.totalprice = +prd.qty * +localPrice;
@@ -464,10 +464,10 @@ export default class Editorder extends Component {
             {
               ...product[0],
               ...valu,
-              AvailableQuantity: product[0].AvailableQuantity
-                ? typeof product[0].AvailableQuantity === "object"
-                  ? product[0].AvailableQuantity.$numberDecimal
-                  : product[0].AvailableQuantity
+              availableQuantity: product[0].availableQuantity
+                ? typeof product[0].availableQuantity === "object"
+                  ? product[0].availableQuantity
+                  : product[0].availableQuantity
                 : 0,
               product_id: product[0] && product[0]._id,
               simpleData: product[0] && product[0].simpleData,
@@ -622,7 +622,7 @@ export default class Editorder extends Component {
     localProducts = localProducts.map((product) => {
       if (product.TypeOfProduct === "group") {
         if (prod.groupSlug === product.groupSlug) {
-          let av = +product.AvailableQuantity.$numberDecimal;
+          let av = +product.availableQuantity;
           av = product.packet_size
             ? +av / +product.packet_size
             : +av / (+product.unitQuantity || 1);
@@ -638,10 +638,9 @@ export default class Editorder extends Component {
       } else {
         if (prod.product_unique_id === product.product_unique_id) {
           let av =
-            typeof product.AvailableQuantity === "object"
-              ? +product.AvailableQuantity.$numberDecimal
-              : +product.AvailableQuantity;
-          console.log(product);
+            typeof product.availableQuantity === "object"
+              ? +product.availableQuantity + product.initialQty
+              : +product.availableQuantity + product.initialQty;
           av = product.packet_size
             ? +av / +product.packet_size
             : +av / (+product.unitQuantity || 1);
@@ -1102,7 +1101,7 @@ export default class Editorder extends Component {
                 all_products.push({
                   value: item._id,
                   name: item.product_name,
-                  AvailableQuantity: +item.AvailableQuantity.$numberDecimal,
+                  availableQuantity: +item.availableQuantity,
                   TypeOfProduct: item.TypeOfProduct,
                 });
               }
@@ -1123,11 +1122,11 @@ export default class Editorder extends Component {
                   name: item.product_name || item.product_id.product_name,
                   index: index,
                   barcode: item.barcode || "",
-                  AvailableQuantity: item.AvailableQuantity
-                    ? typeof item.AvailableQuantity === "object"
-                      ? item.AvailableQuantity.$numberDecimal
-                      : item.AvailableQuantity
-                    : item.product_id.AvailableQuantity.$numberDecimal,
+                  availableQuantity: item.availableQuantity
+                    ? typeof item.availableQuantity === "object"
+                      ? item.availableQuantity
+                      : item.availableQuantity
+                    : item.product_id.availableQuantity,
                   qty: item.qty || 0,
                   packetLabel: item.packetLabel,
                   packet_size: item.packet_size,
@@ -1307,17 +1306,13 @@ export default class Editorder extends Component {
         } else {
           swal({
             title: "Network Issue",
-            // text: "Are you sure that you want to leave this page?",
             icon: "warning",
             dangerMode: true,
           });
         }
       })
       .then(() => {
-        // this.getAllCity();
         this.getBillingCompanies();
-        // this.getcustomer();
-        // this.get_unit_measurement();
         setTimeout(() => {
           this.getOneBooking();
         }, 0);

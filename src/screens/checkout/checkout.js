@@ -25,12 +25,14 @@ import {
   userdetails,
 } from "../../redux/actions/actions";
 import Gifting from "./Gifting";
+import krishiLogo from "./krishilogo.jpeg";
 import UserProfile from "./UserProfile";
 const google = window.google;
 const fbq = window.fbq;
 const GOOGLE_API_KEY = "AIzaSyCazDplf1HtSAyvjhY40uqUaTBuSYoVyGE";
 Geocode.setApiKey(GOOGLE_API_KEY);
 Geocode.setRegion("in");
+var RAZORPAY_KEY = "";
 
 // const advancedMatching = {}; // optional, more info: https://developers.facebook.com/docs/facebook-pixel/advanced/advanced-matching
 // const options = {
@@ -153,6 +155,8 @@ class Checkout extends React.Component {
       customerProfileModal: false,
       itemWiseData: [],
       creditPaymentOnOff: false,
+      paytmShow: false,
+      razorpayShow: false,
     };
     this.onchangeinng = this.onchangeinng.bind(this);
   }
@@ -200,18 +204,26 @@ class Checkout extends React.Component {
 
           this.state.cart_data.forEach((localcart) => {
             res.data.data.cartDetail.forEach((apicart) => {
-              if (localcart._id === apicart.product_id._id) {
-                newModifiedCart.push({
-                  ...localcart,
-                  itemDiscountAmount: apicart.itemDiscountAmount,
-                  itemDiscountPercentage: apicart.itemDiscountPercentage,
+              const localSlug = localcart._id + localcart.packet_size;
+              const cartSlug =
+                apicart.product_id._id + apicart.simpleItem.packet_size;
+              if (localSlug === cartSlug) {
+                if (apicart.product_id.preOrder) {
+                  localStorage.setItem("status", true);
+                  this.setState({ subscribe_status: true });
+                }
+                let newItem = {
+                  itemDiscountAmount: localcart.itemDiscountAmount,
+                  itemDiscountPercentage: localcart.itemDiscountPercentage,
                   preOrder: apicart.product_id.preOrder,
                   totalprice: apicart.totalprice,
+                  price: apicart.price,
                   preOrderStartDate: apicart.product_id.preOrderStartDate,
                   preOrderEndDate: apicart.product_id.preOrderEndDate,
                   sameDayDelivery: apicart.product_id.sameDayDelivery,
                   farmPickup: apicart.product_id.farmPickup,
-                });
+                };
+                newModifiedCart.push(Object.assign(localcart, newItem));
               }
             });
           });
@@ -223,9 +235,6 @@ class Checkout extends React.Component {
             status: true,
             products: [],
           };
-          // var fresh_data = newModifiedCart.filter(
-          //   (value, index) => newModifiedCart.indexOf(value) === index
-          // );
           newModifiedCart.forEach((a) => {
             if (!a.farmPickup) {
               farmPickupProductStatus.status = false;
@@ -240,12 +249,17 @@ class Checkout extends React.Component {
             samDayDeliveryProductStatus: samDayDeliveryProductStatus,
             farmPickupProductStatus: farmPickupProductStatus,
           });
-          var fresh_data = newModifiedCart.from(new Set(this));
+          var fresh_data = newModifiedCart;
 
           setTimeout(() => {
             this.setState({
               cart_data: fresh_data,
             });
+            this.props.addToCart(fresh_data);
+            localStorage.setItem("cartItem", JSON.stringify(fresh_data));
+            setTimeout(() => {
+              this.calculate_summry("", fresh_data);
+            }, 0);
           }, 0);
         }
       })
@@ -297,6 +311,7 @@ class Checkout extends React.Component {
       pincode: "",
     });
   };
+
   changePlaces = (e) => {
     this.setState({
       loading: false,
@@ -394,20 +409,6 @@ class Checkout extends React.Component {
     this.setState({ modalIsOpen: true });
   };
 
-  // closeModal = () => {
-  //   this.setState({
-  //     modalIsOpen: false,
-  //     street_address: "",
-  //     latitude: "",
-  //     longitude: "",
-  //     editstreet: "",
-  //     country: "",
-  //     state: "",
-  //     city: "",
-  //     pincode: "",
-  //   });
-  // };
-
   formHandler(val) {
     var name = val.target.name;
     var value = val.target.value;
@@ -468,14 +469,6 @@ class Checkout extends React.Component {
       valueErr = document.getElementsByClassName("err_editstreet");
       valueErr[0].innerText = "Field is Required";
     }
-    // if (this.state.editcity === "") {
-    //   valueErr = document.getElementsByClassName("err_editcity");
-    //   valueErr[0].innerText = "Field is Required";
-    // }
-    // if (this.state.editstate === "") {
-    //   valueErr = document.getElementsByClassName("err_editstate");
-    //   valueErr[0].innerText = "Field is Required";
-    // }
     if (this.state.editpincode === "") {
       valueErr = document.getElementsByClassName("err_editpincode");
       valueErr[0].innerText = "Field is Required";
@@ -483,20 +476,12 @@ class Checkout extends React.Component {
       valueErr = document.getElementsByClassName("err_editpincode");
       valueErr[0].innerText = "Incorrect Pincode";
     }
-    // if (this.state.editcountry === "") {
-    //   valueErr = document.getElementsByClassName("err_editcountry");
-    //   valueErr[0].innerText = "Field is Required";
-    // }
     if (
       this.state.edithouseNo &&
       this.state.editstreet &&
       this.state.editpincode.length === 6 &&
       this.state.editpincode &&
       this.state.editlocattion_tag
-      // && this.state.editcity &&
-      // this.state.editstate &&
-      // this.state.editpincode &&
-      // this.state.editcountry
     ) {
       const requestData = {
         _id: this.state.edituser_id ? this.state.edituser_id : "",
@@ -538,24 +523,13 @@ class Checkout extends React.Component {
             });
             swal({
               title: "Address Updated",
-              // text: "Are you sure that you want to leave this page?",
               icon: "success",
               dangerMode: false,
             });
-            // this.usersdetails();
           } else if (res.status === 503) {
-            // localStorage.setItem("contact", "");
-            // let a = [];
-            // this.props.userdetails(a);
-            // this.props.addToCart(a);
-            // localStorage.setItem("cartItem", a);
-            // localStorage.clear();
-            // this.props.history.push("/");
-            // window.location.reload();
           } else {
             swal({
               title: "Network Error",
-              // text: "Are you sure that you want to leave this page?",
               icon: "warning",
               dangerMode: true,
             });
@@ -583,6 +557,7 @@ class Checkout extends React.Component {
       (err) => console.log(err)
     );
   };
+
   getPositionFromLatLon = (latitude, longitude) => {
     Geocode.fromLatLng(latitude, longitude).then(
       (response) => {
@@ -634,6 +609,7 @@ class Checkout extends React.Component {
       }
     );
   };
+
   onchangeinngGifting(ev) {
     let pin = ev.pincode ? ev.pincode.toString() : "";
     if (
@@ -1344,23 +1320,13 @@ class Checkout extends React.Component {
 
             swal({
               title: "Address Saved",
-              // text: "Are you sure that you want to leave this page?",
               icon: "success",
               dangerMode: false,
             });
           } else if (res.status === 503) {
-            // localStorage.setItem("contact", "");
-            // let a = [];
-            // this.props.userdetails(a);
-            // this.props.addToCart(a);
-            // localStorage.setItem("cartItem", a);
-            // localStorage.clear();
-            // this.props.history.push("/");
-            // window.location.reload();
           } else {
             swal({
               title: "Network Error !",
-              // text: "Are you sure that you want to leave this page?",
               icon: "warning",
               dangerMode: true,
             });
@@ -1404,22 +1370,10 @@ class Checkout extends React.Component {
                 ).checked = true;
               } else {
                 this.setState({ firstTimeLoadAddress: false });
-                // this.onchangeinng(res.data.data[0]);
-                // document.getElementById(
-                //   "address" + res.data.data[0]._id
-                // ).checked = true;
               }
             }
           }, 0);
         } else if (res.status === 503) {
-          // localStorage.setItem("contact", "");
-          // let a = [];
-          // this.props.userdetails(a);
-          // this.props.addToCart(a);
-          // localStorage.setItem("cartItem", a);
-          // localStorage.clear();
-          // this.props.history.push("/");
-          // window.location.reload();
         } else {
         }
       })
@@ -1427,7 +1381,6 @@ class Checkout extends React.Component {
         console.log(error);
       });
 
-    // ApiRequest(requestData, "/wallet/getUserWalletAmount", "GET", token)
     ApiRequest(requestData, "/usersGetOne", "GET", token)
       .then((res) => {
         if (res.status === 201 || res.status === 200) {
@@ -1441,14 +1394,6 @@ class Checkout extends React.Component {
               : 0,
           });
         } else if (res.status === 503) {
-          // localStorage.setItem("contact", "");
-          // let a = [];
-          // this.props.userdetails(a);
-          // this.props.addToCart(a);
-          // localStorage.setItem("cartItem", a);
-          // localStorage.clear();
-          // this.props.history.push("/");
-          // window.location.reload();
         } else {
         }
       })
@@ -1460,6 +1405,31 @@ class Checkout extends React.Component {
   async componentDidMount() {
     this.getCartData();
     await this.usersaddress();
+    const token = localStorage.getItem("_jw_token")
+      ? "Bearer " + localStorage.getItem("_jw_token")
+      : "";
+    await ApiRequest({}, "/payment/gateway/getAllActive", "GET", token)
+      .then((res) => {
+        if (res.status === 200 || res.status === 201) {
+          res.data.data.forEach((dt) => {
+            if (dt.name === "Paytm") {
+              this.setState({
+                paytmShow: true,
+              });
+            }
+            if (dt.name === "Razorpay") {
+              this.setState({
+                razorpayShow: true,
+              });
+              RAZORPAY_KEY = dt.keys.keyid;
+            }
+          });
+        } else {
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
 
     ApiRequest({}, "/storehey/getSetting", "GET")
       .then((res) => {
@@ -1525,24 +1495,7 @@ class Checkout extends React.Component {
         ? item.simpleData[0].package
             .filter((dta) => dta.selected == true)
             .map((data, ind) => {
-              if (this.props.user_details.length !== 0) {
-                if (this.props.user_details.user_type === "b2b") {
-                  localPrice = data.B2B_price;
-                } else if (this.props.user_details.user_type === "retail") {
-                  localPrice = data.Retail_price;
-                } else if (
-                  this.props.user_details.user_type === "user" ||
-                  this.props.user_details.user_type === null
-                ) {
-                  localPrice = data.selling_price;
-                }
-              } else {
-                if (data.selling_price) {
-                  localPrice = data.selling_price;
-                } else {
-                  localPrice = data.packetmrp;
-                }
-              }
+              localPrice = item.totalprice;
               cart_data_dt.push({
                 product_categories: item.product_categories || [],
                 ...item,
@@ -1559,8 +1512,8 @@ class Checkout extends React.Component {
                 packet_size: data.packet_size,
                 packetLabel: data.packetLabel,
                 qty: data.quantity,
-                price: localPrice,
-                totalprice: data.quantity * localPrice,
+                price: item.price,
+                totalprice: data.quantity * item.price,
                 without_package: false,
               });
             })
@@ -1569,24 +1522,7 @@ class Checkout extends React.Component {
 
     localProducts.map((item, index) => {
       if (item.TypeOfProduct === "simple") {
-        if (this.props.user_details.length !== 0) {
-          if (this.props.user_details.user_type === "b2b") {
-            localPrice = item.simpleData[0].RegionB2BPrice;
-          } else if (this.props.user_details.user_type === "retail") {
-            localPrice = item.simpleData[0].RegionRetailPrice;
-          } else if (
-            this.props.user_details.user_type === "user" ||
-            this.props.user_details.user_type === null
-          ) {
-            localPrice = item.simpleData[0].RegionSellingPrice;
-          }
-        } else {
-          if (item.selling_price) {
-            localPrice = item.simpleData[0].RegionSellingPrice;
-          } else {
-            localPrice = item.simpleData[0].packetmrp;
-          }
-        }
+        localPrice = item.totalPrice;
       } else {
         localPrice = item.totalPrice;
       }
@@ -1612,8 +1548,8 @@ class Checkout extends React.Component {
                 unitQuantity: item.unitQuantity,
                 unitMeasurement: item.unitMeasurement,
                 qty: item.simpleData[0].userQuantity,
-                price: localPrice,
-                totalprice: item.simpleData[0].userQuantity * localPrice,
+                price: item.price,
+                totalprice: item.simpleData[0].userQuantity * item.price,
                 without_package: true,
               });
             }
@@ -1769,198 +1705,201 @@ class Checkout extends React.Component {
     }, 0);
   };
 
-  calculate_summry(callFrom) {
+  calculate_summry(callFrom, cart) {
     var sub_total = 0;
     var discountApplied = false;
     var total_gst = 0;
     var allGsts = [];
     var cart_total = 0;
     var total_after_dis = 0;
-    var localCart = this.state.cart_data;
+    var localCart = cart || this.state.cart_data;
 
     //calculating price of each product and storing in sub_total
-    this.state.cart_data.map((item, index) => {
+    localCart.map((item, index) => {
       if (
         item.TypeOfProduct === "group" ||
-        item.TypeOfProduct === "configurable"
+        item.TypeOfProduct === "configurable" ||
+        item.TypeOfProduct === "simple"
       ) {
         sub_total = sub_total + item.price * item.qty;
       }
-      if (item.simpleData) {
-        if (item.simpleData.length > 0) {
-          if (item.TypeOfProduct === "simple") {
-            if (item.simpleData[0].package[0]) {
-              item.simpleData[0].package
-                .filter((dta) => dta.selected == true)
-                .map((data, ind) => {
-                  if (this.props.user_details.length !== 0) {
-                    if (this.props.user_details.user_type === "b2b") {
-                      sub_total = sub_total + data.B2B_price * data.quantity;
-                    } else if (this.props.user_details.user_type === "retail") {
-                      sub_total = sub_total + data.Retail_price * data.quantity;
-                    } else if (
-                      this.props.user_details.user_type === "user" ||
-                      this.props.user_details.user_type === null
-                    ) {
-                      sub_total =
-                        sub_total + data.selling_price * data.quantity;
-                    }
-                  } else {
-                    sub_total = sub_total + data.selling_price * data.quantity;
-                  }
-                });
-            } else {
-              if (this.props.user_details.length !== 0) {
-                if (this.props.user_details.user_type === "b2b") {
-                  sub_total =
-                    sub_total +
-                    item.simpleData[0].RegionB2BPrice *
-                      item.simpleData[0].userQuantity;
-                } else if (this.props.user_details.user_type === "retail") {
-                  sub_total =
-                    sub_total +
-                    item.simpleData[0].RegionRetailPrice *
-                      item.simpleData[0].userQuantity;
-                } else if (
-                  this.props.user_details.user_type === "user" ||
-                  this.props.user_details.user_type === null
-                ) {
-                  sub_total =
-                    sub_total +
-                    item.simpleData[0].RegionSellingPrice *
-                      item.simpleData[0].userQuantity;
-                }
-              } else {
-                sub_total =
-                  sub_total +
-                  item.simpleData[0].RegionSellingPrice *
-                    item.simpleData[0].userQuantity;
-              }
-            }
-          }
-        }
-      }
+      // if (item.simpleData) {
+      //   if (item.simpleData.length > 0) {
+      //     if (item.TypeOfProduct === "simple") {
+      //       if (item.simpleData[0].package[0]) {
+      //         item.simpleData[0].package
+      //           .filter((dta) => dta.selected == true)
+      //           .map((data, ind) => {
+      //             if (this.props.user_details.length !== 0) {
+      //               if (this.props.user_details.user_type === "b2b") {
+      //                 sub_total = sub_total + data.B2B_price * data.quantity;
+      //               } else if (this.props.user_details.user_type === "retail") {
+      //                 sub_total = sub_total + data.Retail_price * data.quantity;
+      //               } else if (
+      //                 this.props.user_details.user_type === "user" ||
+      //                 this.props.user_details.user_type === null
+      //               ) {
+      //                 sub_total =
+      //                   sub_total + data.selling_price * data.quantity;
+      //               }
+      //             } else {
+      //               sub_total = sub_total + data.selling_price * data.quantity;
+      //             }
+      //           });
+      //       } else {
+      //         if (this.props.user_details.length !== 0) {
+      //           if (this.props.user_details.user_type === "b2b") {
+      //             sub_total =
+      //               sub_total +
+      //               item.simpleData[0].RegionB2BPrice *
+      //                 item.simpleData[0].userQuantity;
+      //           } else if (this.props.user_details.user_type === "retail") {
+      //             sub_total =
+      //               sub_total +
+      //               item.simpleData[0].RegionRetailPrice *
+      //                 item.simpleData[0].userQuantity;
+      //           } else if (
+      //             this.props.user_details.user_type === "user" ||
+      //             this.props.user_details.user_type === null
+      //           ) {
+      //             sub_total =
+      //               sub_total +
+      //               item.simpleData[0].RegionSellingPrice *
+      //                 item.simpleData[0].userQuantity;
+      //           }
+      //         } else {
+      //           sub_total =
+      //             sub_total +
+      //             item.simpleData[0].RegionSellingPrice *
+      //               item.simpleData[0].userQuantity;
+      //         }
+      //       }
+      //     }
+      //   }
+      // }
     });
 
     //looping through cart and calcuating gst per product
-    if (this.state.showTaxFields) {
-      let itemWiseData = [];
-      const newLocalCart = localCart.map((itm) => {
-        var totalpriceBeforeTax = 0; // total price (price * quantity) - single product
-        var totalDiscountpriceBeforeTax = 0; // itemdiscountamount
-        var singleProductTaxPrice = 0; // tax price total -- single product
-        var singleProductDiscountedTaxPrice = 0;
-        var totalTaxPercentage = 0; //tax percentage of single product
-        var selectedTaxRegion;
-        if (+itm.itemDiscountAmount > 0) {
-          discountApplied = true;
-        }
-        if (itm.TypeOfProduct === "simple") {
-          if (itm.simpleData[0].package.length > 0) {
-            // totalpriceBeforeTax = itm.itemDiscountAmount || itm.totalprice;
-            totalpriceBeforeTax = itm.totalprice;
-          } else {
-            totalpriceBeforeTax = itm.price * itm.qty;
-          }
+    // if (this.state.showTaxFields) {
+    let itemWiseData = [];
+    const newLocalCart = localCart.map((itm) => {
+      var totalpriceBeforeTax = 0; // total price (price * quantity) - single product
+      var totalDiscountpriceBeforeTax = 0; // itemdiscountamount
+      var singleProductTaxPrice = 0; // tax price total -- single product
+      var singleProductDiscountedTaxPrice = 0;
+      var totalTaxPercentage = 0; //tax percentage of single product
+      var selectedTaxRegion;
+      if (+itm.itemDiscountAmount > 0) {
+        discountApplied = true;
+      }
+      if (itm.TypeOfProduct === "simple") {
+        if (itm.simpleData[0].package.length > 0) {
+          // totalpriceBeforeTax = itm.itemDiscountAmount || itm.totalprice;
+          totalpriceBeforeTax = itm.totalprice;
         } else {
           totalpriceBeforeTax = itm.price * itm.qty;
         }
-        //checking if tax data is provided in product or not and breaking loop if not
-        if (this.state.insideHaryana) {
-          if (!itm.salesTaxWithIn.totalTax) {
-            return;
+      } else {
+        totalpriceBeforeTax = itm.price * itm.qty;
+      }
+      //checking if tax data is provided in product or not and breaking loop if not
+      if (this.state.insideHaryana) {
+        if (!itm.salesTaxWithIn.totalTax) {
+          return;
+        }
+      } else {
+        if (!itm.salesTaxOutSide.totalTax) {
+          return;
+        }
+      }
+
+      //checking if user is inside haryana or outside haryana
+      if (this.state.insideHaryana) {
+        totalTaxPercentage = itm.salesTaxWithIn.totalTax || 0;
+        selectedTaxRegion = itm.salesTaxWithIn;
+      } else {
+        totalTaxPercentage = itm.salesTaxOutSide.totalTax || 0;
+        selectedTaxRegion = itm.salesTaxOutSide;
+      }
+      //calculating single product tax price
+      singleProductTaxPrice =
+        +totalpriceBeforeTax -
+        +totalpriceBeforeTax * (100 / (100 + +totalTaxPercentage));
+      total_gst += singleProductTaxPrice;
+      // total_gst += singleProductDiscountedTaxPrice;
+
+      selectedTaxRegion.taxData.length > 0 &&
+        selectedTaxRegion.taxData.map((tx) => {
+          //checking if sub tax is already in array and then adding it to previously added tax.
+          if (
+            allGsts.filter((i) => {
+              return (
+                i.tax_name + i.tax_percent === tx.tax_name + tx.tax_percent
+              );
+            }).length > 0
+          ) {
+            allGsts.map((gst) => {
+              if (
+                gst.tax_name + gst.tax_percent ===
+                tx.tax_name + tx.tax_percent
+              ) {
+                let total =
+                  (+singleProductTaxPrice.toFixed(2) * +tx.tax_percent) /
+                  +totalTaxPercentage;
+                total = total;
+                let totalprice = parseFloat(gst.totalPrice) + parseFloat(total);
+                gst.totalPrice = totalprice;
+                gst.tax_percent = +gst.tax_percent;
+              }
+            });
+          } else {
+            //if sub tax doesn't exist in array then pushing it directly to array
+            let total =
+              (+singleProductTaxPrice.toFixed(2) * +tx.tax_percent) /
+              +totalTaxPercentage;
+            allGsts.push({
+              tax_name: tx.tax_name,
+              totalPrice: total.toFixed(3),
+              tax_percent: tx.tax_percent,
+            });
           }
-        } else {
-          if (!itm.salesTaxOutSide.totalTax) {
-            return;
-          }
-        }
-
-        //checking if user is inside haryana or outside haryana
-        if (this.state.insideHaryana) {
-          totalTaxPercentage = itm.salesTaxWithIn.totalTax || 0;
-          selectedTaxRegion = itm.salesTaxWithIn;
-        } else {
-          totalTaxPercentage = itm.salesTaxOutSide.totalTax || 0;
-          selectedTaxRegion = itm.salesTaxOutSide;
-        }
-        //calculating single product tax price
-        singleProductTaxPrice =
-          +totalpriceBeforeTax -
-          +totalpriceBeforeTax * (100 / (100 + +totalTaxPercentage));
-        total_gst += singleProductTaxPrice;
-        // total_gst += singleProductDiscountedTaxPrice;
-
-        selectedTaxRegion.taxData.length > 0 &&
-          selectedTaxRegion.taxData.map((tx) => {
-            //checking if sub tax is already in array and then adding it to previously added tax.
-            if (
-              allGsts.filter((i) => {
-                return (
-                  i.tax_name + i.tax_percent === tx.tax_name + tx.tax_percent
-                );
-              }).length > 0
-            ) {
-              allGsts.map((gst) => {
-                if (
-                  gst.tax_name + gst.tax_percent ===
-                  tx.tax_name + tx.tax_percent
-                ) {
-                  let total =
-                    (+singleProductTaxPrice.toFixed(2) * +tx.tax_percent) /
-                    +totalTaxPercentage;
-                  total = total;
-                  let totalprice =
-                    parseFloat(gst.totalPrice) + parseFloat(total);
-                  gst.totalPrice = totalprice;
-                  gst.tax_percent = +gst.tax_percent;
-                }
-              });
-            } else {
-              //if sub tax doesn't exist in array then pushing it directly to array
-              let total =
-                (+singleProductTaxPrice.toFixed(2) * +tx.tax_percent) /
-                +totalTaxPercentage;
-              allGsts.push({
-                tax_name: tx.tax_name,
-                totalPrice: total.toFixed(3),
-                tax_percent: tx.tax_percent,
-              });
-            }
-          });
-
-        let amountBeforeGST = 0,
-          itemDiscountAmountBeforeGST = 0;
-        if (itm.simpleData[0] && itm.simpleData[0].package.length > 0) {
-          amountBeforeGST = itm.totalprice - singleProductTaxPrice;
-        } else {
-          amountBeforeGST = itm.price * itm.qty - singleProductTaxPrice;
-        }
-        if (itm.itemDiscountAmount) {
-          itemDiscountAmountBeforeGST =
-            itm.itemDiscountAmount - singleProductTaxPrice;
-        }
-        itemWiseData.push({
-          ...itm,
-          itemWiseGst: singleProductTaxPrice.toFixed(2),
-          itemDiscountAmount:
-            +itm.itemDiscountAmount > 0 ? itm.itemDiscountAmount : null,
-          totalPriceAfterGST: itm.totalprice,
-          totalprice: itm.totalPriceBeforeGST,
-          price: +itm.totalPriceBeforeGST / +itm.qty,
         });
 
-        return {
-          ...itm,
-          itemDiscountAmount:
-            +itm.itemDiscountAmount > 0 ? itm.itemDiscountAmount : null,
-          totalPriceBeforeGST: amountBeforeGST.toFixed(2),
-          itemDiscountAmountBeforeGST: itemDiscountAmountBeforeGST.toFixed(2),
-        };
+      let amountBeforeGST = 0,
+        itemDiscountAmountBeforeGST = 0;
+      if (itm.simpleData[0] && itm.simpleData[0].package.length > 0) {
+        console.log(itm.totalprice);
+        amountBeforeGST = itm.totalprice - singleProductTaxPrice;
+      } else {
+        amountBeforeGST = itm.price * itm.qty - singleProductTaxPrice;
+      }
+      if (itm.itemDiscountAmount) {
+        itemDiscountAmountBeforeGST =
+          itm.itemDiscountAmount - singleProductTaxPrice;
+      }
+      itemWiseData.push({
+        ...itm,
+        itemWiseGst: singleProductTaxPrice.toFixed(2),
+        itemDiscountAmount:
+          +itm.itemDiscountAmount > 0 ? itm.itemDiscountAmount : null,
+        totalPriceAfterGST: itm.totalprice,
+        totalprice: itm.totalPriceBeforeGST,
+        price: +itm.totalPriceBeforeGST / +itm.qty,
       });
-      console.log(":::::::;", newLocalCart);
-      this.setState({ cart_data: newLocalCart, itemWiseData: itemWiseData });
-    }
+
+      return {
+        ...itm,
+        itemDiscountAmount:
+          +itm.itemDiscountAmount > 0 ? itm.itemDiscountAmount : null,
+        totalPriceBeforeGST: amountBeforeGST.toFixed(2),
+        itemDiscountAmountBeforeGST: itemDiscountAmountBeforeGST.toFixed(2),
+      };
+    });
+    console.log(":::::::;", newLocalCart);
+    this.setState({ cart_data: newLocalCart, itemWiseData: itemWiseData });
+    // } else {
+    //   alert(2);
+    // }
 
     cart_total = sub_total; // cart price without gst
     // cart_total = total_gst + sub_total; // cart price with gst
@@ -2078,69 +2017,7 @@ class Checkout extends React.Component {
     var total_after_dis = 0;
     newItemsArray &&
       newItemsArray.map((item, index) => {
-        if (item.TypeOfProduct === "simple") {
-          if (item.simpleData) {
-            if (item.simpleData.length > 0) {
-              if (item.TypeOfProduct === "simple") {
-                if (item.simpleData[0].package[0]) {
-                  item.simpleData[0].package
-                    .filter((dta) => dta.selected == true)
-                    .map((data, ind) => {
-                      if (this.props.user_details.length !== 0) {
-                        if (this.props.user_details.user_type === "b2b") {
-                          sub_total =
-                            sub_total + data.B2B_price * data.quantity;
-                        } else if (
-                          this.props.user_details.user_type === "retail"
-                        ) {
-                          sub_total =
-                            sub_total + data.Retail_price * data.quantity;
-                        } else if (
-                          this.props.user_details.user_type === "user" ||
-                          this.props.user_details.user_type === null
-                        ) {
-                          sub_total =
-                            sub_total + data.selling_price * data.quantity;
-                        }
-                      } else {
-                        sub_total =
-                          sub_total + data.selling_price * data.quantity;
-                      }
-                    });
-                } else {
-                  if (this.props.user_details.length !== 0) {
-                    if (this.props.user_details.user_type === "b2b") {
-                      sub_total =
-                        sub_total +
-                        item.simpleData[0].RegionB2BPrice *
-                          item.simpleData[0].userQuantity;
-                    } else if (this.props.user_details.user_type === "retail") {
-                      sub_total =
-                        sub_total +
-                        item.simpleData[0].RegionRetailPrice *
-                          item.simpleData[0].userQuantity;
-                    } else if (
-                      this.props.user_details.user_type === "user" ||
-                      this.props.user_details.user_type === null
-                    ) {
-                      sub_total =
-                        sub_total +
-                        item.simpleData[0].RegionSellingPrice *
-                          item.simpleData[0].userQuantity;
-                    }
-                  } else {
-                    sub_total =
-                      sub_total +
-                      item.simpleData[0].RegionSellingPrice *
-                        item.simpleData[0].userQuantity;
-                  }
-                }
-              }
-            }
-          }
-        } else {
-          sub_total = sub_total + item.price * item.qty;
-        }
+        sub_total = sub_total + item.price * item.qty;
       });
     //looping through cart and calcuating gst per product
 
@@ -2247,6 +2124,7 @@ class Checkout extends React.Component {
       allGstLists: allGsts,
     });
   }
+
   _handleForm(val) {
     var name = val.target.name;
     var value = val.target.value;
@@ -2477,6 +2355,16 @@ class Checkout extends React.Component {
         walletstatus: false,
         visaStatus: false,
         creditStatus: false,
+        razorpayStatus: false,
+      });
+    } else if (name === "razorpay") {
+      this.setState({
+        payStatus: false,
+        cashStatus: false,
+        walletstatus: false,
+        visaStatus: false,
+        creditStatus: false,
+        razorpayStatus: true,
       });
     } else if (name === "cash") {
       this.setState({
@@ -2485,6 +2373,7 @@ class Checkout extends React.Component {
         cashStatus: true,
         visaStatus: false,
         creditStatus: false,
+        razorpayStatus: false,
       });
     } else if (name === "visa") {
       this.setState({
@@ -2493,6 +2382,7 @@ class Checkout extends React.Component {
         walletstatus: false,
         visaStatus: true,
         creditStatus: false,
+        razorpayStatus: false,
       });
     } else if (name === "wallet") {
       this.setState({
@@ -2501,6 +2391,7 @@ class Checkout extends React.Component {
         visaStatus: false,
         walletstatus: true,
         creditStatus: false,
+        razorpayStatus: false,
       });
     } else if (name === "credit") {
       this.setState({
@@ -2509,6 +2400,7 @@ class Checkout extends React.Component {
         cashStatus: false,
         visaStatus: false,
         creditStatus: true,
+        razorpayStatus: false,
       });
     }
     // ;
@@ -2589,6 +2481,7 @@ class Checkout extends React.Component {
         console.log(error);
       });
   };
+
   addPaymentDetail = () => {
     var preOrder = false;
     this.state.cart_data.map((itmpre, indpre) =>
@@ -2746,9 +2639,524 @@ class Checkout extends React.Component {
     }
   };
 
+  //checking all required fields when trying to place order
+  checkValidations = () => {
+    let errorExist = false;
+
+    var valueErr = document.getElementsByClassName("err");
+    for (var i = 0; i < valueErr.length; i++) {
+      valueErr[i].innerText = "";
+    }
+    if (+this.state.subTotal_price < +this.state.minimumOrderValue) {
+      errorExist = true;
+      swal({
+        title: "Error",
+        text:
+          "Minimum order value for selected pincode is ₹" +
+          this.state.minimumOrderValue,
+        icon: "warning",
+        dangerMode: true,
+      });
+    } else if (!this.state.giftingFormCompleted) {
+      errorExist = true;
+      swal({
+        title: "Error",
+        text: "Please complete gifting form or deselect gifting status.",
+        icon: "warning",
+        dangerMode: true,
+      });
+    }
+    if (!this.state.name) {
+      errorExist = true;
+      valueErr = document.getElementsByClassName("err_name1");
+      valueErr[0].innerText = "This Field is Required";
+      swal({
+        title: "Error",
+        text: "Please Enter Name.",
+        icon: "warning",
+        dangerMode: true,
+      });
+    }
+    if (!this.state.deliveryslot) {
+      errorExist = true;
+      valueErr = document.getElementsByClassName("err_deliveryslot");
+      valueErr[0].innerText = this.state.selectedaddress
+        ? this.state.noDeliverySlots
+          ? "We are currently not delivering in your area."
+          : "Please select a delivery slot."
+        : "Please add Shipping Details.";
+      swal({
+        title: "Error",
+        text: this.state.selectedaddress
+          ? this.state.noDeliverySlots
+            ? "We are currently not delivering in your area."
+            : "Please select a delivery slot."
+          : "Please add Shipping Details.",
+        icon: "warning",
+        dangerMode: true,
+      });
+    }
+    if (!this.state.email) {
+      errorExist = true;
+      valueErr = document.getElementsByClassName("err_email1");
+      valueErr[0].innerText = "This Field is Required";
+      swal({
+        title: "Error",
+        text: "Please enter email.",
+        icon: "warning",
+        dangerMode: true,
+      });
+    }
+    if (!this.state.selectedaddress) {
+      errorExist = true;
+      valueErr = document.getElementsByClassName("err_address");
+      valueErr[0].innerText = "Please select an address or add a new one";
+      swal({
+        title: "Error",
+        text: "Please select an address or add a new one.",
+        icon: "warning",
+        dangerMode: true,
+      });
+    } else if (this.state.selectedaddress) {
+      valueErr = document.getElementsByClassName("err_address");
+      valueErr[0].innerText = "";
+    }
+    if (
+      this.state.giftingContent.status &&
+      !this.state.selectedgiftingaddress
+    ) {
+      errorExist = true;
+      valueErr = document.getElementsByClassName("err_giftingaddress");
+      valueErr[0].innerText =
+        "Please select a gifting address or add a new One";
+      swal({
+        title: "Error",
+        text: "Please select a gifting address or add a new one.",
+        icon: "warning",
+        dangerMode: true,
+      });
+    }
+
+    if (this.state.creditStatus) {
+      if (this.state.creditPending < this.state.final_total_price) {
+        errorExist = true;
+        valueErr = document.getElementsByClassName("err_wallet");
+        valueErr[0].innerText = "";
+        swal({
+          title: "Insufficient funds in credit!",
+          icon: "warning",
+          dangerMode: true,
+        });
+      }
+    } else if (this.state.walletstatus) {
+      if (this.state.wallet_amount < this.state.final_total_price) {
+        errorExist = true;
+        valueErr = document.getElementsByClassName("err_wallet");
+        valueErr[0].innerText = "";
+        swal({
+          title: "Insufficient funds in the wallet!",
+          text: "Please add money to your wallet",
+          icon: "warning",
+          dangerMode: true,
+        });
+      }
+    }
+
+    return errorExist;
+  };
+
+  //Making data to send in API
+  makePlaceOrderData = (dt, orderType, paymentType, preOrderStatus1) => {
+    let normalOrder = true;
+    if (orderType !== "normal") {
+      normalOrder = false;
+    }
+    const gstPrice = +this.state.gst_price;
+    let preOrder = false;
+    this.state.cart_data.map((itmpre, indpre) =>
+      itmpre.preOrder === true ? (preOrder = true) : ""
+    );
+    const deliveryCharge = this.state.deliveryCharge;
+    const codCharges = this.state.codCharges;
+
+    //Making API object
+    let requestData = {
+      user_id: this.props.user_details._id,
+      user_email: this.state.email,
+      user_name: this.state.name,
+      device_name: "web",
+      deliverySlot: this.state.deliverySlotSlug,
+      itemWiseData: this.state.itemWiseData,
+      taxType: "inclusive",
+      totalCouponDiscountAmount: localStorage.getItem("discount_amount") || 0,
+      regionID: localStorage.getItem("selectedRegionId")
+        ? JSON.parse(localStorage.getItem("selectedRegionId"))
+        : "",
+      regionName: localStorage.getItem("selectedRegionName")
+        ? localStorage.getItem("selectedRegionName")
+        : "",
+      couponCode: localStorage.getItem("coupon_code")
+        ? localStorage.getItem("coupon_code")
+        : "",
+      couponId: localStorage.getItem("couponId")
+        ? localStorage.getItem("couponId")
+        : "",
+      delivery_instructions: this.state.delivery_instructions,
+      address: this.state.selectedFullAddress
+        ? this.state.selectedFullAddress
+        : "",
+      houseNo: this.state.selectedaddress.houseNo || "",
+      locationTag: this.state.selectedaddress.locationTag || "",
+      locality: this.state.selectedaddress.locality
+        ? this.state.selectedaddress.locality
+        : "",
+      referralDiscount: this.state.referral_discount
+        ? this.state.referral_discount
+        : "",
+      country: this.state.selectedaddress.country
+        ? this.state.selectedaddress.country
+        : "",
+      state: this.state.selectedaddress.state
+        ? this.state.selectedaddress.state
+        : "",
+      city: this.state.selectedaddress.city
+        ? this.state.selectedaddress.city
+        : "",
+      pincode: this.state.selectedaddress.pincode
+        ? this.state.selectedaddress.pincode
+        : "",
+      latitude: this.state.selectedaddress.latitude
+        ? this.state.selectedaddress.latitude
+        : "",
+      longitude: this.state.selectedaddress.longitude
+        ? this.state.selectedaddress.longitude
+        : "",
+      otheraddress: "",
+      paymentmethod:
+        paymentType === "wallet_credit"
+          ? this.state.creditStatus
+            ? "Credit"
+            : "Wallet"
+          : this.state.cashStatus === false
+          ? this.state.razorpayStatus
+            ? "Razorpay"
+            : "Paytm"
+          : "COD",
+      preOrder: preOrder,
+      payment_id: "",
+      cod: this.state.cashStatus ? true : false,
+      codCharges: this.state.cashStatus ? codCharges : 0,
+      deliveryCharges: deliveryCharge,
+      totalCartPrice: this.state.subTotal_price,
+      totalCartPriceWithoutGST:
+        Math.floor(+this.state.subTotalWithoutGST * 100) / 100,
+      bookingMode: "online",
+      gst: gstPrice.toFixed(2),
+      allGstLists: this.state.allGstLists,
+    };
+
+    if (normalOrder) {
+      //Normal Orders
+      requestData.total_payment = this.state.final_total_price;
+      requestData.redeem = this.state.loyaltyPointApplied
+        ? +this.state.totalSeedRedeem / +this.state.seedValue
+        : "";
+      requestData.redeemDiscount = this.state.loyaltyPointApplied
+        ? this.state.totalSeedRedeem
+        : "";
+      requestData.addToCartID = dt.AddToCartId;
+      requestData.giftingStatus = this.state.giftingContent.status
+        ? true
+        : false;
+      requestData.giftingName = this.state.giftingContent.name;
+      requestData.giftingContact = this.state.giftingContent.contact;
+      requestData.giftingAddress = this.state.giftingContent.address;
+      requestData.giftingNote = this.state.giftingContent.note;
+    } else {
+      //Subscription & PreOrders
+
+      const subscribeLoyalty =
+        +this.state.subscriptionLoyaltyPoints / +this.state.selectdates.length;
+      var noofdays = preOrderStatus1 ? 1 : +this.state.selectdates.length;
+
+      var correctDates = [];
+
+      this.state.selectdates &&
+        this.state.selectdates.forEach((d) => {
+          var dateNew = d.date;
+          correctDates.push({ date: dateNew });
+        });
+      const cartData = dt.cartDetail.map((itm) => {
+        return {
+          ...itm,
+          packet_size: itm.simpleItem ? itm.simpleItem.packet_size : null,
+          packetLabel: itm.simpleItem ? itm.simpleItem.packetLabel : null,
+          packet_id: itm.simpleItem ? itm.simpleItem._id : null,
+        };
+      });
+
+      requestData.total_payment = +this.state.final_total_price / noofdays;
+      requestData.redeem = this.state.loyaltyPointApplied
+        ? subscribeLoyalty
+          ? +subscribeLoyalty / +this.state.seedValue
+          : +this.state.totalSeedRedeem / +this.state.seedValue
+        : "";
+      requestData.redeemDiscount = this.state.loyaltyPointApplied
+        ? subscribeLoyalty
+          ? subscribeLoyalty
+          : this.state.totalSeedRedeem
+        : "";
+      requestData.cartDetail = cartData;
+      requestData.userMobile = this.props.user_details.contactNumber;
+      requestData.userType = this.props.user_details.user_type;
+      requestData.dates = preOrderStatus1
+        ? [{ date: preOrderStatus1.preOrderEndDate }]
+        : correctDates;
+      requestData.OrderTotal =
+        (this.state.total_after_discount + deliveryCharge) *
+        this.state.selectdates.length;
+    }
+
+    return requestData;
+  };
+
+  //Place order though cod/wallet/credit
+  PlaceOrder_OFFLINE = (requestData, orderType) => {
+    ApiRequest(
+      requestData,
+      orderType === "normal" ? "/createBooking" : "/subscription/addOne",
+      "POST"
+    )
+      .then((res) => {
+        this.setState({
+          loading: false,
+        });
+        if (res.status === 201 || res.status === 200) {
+          this.purchaseROAS(this.state.final_total_price);
+          this.props.changethankyouAuth(true);
+          this.setState({
+            paymentData: res.data,
+          });
+          var a = [];
+          this.props.addToCart(a);
+          this.props.history.replace(`/Thankyou`);
+        } else {
+          if (res.data.status === "error") {
+            swal({
+              title: "Error",
+              text:
+                res.data.allErrors?.length > 0
+                  ? "You can not add " + res.data.allErrors.join("")
+                  : res.data.msg || "Something Went Wrong",
+              icon: "warning",
+              dangerMode: true,
+            }).then(() => {
+              this.props.history.push("/cart");
+            });
+          } else {
+            swal({
+              title: "Error",
+              text: "Network Error",
+              icon: "warning",
+              dangerMode: true,
+            });
+          }
+        }
+      })
+      .then(() => {
+        this.setState({
+          loading: false,
+        });
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  //Place order though Paytm
+  PlaceOrder_PAYTM = (requestData, orderType) => {
+    let errorFromAPI = false;
+    fetch(
+      DynamicUrl +
+        (orderType === "normal" ? "/createBooking" : "/subscription/addOne"),
+      {
+        method: "post",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify(requestData),
+      }
+    )
+      .then(async (res) => {
+        if (res.status === 201 || res.status === 200) {
+          await this.props.changethankyouAuth(true);
+          this.purchaseROAS(this.state.final_total_price);
+          return res.text();
+        } else {
+          let response1 = await res.json();
+          errorFromAPI = true;
+
+          if (response1.status === "error") {
+            swal({
+              title: "Error",
+              text:
+                response1.allErrors?.length > 0
+                  ? "You can not add " + response1.allErrors.join("")
+                  : response1.msg || "Something Went Wrong",
+              icon: "warning",
+              dangerMode: true,
+            }).then(() => {
+              this.props.history.push("/cart");
+            });
+          } else {
+            swal({
+              title: "Error",
+              text: "Network Error",
+              icon: "warning",
+              dangerMode: true,
+            });
+          }
+        }
+      })
+      .then((data) => {
+        if (data !== undefined && !errorFromAPI) {
+          document.querySelector("html").innerHTML = data;
+          document.f1.submit();
+        }
+      })
+      .then(() => {
+        if (!errorFromAPI) {
+          this.setState({
+            loading: false,
+          });
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  PlaceOrder_RAZORPAY = (requestData, orderType) => {
+    requestData.createDbDoc = false;
+    ApiRequest(
+      requestData,
+      orderType === "normal" ? "/createBooking" : "/subscription/addOne",
+      "POST"
+    )
+      .then((res) => {
+        this.setState({
+          loading: false,
+        });
+        if (res.status === 201 || res.status === 200) {
+          let options = {
+            key: RAZORPAY_KEY,
+            amount: parseFloat(this.state.final_total_price) * 100, // 2000 paise = INR 20, amount in paisa
+            name: this.state.name.toUpperCase(),
+            description: "Purchase Description",
+            image: krishiLogo,
+            handler: (response) => {
+              requestData.TXNID = response.razorpay_payment_id;
+              requestData.createDbDoc = true;
+              requestData.payment = "Complete";
+              return new Promise((resolve, reject) => {
+                ApiRequest(
+                  requestData,
+                  orderType === "normal"
+                    ? "/createBooking"
+                    : "/subscription/addOne",
+                  "POST"
+                )
+                  .then((res) => {
+                    this.setState({
+                      loading: false,
+                    });
+                    if (res.status === 201 || res.status === 200) {
+                      this.purchaseROAS(this.state.final_total_price);
+                      this.props.changethankyouAuth(true);
+                      this.setState({
+                        paymentData: res.data,
+                      });
+                      var a = [];
+                      this.props.addToCart(a);
+                      this.props.history.replace(`/Thankyou`);
+                    } else {
+                      if (res.data.status === "error") {
+                        swal({
+                          title: "Error",
+                          text:
+                            res.data.allErrors?.length > 0
+                              ? "You can not add " + res.data.allErrors.join("")
+                              : res.data.msg || "Something Went Wrong",
+                          icon: "warning",
+                          dangerMode: true,
+                        }).then(() => {
+                          this.props.history.push("/cart");
+                        });
+                      } else {
+                        swal({
+                          title: "Error",
+                          text: "Network Error",
+                          icon: "warning",
+                          dangerMode: true,
+                        });
+                      }
+                    }
+                  })
+                  .then(() => {
+                    this.setState({
+                      loading: false,
+                    });
+                  })
+                  .catch((error) => {
+                    console.log(error);
+                  });
+              });
+            },
+            modal: {
+              ondismiss: (e) => {
+                console.log(e);
+              },
+            },
+            prefill: {
+              name: this.state.name.toUpperCase(),
+              email: this.props.user_details.email,
+              contact: this.props.user_details.contactNumber,
+            },
+          };
+
+          const rzp = new window.Razorpay(options);
+          rzp.open();
+        } else {
+          if (res.data.status === "error") {
+            swal({
+              title: "Error",
+              text:
+                res.data.allErrors?.length > 0
+                  ? "You can not add " + res.data.allErrors.join("")
+                  : res.data.msg || "Something Went Wrong",
+              icon: "warning",
+              dangerMode: true,
+            }).then(() => {
+              this.props.history.push("/cart");
+            });
+          } else {
+            swal({
+              title: "Error",
+              text: "Network Error",
+              icon: "warning",
+              dangerMode: true,
+            });
+          }
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  //Subscription Orders and Pre-Orders
   opencashsubscribe = async () => {
-    const subscribeLoyalty =
-      +this.state.subscriptionLoyaltyPoints / +this.state.selectdates.length;
+    var valueErr = document.getElementsByClassName("err");
     const preOrderStatus1 = this.state.cart_data.find(
       (item) => item.preOrder == true
     );
@@ -2763,16 +3171,9 @@ class Checkout extends React.Component {
         submit_status = false;
       }
     }
-    if (+this.state.subTotal_price < +this.state.minimumOrderValue) {
-      swal({
-        title: "Error",
-        text:
-          "Minimum order value for selected pincode is ₹" +
-          this.state.minimumOrderValue,
-        icon: "warning",
-        dangerMode: true,
-      });
-    } else {
+    const errorsFound = this.checkValidations();
+
+    if (!errorsFound) {
       if (this.state.walletstatus === true) {
         const data = { subscription_dates: +this.state.selectdates.length };
         var cart_id = "";
@@ -2786,16 +3187,7 @@ class Checkout extends React.Component {
           this.setState({
             loading: true,
           });
-          var noofdays = preOrderStatus1 ? 1 : +this.state.selectdates.length;
 
-          var correctDates = [];
-
-          this.state.selectdates &&
-            this.state.selectdates.forEach((d) => {
-              var dateNew = d.date;
-              // dateNew.setDate(dateNew.getDate() + 1);
-              correctDates.push({ date: dateNew });
-            });
           await ApiRequest(
             data,
             "/get/addtocart/" + this.props.user_details._id,
@@ -2820,206 +3212,22 @@ class Checkout extends React.Component {
                   "status",
                   Boolean(res.data.data.subscribe)
                 );
-                const localRegionDetails = JSON.parse(
-                  localStorage.getItem("regionDetails")
+                const requestData = this.makePlaceOrderData(
+                  {
+                    cartDetail: res.data.data.cartDetail,
+                  },
+                  "subscription",
+                  "wallet_credit",
+                  preOrderStatus1
                 );
-                const cartData = res.data.data.cartDetail.map((itm) => {
-                  return {
-                    ...itm,
-                    packet_size: itm.simpleItem
-                      ? itm.simpleItem.packet_size
-                      : null,
-                    packetLabel: itm.simpleItem
-                      ? itm.simpleItem.packetLabel
-                      : null,
-                    packet_id: itm.simpleItem ? itm.simpleItem._id : null,
-                  };
-                });
-                const deliveryCharge = this.state.deliveryCharge;
-                const codCharges = this.state.codCharges;
-                const requestData = {
-                  user_id: this.props.user_details._id,
-                  user_email: this.state.email,
-                  user_name: this.state.name,
-                  itemWiseData: this.state.itemWiseData,
-                  device_name: "web",
-                  deliverySlot: this.state.deliverySlotSlug,
-                  taxType: "inclusive",
-                  totalCouponDiscountAmount:
-                    localStorage.getItem("discount_amount") || 0,
-                  userMobile: this.props.user_details.contactNumber,
-                  regionID: localStorage.getItem("selectedRegionId")
-                    ? JSON.parse(localStorage.getItem("selectedRegionId"))
-                    : "",
-                  userType: this.props.user_details.user_type,
-                  regionName: localStorage.getItem("selectedRegionName")
-                    ? JSON.parse(localStorage.getItem("selectedRegionName"))
-                    : "",
-                  couponCode: localStorage.getItem("coupon_code")
-                    ? localStorage.getItem("coupon_code")
-                    : "",
-                  couponId: localStorage.getItem("couponId")
-                    ? localStorage.getItem("couponId")
-                    : "",
-                  cartDetail: cartData,
-                  delivery_instructions: this.state.delivery_instructions,
-                  dates: preOrderStatus1
-                    ? [{ date: preOrderStatus1.preOrderEndDate }]
-                    : correctDates,
-                  address: this.state.selectedFullAddress
-                    ? this.state.selectedFullAddress
-                    : "",
-                  houseNo: this.state.selectedaddress.houseNo || "",
-                  locationTag: this.state.selectedaddress.locationTag || "",
-                  locality: this.state.selectedaddress.locality
-                    ? this.state.selectedaddress.locality
-                    : "",
-                  country: this.state.selectedaddress.country
-                    ? this.state.selectedaddress.country
-                    : "",
-                  state: this.state.selectedaddress.state
-                    ? this.state.selectedaddress.state
-                    : "",
-                  city: this.state.selectedaddress.city
-                    ? this.state.selectedaddress.city
-                    : "",
-                  pincode: this.state.selectedaddress.pincode
-                    ? this.state.selectedaddress.pincode
-                    : "",
-                  latitude: this.state.selectedaddress.latitude
-                    ? this.state.selectedaddress.latitude
-                    : "",
-                  longitude: this.state.selectedaddress.longitude
-                    ? this.state.selectedaddress.longitude
-                    : "",
-                  otheraddress: "",
-                  paymentmethod: this.state.creditStatus ? "Credit" : "Wallet",
-                  payment_id: "",
-                  referralDiscount: this.state.referral_discount
-                    ? this.state.referral_discount
-                    : "",
-                  redeem: this.state.loyaltyPointApplied
-                    ? subscribeLoyalty
-                      ? +subscribeLoyalty / +this.state.seedValue
-                      : +this.state.totalSeedRedeem / +this.state.seedValue
-                    : "",
-                  redeemDiscount: this.state.loyaltyPointApplied
-                    ? subscribeLoyalty
-                      ? subscribeLoyalty
-                      : this.state.totalSeedRedeem
-                    : "",
-                  cod: this.state.cashStatus ? true : false,
-                  codCharges: this.state.cashStatus ? codCharges : 0,
-                  deliveryCharges: deliveryCharge,
 
-                  total_payment: +this.state.final_total_price / noofdays,
-                  OrderTotal:
-                    (this.state.total_after_discount + deliveryCharge) *
-                    this.state.selectdates.length,
-                  totalCartPrice: this.state.subTotal_price,
-
-                  totalCartPriceWithoutGST:
-                    Math.floor(+this.state.subTotalWithoutGST * 100) / 100,
-                  bookingMode: "online",
-                  gst: this.state.gst_price,
-                  allGstLists: this.state.allGstLists,
-                  preOrder: preOrderStatus1 ? true : false,
-                };
-
-                {
-                  console.log(requestData);
-                  ApiRequest(requestData, "/subscription/addOne", "POST")
-                    .then((res) => {
-                      if (res.status === 201 || res.status === 200) {
-                        this.purchaseROAS(this.state.final_total_price);
-                        this.props.changethankyouAuth(true);
-                        this.setState({ paymentData: res.data });
-                        var a = [];
-                        this.props.addToCart(a);
-                        localStorage.setItem("cartItem", a);
-                        localStorage.setItem("coupon_code", "");
-                        localStorage.setItem("couponId", "");
-                        localStorage.setItem("couponApplied", "");
-                        this.props.history.replace(`/Thankyou`);
-                      } else if (res.status === 401 || res.status === 400) {
-                        swal({
-                          title: "Error",
-                          text: res.data.result,
-                          icon: "warning",
-                          dangerMode: true,
-                        }).then(() => {
-                          res.data.result !== "Credit Limit Exceeded" &&
-                            this.props.history.push("/");
-                        });
-                      } else if (res.status === 500) {
-                        swal({
-                          title: res.data.error || "Network Error",
-                          text:
-                            res.data.error === "Cart Modified"
-                              ? "Your cart has been modified on another device you may have previously logged on to. Please check your cart once before you proceed."
-                              : "",
-                          icon: "warning",
-                          dangerMode: true,
-                        }).then(() => {
-                          this.props.history.replace(`/cart`);
-                        });
-                      }
-                    })
-                    .then(() => {
-                      this.setState({
-                        loading: false,
-                      });
-                    })
-                    .catch((error) => {
-                      console.log(error);
-                    });
-                }
+                this.PlaceOrder_OFFLINE(requestData, "subscription");
               }
             })
             .catch((error) => {
               console.log(error);
             });
         } else {
-          var valueErr = document.getElementsByClassName("err");
-          for (var i = 0; i < valueErr.length; i++) {
-            valueErr[i].innerText = "";
-          }
-          if (this.state.wallet_amount < this.state.final_total_price) {
-            valueErr = document.getElementsByClassName("err_wallet");
-            valueErr[0].innerText = "";
-            swal({
-              title: "Insufficient funds in the wallet!",
-              text: "Please add money to your wallet",
-              icon: "warning",
-              dangerMode: true,
-            });
-          }
-          if (!this.state.name) {
-            valueErr = document.getElementsByClassName("err_name1");
-            valueErr[0].innerText = "This Field is Required";
-          }
-          if (!this.state.deliveryslot) {
-            valueErr = document.getElementsByClassName("err_deliveryslot");
-            valueErr[0].innerText = this.state.selectedaddress
-              ? this.state.noDeliverySlots
-                ? "We are currently not delivering in your area."
-                : "Please select a delivery slot."
-              : "Please add Shipping Details.";
-            swal({
-              title: "Error",
-              text: this.state.selectedaddress
-                ? this.state.noDeliverySlots
-                  ? "We are currently not delivering in your area."
-                  : "Please select a delivery slot."
-                : "Please add Shipping Details.",
-              icon: "warning",
-              dangerMode: true,
-            });
-          }
-          if (!this.state.email) {
-            valueErr = document.getElementsByClassName("err_email1");
-            valueErr[0].innerText = "This Field is Required";
-          }
           if (submit_status !== true) {
             if (this.state.selectdates.length <= 1) {
               valueErr = document.getElementsByClassName("err_dates");
@@ -3044,21 +3252,6 @@ class Checkout extends React.Component {
               valueErr[0].innerText = "";
             }
           }
-
-          if (!this.state.selectedaddress) {
-            valueErr = document.getElementsByClassName("err_address");
-            valueErr[0].innerText = "Please select an address or add a new one";
-            swal({
-              title: "Error",
-              text: "Please select an address or add a new one.",
-              icon: "warning",
-              dangerMode: true,
-            });
-          } else if (this.state.selectedaddress) {
-            valueErr = document.getElementsByClassName("err_address");
-            valueErr[0].innerText = "";
-          }
-
           this.setState({
             loading: false,
           });
@@ -3076,14 +3269,6 @@ class Checkout extends React.Component {
           this.setState({
             loading: true,
           });
-          var correctDates = [];
-          this.state.selectdates.forEach((d) => {
-            var dateNew = d.date;
-            // dateNew.setDate(dateNew.getDate() + 1);
-            correctDates.push({ date: dateNew });
-          });
-          var noofdays = preOrderStatus1 ? 1 : +this.state.selectdates.length;
-
           await ApiRequest(
             data,
             "/get/addtocart/" + this.props.user_details._id,
@@ -3107,245 +3292,27 @@ class Checkout extends React.Component {
                   "status",
                   Boolean(res.data.data.subscribe)
                 );
-                cart_id = res.data.data.AddToCartId;
-                const localRegionDetails = JSON.parse(
-                  localStorage.getItem("regionDetails")
+
+                const requestData = this.makePlaceOrderData(
+                  {
+                    cartDetail: res.data.data.cartDetail,
+                  },
+                  "subscription",
+                  "cod_online",
+                  preOrderStatus1
                 );
-                const cartData = res.data.data.cartDetail.map((itm) => {
-                  return {
-                    ...itm,
-                    packet_size: itm.simpleItem
-                      ? itm.simpleItem.packet_size
-                      : null,
-                    packetLabel: itm.simpleItem
-                      ? itm.simpleItem.packetLabel
-                      : null,
-                  };
-                });
-                const deliveryCharge = this.state.deliveryCharge;
-                const codCharges = this.state.codCharges;
-                const requestData = {
-                  user_id: this.props.user_details._id,
-                  user_email: this.state.email,
-                  user_name: this.state.name,
-                  itemWiseData: this.state.itemWiseData,
-                  device_name: "web",
-                  deliverySlot: this.state.deliverySlotSlug,
-                  taxType: "inclusive",
-                  totalCouponDiscountAmount:
-                    localStorage.getItem("discount_amount") || 0,
-                  userMobile: this.props.user_details.contactNumber,
-                  regionID: localStorage.getItem("selectedRegionId")
-                    ? JSON.parse(localStorage.getItem("selectedRegionId"))
-                    : "",
-                  userType: this.props.user_details.user_type,
-                  regionName: localStorage.getItem("selectedRegionName")
-                    ? JSON.parse(localStorage.getItem("selectedRegionName"))
-                    : "",
-                  couponCode: localStorage.getItem("coupon_code")
-                    ? localStorage.getItem("coupon_code")
-                    : "",
-                  couponId: localStorage.getItem("couponId")
-                    ? localStorage.getItem("couponId")
-                    : "",
-                  cartDetail: cartData,
-                  delivery_instructions: this.state.delivery_instructions,
-                  dates: preOrderStatus1
-                    ? [{ date: preOrderStatus1.preOrderEndDate }]
-                    : correctDates,
-                  address: this.state.selectedFullAddress
-                    ? this.state.selectedFullAddress
-                    : "",
-                  houseNo: this.state.selectedaddress.houseNo || "",
-                  locationTag: this.state.selectedaddress.locationTag || "",
-                  locality: this.state.selectedaddress.locality
-                    ? this.state.selectedaddress.locality
-                    : "",
-                  country: this.state.selectedaddress.country
-                    ? this.state.selectedaddress.country
-                    : "",
-                  state: this.state.selectedaddress.state
-                    ? this.state.selectedaddress.state
-                    : "",
-                  city: this.state.selectedaddress.city
-                    ? this.state.selectedaddress.city
-                    : "",
-                  pincode: this.state.selectedaddress.pincode
-                    ? this.state.selectedaddress.pincode
-                    : "",
-                  latitude: this.state.selectedaddress.latitude
-                    ? this.state.selectedaddress.latitude
-                    : "",
-                  longitude: this.state.selectedaddress.longitude
-                    ? this.state.selectedaddress.longitude
-                    : "",
-                  otheraddress: "",
-                  referralDiscount: this.state.referral_discount
-                    ? this.state.referral_discount
-                    : "",
-                  redeem: this.state.loyaltyPointApplied
-                    ? subscribeLoyalty
-                      ? +subscribeLoyalty / +this.state.seedValue
-                      : +this.state.totalSeedRedeem / +this.state.seedValue
-                    : "",
-                  redeemDiscount: this.state.loyaltyPointApplied
-                    ? subscribeLoyalty
-                      ? subscribeLoyalty
-                      : this.state.totalSeedRedeem
-                    : "",
-                  paymentmethod:
-                    this.state.cashStatus === false ? "Paytm" : "COD",
-                  payment_id: "",
-                  cod: this.state.cashStatus ? true : false,
-                  codCharges: this.state.cashStatus ? codCharges : 0,
-                  deliveryCharges: deliveryCharge,
 
-                  total_payment: +this.state.final_total_price / noofdays,
-                  // total_payment: this.state.total_after_discount + deliveryCharge,
-                  OrderTotal:
-                    (this.state.total_after_discount + deliveryCharge) *
-                    this.state.selectdates.length,
-                  totalCartPrice: this.state.subTotal_price,
-                  // totalCartPriceWithoutGST:
-                  //   Math.floor(
-                  //     (+this.state.subTotal_price - +this.state.gst_price) * 100
-                  //   ) / 100,
-
-                  totalCartPriceWithoutGST:
-                    Math.floor(+this.state.subTotalWithoutGST * 100) / 100,
-                  bookingMode: "online",
-                  gst: this.state.gst_price,
-                  allGstLists: this.state.allGstLists,
-                  preOrder: preOrderStatus1 ? true : false,
-                };
-                let errorFromAPI = false;
-                {
-                  this.state.cashStatus === true
-                    ? ApiRequest(requestData, "/subscription/addOne", "POST")
-                        .then((res) => {
-                          if (res.status === 201 || res.status === 200) {
-                            this.purchaseROAS(this.state.final_total_price);
-                            this.props.changethankyouAuth(true);
-                            this.setState({ paymentData: res.data });
-                            var a = [];
-                            this.props.addToCart(a);
-                            localStorage.setItem("cartItem", a);
-                            this.props.history.replace(`/Thankyou`);
-                          } else if (res.status === 500) {
-                            swal({
-                              title: res.data.error || "Network Error",
-                              text:
-                                res.data.error === "Cart Modified"
-                                  ? "Your cart has been modified on another device you may have previously logged on to. Please check your cart once before you proceed."
-                                  : "",
-                              icon: "warning",
-                              dangerMode: true,
-                            }).then(() => {
-                              this.props.history.replace(`/cart`);
-                            });
-                          }
-                        })
-                        .then(() => {
-                          this.setState({
-                            loading: false,
-                          });
-                        })
-                        .catch((error) => {
-                          console.log(error);
-                        })
-                    : fetch(DynamicUrl + "/subscription/addOne", {
-                        method: "post",
-                        headers: { "content-type": "application/json" },
-                        body: JSON.stringify(requestData),
-                      })
-                        .then(async (res) => {
-                          // let response1 = await res.json();
-                          if (res.status === 201 || res.status === 200) {
-                            this.purchaseROAS(this.state.final_total_price);
-                            this.props.changethankyouAuth(true);
-                            // var a = [];
-                            // this.props.addToCart(a);
-                            // localStorage.setItem("cartItem", a);
-                            return res.text();
-                          } else if (res.status === 401 || res.status === 400) {
-                            let response1 = await res.json();
-                            errorFromAPI = true;
-                            this.setState({
-                              loading: false,
-                            });
-                            // "Your account is currently disabled.Please contact us for more information."
-                            swal({
-                              title: "Error",
-                              text: response1.result,
-                              icon: "warning",
-                              dangerMode: true,
-                            }).then(() => {
-                              this.props.history.push("/");
-                            });
-                          } else if (res.status === 500) {
-                            errorFromAPI = true;
-                            swal({
-                              title: "Cart Modified",
-                              text: "Your cart has been modified on another device you may have previously logged on to. Please check your cart once before you proceed.",
-                              icon: "warning",
-                              dangerMode: true,
-                            }).then(() => {
-                              this.props.history.replace(`/cart`);
-                            });
-                          }
-                        })
-                        .then((data) => {
-                          if (data !== undefined && !errorFromAPI) {
-                            document.querySelector("html").innerHTML = data;
-                            document.f1.submit();
-                          }
-                        })
-                        .then(() => {
-                          this.setState({
-                            loading: false,
-                          });
-                        })
-                        .catch((error) => {
-                          console.log(error);
-                        });
-                }
+                this.state.cashStatus === true
+                  ? this.PlaceOrder_OFFLINE(requestData, "subscription")
+                  : this.state.razorpayStatus
+                  ? this.PlaceOrder_RAZORPAY(requestData, "subscription")
+                  : this.PlaceOrder_PAYTM(requestData, "subscription");
               }
             })
             .catch((error) => {
               console.log(error);
             });
         } else {
-          var valueErr = document.getElementsByClassName("err");
-          for (var i = 0; i < valueErr.length; i++) {
-            valueErr[i].innerText = "";
-          }
-
-          if (!this.state.name) {
-            valueErr = document.getElementsByClassName("err_name1");
-            valueErr[0].innerText = "This Field is Required";
-          }
-          if (!this.state.deliveryslot) {
-            valueErr = document.getElementsByClassName("err_deliveryslot");
-            valueErr[0].innerText = this.state.selectedaddress
-              ? this.state.noDeliverySlots
-                ? "We are currently not delivering in your area."
-                : "Please select a delivery slot."
-              : "Please add Shipping Details.";
-            swal({
-              title: "Error",
-              text: this.state.selectedaddress
-                ? this.state.noDeliverySlots
-                  ? "We are currently not delivering in your area."
-                  : "Please select a delivery slot."
-                : "Please add Shipping Details.",
-              icon: "warning",
-              dangerMode: true,
-            });
-          }
-          if (!this.state.email) {
-            valueErr = document.getElementsByClassName("err_email1");
-            valueErr[0].innerText = "This Field is Required";
-          }
           if (submit_status !== true) {
             if (this.state.selectdates.length <= 1) {
               valueErr = document.getElementsByClassName("err_dates");
@@ -3362,747 +3329,136 @@ class Checkout extends React.Component {
               valueErr[0].innerText = "";
             }
           }
-          if (!this.state.selectedaddress) {
-            valueErr = document.getElementsByClassName("err_address");
-            valueErr[0].innerText = "Please select an address or add a new one";
-            swal({
-              title: "Error",
-              text: "Please select an address or add a new one.",
-              icon: "warning",
-              dangerMode: true,
-            });
-          } else if (this.state.selectedaddress) {
-            valueErr = document.getElementsByClassName("err_address");
-            valueErr[0].innerText = "";
-          }
-          this.setState({
-            loading: false,
-          });
         }
       }
     }
   };
-  truncateToDecimals = (num, dec = 2) => {
-    const calcDec = Math.pow(10, dec);
-    return Math.trunc(num * calcDec) / calcDec;
-  };
 
+  //Normal Orders
   opencash = async () => {
-    const gstPrice = +this.state.gst_price;
-    if (+this.state.subTotal_price < +this.state.minimumOrderValue) {
-      swal({
-        title: "Error",
-        text:
-          "Minimum order value for selected pincode is ₹" +
-          this.state.minimumOrderValue,
-        icon: "warning",
-        dangerMode: true,
-      });
-    } else { 
-      if (this.state.giftingFormCompleted) {
-        if (this.state.walletstatus === true) {
-          // ;
-          const data = {};
-          var cart_id = "";
-          // this.state.cart_data ? (
-          //                           this.state.cart_data.map((item, index) => (
-          //                             item.preOrder === true ?
-          var preOrder = false;
-          this.state.cart_data.map((itmpre, indpre) =>
-            itmpre.preOrder === true ? (preOrder = true) : ""
-          );
-          if (
-            this.props.user_details._id &&
-            +this.state.wallet_amount > +this.state.final_total_price &&
-            this.state.selectedaddress &&
-            this.state.deliveryslot
-          ) {
-            if (
-              this.state.selectedaddress.houseNo &&
-              ((this.state.giftingContent.status &&
-                this.state.selectedgiftingaddress) ||
-                !this.state.giftingContent.status) &&
-              this.state.deliveryslot
-            ) {
-              this.setState({
-                loading: true,
-              });
-              await ApiRequest(
-                data,
-                "/get/addtocart/" + this.props.user_details._id,
-                "GET"
-              )
-                .then((res) => {
-                  if (res.data.data.outOfStock.length !== 0) {
-                    this.setState({
-                      loading: false,
-                    });
-                    swal({
-                      title: "Please note!",
-                      text: `${res.data.data.outOfStock.join(
-                        ", "
-                      )} is currently out of stock.`,
-                      icon: "warning",
-                      successMode: true,
-                    }).then(() => this.props.history.push("/cart"));
-                  } else {
-                    localStorage.setItem(
-                      "status",
-                      Boolean(res.data.data.subscribe)
-                    );
-                    cart_id = res.data.data.AddToCartId;
-                    const localRegionDetails = JSON.parse(
-                      localStorage.getItem("regionDetails")
-                    );
-                    const deliveryCharge = this.state.deliveryCharge;
-                    const codCharges = this.state.codCharges;
-                    const requestData = {
-                      user_id: this.props.user_details._id,
-                      user_email: this.state.email,
-                      user_name: this.state.name,
-                      device_name: "web",
-                      deliverySlot: this.state.deliverySlotSlug,
-                      itemWiseData: this.state.itemWiseData,
-                      taxType: "inclusive",
-                      totalCouponDiscountAmount:
-                        localStorage.getItem("discount_amount") || 0,
-                      regionID: localStorage.getItem("selectedRegionId")
-                        ? JSON.parse(localStorage.getItem("selectedRegionId"))
-                        : "",
-                      regionName: localStorage.getItem("selectedRegionName")
-                        ? localStorage.getItem("selectedRegionName")
-                        : "",
-                      couponCode: localStorage.getItem("coupon_code")
-                        ? localStorage.getItem("coupon_code")
-                        : "",
-                      couponId: localStorage.getItem("couponId")
-                        ? localStorage.getItem("couponId")
-                        : "",
-                      addToCartID: res.data.data.AddToCartId,
-                      giftingStatus: this.state.giftingContent.status
-                        ? true
-                        : false,
-                      // gifting: this.state.giftingContent,
-                      giftingName: this.state.giftingContent.name,
-                      giftingContact: this.state.giftingContent.contact,
-                      delivery_instructions: this.state.delivery_instructions,
-                      giftingAddress: this.state.giftingContent.address,
-                      giftingNote: this.state.giftingContent.note,
-                      address: this.state.selectedFullAddress
-                        ? this.state.selectedFullAddress
-                        : "",
-                      houseNo: this.state.selectedaddress.houseNo || "",
-                      locationTag: this.state.selectedaddress.locationTag || "",
-                      locality: this.state.selectedaddress.locality
-                        ? this.state.selectedaddress.locality
-                        : "",
-                      referralDiscount: this.state.referral_discount
-                        ? this.state.referral_discount
-                        : "",
-                      redeem: this.state.loyaltyPointApplied
-                        ? +this.state.totalSeedRedeem / +this.state.seedValue
-                        : "",
-                      redeemDiscount: this.state.loyaltyPointApplied
-                        ? this.state.totalSeedRedeem
-                        : "",
-                      country: this.state.selectedaddress.country
-                        ? this.state.selectedaddress.country
-                        : "",
-                      state: this.state.selectedaddress.state
-                        ? this.state.selectedaddress.state
-                        : "",
-                      city: this.state.selectedaddress.city
-                        ? this.state.selectedaddress.city
-                        : "",
-                      pincode: this.state.selectedaddress.pincode
-                        ? this.state.selectedaddress.pincode
-                        : "",
-                      latitude: this.state.selectedaddress.latitude
-                        ? this.state.selectedaddress.latitude
-                        : "",
-                      longitude: this.state.selectedaddress.longitude
-                        ? this.state.selectedaddress.longitude
-                        : "",
-                      otheraddress: "",
-                      paymentmethod: this.state.creditStatus
-                        ? "Credit"
-                        : "Wallet",
-                      preOrder: preOrder,
-                      payment_id: "",
-                      cod: this.state.cashStatus ? true : false,
-                      codCharges: this.state.cashStatus ? codCharges : 0,
-                      deliveryCharges: deliveryCharge,
-                      total_payment: this.state.final_total_price,
-                      totalCartPrice: this.state.subTotal_price,
-                      totalCartPriceWithoutGST:
-                        Math.floor(+this.state.subTotalWithoutGST * 100) / 100,
-                      bookingMode: "online",
-                      gst: gstPrice.toFixed(2),
-                      allGstLists: this.state.allGstLists,
-                    };
-                    {
-                      // this.state.cashStatus === true?
-                      ApiRequest(requestData, "/createBooking", "POST")
-                        .then((res) => {
-                          this.setState({
-                            loading: false,
-                          });
-                          if (res.status === 201 || res.status === 200) {
-                            this.purchaseROAS(this.state.final_total_price);
-                            this.props.changethankyouAuth(true);
-                            this.setState({
-                              paymentData: res.data,
-                            });
-                            var a = [];
-                            this.props.addToCart(a);
-                            this.props.history.replace(`/Thankyou`);
-                          } else if (res.status === 400 || res.status === 401) {
-                            if (res.data.status === "error") {
-                              if (res.data.result.includes("user")) {
-                                swal({
-                                  title: "Error",
-                                  text: "Your account is currently disabled.Please contact us for more information.",
-                                  icon: "warning",
-                                  dangerMode: true,
-                                }).then(() => {
-                                  this.props.history.push("/");
-                                });
-                              } else {
-                                swal({
-                                  title: "Error",
-                                  text: res.data.result,
-                                  icon: "warning",
-                                  dangerMode: true,
-                                });
-                              }
-                            }
-                          } else if (res.status === 500) {
-                            swal({
-                              title: res.data.error || "Network Error",
-                              text:
-                                res.data.error === "Cart Modified"
-                                  ? "Your cart has been modified on another device you may have previously logged on to. Please check your cart once before you proceed."
-                                  : "",
-                              icon: "warning",
-                              dangerMode: true,
-                            }).then(() => {
-                              this.props.history.replace(`/cart`);
-                            });
-                          }
-                        })
-                        .then(() => {
-                          this.setState({
-                            loading: false,
-                          });
-                        })
-                        .catch((error) => {
-                          console.log(error);
-                        });
-                    }
-                  }
-                })
-                .catch((error) => {
-                  console.log(error);
-                });
-            } else {
-              var valueErr = document.getElementsByClassName("err");
-              for (var i = 0; i < valueErr.length; i++) {
-                valueErr[i].innerText = "";
-              }
+    const errorsFound = this.checkValidations();
 
-              if (!this.state.name) {
-                valueErr = document.getElementsByClassName("err_name1");
-                valueErr[0].innerText = "This Field is Required";
-              }
-              if (!this.state.deliveryslot) {
-                valueErr = document.getElementsByClassName("err_deliveryslot");
-                valueErr[0].innerText = this.state.selectedaddress
-                  ? this.state.noDeliverySlots
-                    ? "We are currently not delivering in your area."
-                    : "Please select a delivery slot."
-                  : "Please add Shipping Details.";
-                swal({
-                  title: "Error",
-                  text: this.state.selectedaddress
-                    ? this.state.noDeliverySlots
-                      ? "We are currently not delivering in your area."
-                      : "Please select a delivery slot."
-                    : "Please add Shipping Details.",
-                  icon: "warning",
-                  dangerMode: true,
-                });
-              }
-              if (!this.state.email) {
-                valueErr = document.getElementsByClassName("err_email1");
-                valueErr[0].innerText = "This Field is Required";
-              }
-              if (!this.state.selectedaddress) {
-                valueErr = document.getElementsByClassName("err_address");
-                valueErr[0].innerText =
-                  "Please select an address or add a new one";
-                swal({
-                  title: "Error",
-                  text: "Please select an address or add a new one.",
-                  icon: "warning",
-                  dangerMode: true,
-                });
-              } else if (this.state.selectedaddress) {
-                valueErr = document.getElementsByClassName("err_address");
-                valueErr[0].innerText = "";
-              }
-              if (
-                this.state.giftingContent.status &&
-                !this.state.selectedgiftingaddress
-              ) {
-                valueErr =
-                  document.getElementsByClassName("err_giftingaddress");
-                valueErr[0].innerText =
-                  "Please select a gifting address or add a new One";
-                swal({
-                  title: "Error",
-                  text: "Please select a gifting address or add a new one.",
-                  icon: "warning",
-                  dangerMode: true,
-                });
-              }
-              if (this.state.wallet_amount < this.state.final_total_price) {
-                valueErr = document.getElementsByClassName("err_wallet");
-                valueErr[0].innerText = "";
-                swal({
-                  title: "Insufficient funds in the wallet!",
-                  text: "Please add money to your wallet",
-                  icon: "warning",
-                  dangerMode: true,
-                });
-              }
-              this.setState({
-                loading: false,
-              });
-            }
-          } else {
-            if (this.state.wallet_amount < this.state.final_total_price) {
-              valueErr = document.getElementsByClassName("err_wallet");
-              valueErr[0].innerText = "";
-              swal({
-                title: "Insufficient funds in the wallet!",
-                text: "Please add money to your wallet",
-                icon: "warning",
-                dangerMode: true,
-              });
-            }
-            if (!this.state.name) {
-              valueErr = document.getElementsByClassName("err_name1");
-              valueErr[0].innerText = "This Field is Required";
-              swal({
-                title: "Error",
-                text: "Please Enter Name.",
-                icon: "warning",
-                dangerMode: true,
-              });
-            }
-            if (!this.state.deliveryslot) {
-              valueErr = document.getElementsByClassName("err_deliveryslot");
-              valueErr[0].innerText = this.state.selectedaddress
-                ? this.state.noDeliverySlots
-                  ? "We are currently not delivering in your area."
-                  : "Please select a delivery slot."
-                : "Please add Shipping Details.";
-              swal({
-                title: "Error",
-                text: this.state.selectedaddress
-                  ? this.state.noDeliverySlots
-                    ? "We are currently not delivering in your area."
-                    : "Please select a delivery slot."
-                  : "Please add Shipping Details.",
-                icon: "warning",
-                dangerMode: true,
-              });
-            }
-            if (!this.state.email) {
-              valueErr = document.getElementsByClassName("err_email1");
-              valueErr[0].innerText = "This Field is Required";
-              swal({
-                title: "Error",
-                text: "Please enter email.",
-                icon: "warning",
-                dangerMode: true,
-              });
-            }
-            if (!this.state.selectedaddress) {
-              valueErr = document.getElementsByClassName("err_address");
-              valueErr[0].innerText =
-                "Please select an address or add a new one";
-              swal({
-                title: "Error",
-                text: "Please select an address or add a new one.",
-                icon: "warning",
-                dangerMode: true,
-              });
-            } else if (this.state.selectedaddress) {
-              valueErr = document.getElementsByClassName("err_address");
-              valueErr[0].innerText = "";
-            }
-          }
-        } else {
-          const data = {};
-          var cart_id = "";
-          var preOrder = false;
-          this.state.cart_data.map((itmpre, indpre) =>
-            itmpre.preOrder === true ? (preOrder = true) : ""
-          );
+    if (!errorsFound) {
+      if (this.state.walletstatus === true) {
+        const data = {};
+        if (
+          this.props.user_details._id &&
+          +this.state.wallet_amount > +this.state.final_total_price &&
+          this.state.selectedaddress &&
+          this.state.deliveryslot
+        ) {
           if (
-            this.props.user_details._id &&
-            this.state.selectedaddress &&
-            this.state.deliveryslot &&
+            this.state.selectedaddress.houseNo &&
             ((this.state.giftingContent.status &&
               this.state.selectedgiftingaddress) ||
-              !this.state.giftingContent.status)
+              !this.state.giftingContent.status) &&
+            this.state.deliveryslot
           ) {
-            if (this.state.selectedaddress.houseNo) {
-              this.setState({
-                loading: true,
-              });
-              await ApiRequest(
-                data,
-                "/get/addtocart/" + this.props.user_details._id,
-                "GET"
-              )
-                .then((res) => {
-                  if (res.data.data.outOfStock.length !== 0) {
-                    this.setState({
-                      loading: false,
-                    });
-                    swal({
-                      title: "Please note!",
-                      text: `${res.data.data.outOfStock.join(
-                        ", "
-                      )} is currently out of stock.`,
-                      icon: "warning",
-                      successMode: true,
-                    }).then(() => this.props.history.push("/cart"));
-                  } else {
-                    localStorage.setItem(
-                      "status",
-                      Boolean(res.data.data.subscribe)
-                    );
-                    cart_id = res.data.data.AddToCartId;
-                    const localRegionDetails = JSON.parse(
-                      localStorage.getItem("regionDetails")
-                    );
-                    const deliveryCharge = this.state.deliveryCharge;
-                    const codCharges = this.state.codCharges;
-                    const requestData = {
-                      user_id: this.props.user_details._id,
-                      user_email: this.state.email,
-                      user_name: this.state.name,
-                      device_name: "web",
-                      deliverySlot: this.state.deliverySlotSlug,
-                      taxType: "inclusive",
-                      itemWiseData: this.state.itemWiseData,
-                      totalCouponDiscountAmount:
-                        localStorage.getItem("discount_amount") || 0,
-                      regionID: localStorage.getItem("selectedRegionId")
-                        ? JSON.parse(localStorage.getItem("selectedRegionId"))
-                        : "",
-                      regionName: localStorage.getItem("selectedRegionName")
-                        ? localStorage.getItem("selectedRegionName")
-                        : "",
-                      couponCode: localStorage.getItem("coupon_code")
-                        ? localStorage.getItem("coupon_code")
-                        : "",
-                      couponId: localStorage.getItem("couponId")
-                        ? localStorage.getItem("couponId")
-                        : "",
-                      addToCartID: res.data.data.AddToCartId,
-                      address: this.state.selectedFullAddress
-                        ? this.state.selectedFullAddress
-                        : "",
-                      houseNo: this.state.selectedaddress.houseNo || "",
-                      locationTag: this.state.selectedaddress.locationTag || "",
-                      giftingStatus: this.state.giftingContent.status
-                        ? true
-                        : false,
-                      // gifting: this.state.giftingContent,
-                      giftingName: this.state.giftingContent.name,
-                      delivery_instructions: this.state.delivery_instructions,
-                      giftingContact: this.state.giftingContent.contact,
-                      giftingAddress: this.state.giftingContent.address,
-                      giftingNote: this.state.giftingContent.note,
-                      locality: this.state.selectedaddress.locality
-                        ? this.state.selectedaddress.locality
-                        : "",
-                      referralDiscount: this.state.referral_discount
-                        ? this.state.referral_discount
-                        : "",
-                      redeem: this.state.loyaltyPointApplied
-                        ? +this.state.totalSeedRedeem / +this.state.seedValue
-                        : "",
-                      redeemDiscount: this.state.loyaltyPointApplied
-                        ? this.state.totalSeedRedeem
-                        : "",
-                      country: this.state.selectedaddress.country
-                        ? this.state.selectedaddress.country
-                        : "",
-                      state: this.state.selectedaddress.state
-                        ? this.state.selectedaddress.state
-                        : "",
-                      city: this.state.selectedaddress.city
-                        ? this.state.selectedaddress.city
-                        : "",
-                      pincode: this.state.selectedaddress.pincode
-                        ? this.state.selectedaddress.pincode
-                        : "",
-                      latitude: this.state.selectedaddress.latitude
-                        ? this.state.selectedaddress.latitude
-                        : "",
-                      longitude: this.state.selectedaddress.longitude
-                        ? this.state.selectedaddress.longitude
-                        : "",
-                      otheraddress: "",
-                      paymentmethod:
-                        this.state.cashStatus === false ? "Paytm" : "COD",
-                      payment_id: "",
-                      cod: this.state.cashStatus ? true : false,
-                      codCharges: this.state.cashStatus ? codCharges : 0,
-                      deliveryCharges: deliveryCharge,
-                      total_payment: this.state.final_total_price,
-                      bookingMode: "online",
-                      preOrder: preOrder,
-                      totalCartPrice: this.state.subTotal_price,
-                      totalCartPriceWithoutGST:
-                        Math.floor(+this.state.subTotalWithoutGST * 100) / 100,
-                      gst: gstPrice.toFixed(2),
-                      allGstLists: this.state.allGstLists,
-                    };
-                    let errorFromAPI = false;
-                    {
-                      this.state.cashStatus === true
-                        ? ApiRequest(requestData, "/createBooking", "POST")
-                            .then((res) => {
-                              this.setState({
-                                loading: false,
-                              });
-                              if (res.status === 201 || res.status === 200) {
-                                this.purchaseROAS(this.state.final_total_price);
-                                this.props.changethankyouAuth(true);
-                                this.setState({
-                                  paymentData: res.data,
-                                });
-                                var a = [];
-                                this.props.addToCart(a);
-                                this.props.history.replace(`/Thankyou`);
-                              } else if (
-                                res.status === 400 ||
-                                res.status === 401
-                              ) {
-                                if (res.data.status === "error") {
-                                  if (res.data.result.includes("user")) {
-                                    swal({
-                                      title: "Error",
-                                      text: "Your account is currently disabled.Please contact us for more information.",
-                                      icon: "warning",
-                                      dangerMode: true,
-                                    }).then(() => {
-                                      this.props.history.push("/");
-                                    });
-                                  } else {
-                                    swal({
-                                      title: "Error",
-                                      text: res.data.result,
-                                      icon: "warning",
-                                      dangerMode: true,
-                                    });
-                                  }
-                                }
-                              } else if (res.status === 500) {
-                                swal({
-                                  title: "Error",
-                                  text: "Cart Has Been Modified.",
-                                  icon: "warning",
-                                  dangerMode: true,
-                                }).then(() => {
-                                  this.props.history.replace(`/cart`);
-                                });
-                              }
-                            })
-                            .then(() => {
-                              this.setState({
-                                loading: false,
-                              });
-                            })
-                            .catch((error) => {
-                              console.log(error);
-                            })
-                        : fetch(DynamicUrl + "/createBooking", {
-                            method: "post",
-                            headers: {
-                              "content-type": "application/json",
-                            },
-                            body: JSON.stringify(requestData),
-                          })
-                            .then(async (res) => {
-                              // let response1 = await res?.json();
-                              if (res.status === 201 || res.status === 200) {
-                                this.purchaseROAS(this.state.final_total_price);
-                                this.props.changethankyouAuth(true);
-                                return res.text();
-                              } else if (
-                                res.status === 400 ||
-                                res.status === 401
-                              ) {
-                                let response1 = await res.json();
-                                errorFromAPI = true;
-                                if (response1.status === "error") {
-                                  if (response1.result.includes("user")) {
-                                    swal({
-                                      title: "Error",
-                                      text: "Your account is currently disabled.Please contact us for more information.",
-                                      icon: "warning",
-                                      dangerMode: true,
-                                    }).then(() => {
-                                      this.props.history.push("/");
-                                    });
-                                  } else {
-                                    swal({
-                                      title: "Error",
-                                      text: response1.result,
-                                      icon: "warning",
-                                      dangerMode: true,
-                                    }).then(() => {
-                                      this.props.history.push("/");
-                                    });
-                                  }
-                                }
-                              } else if (res.status === 500) {
-                                errorFromAPI = true;
-                                swal({
-                                  title: "Cart Modified",
-                                  text: "Your cart has been modified on another device you may have previously logged on to. Please check your cart once before you proceed.",
-                                  icon: "warning",
-                                  dangerMode: true,
-                                }).then(() => {
-                                  this.props.history.replace(`/cart`);
-                                });
-                              } else {
-                                let response1 = await res.json();
-                                errorFromAPI = true;
-                                swal({
-                                  title: "Error",
-                                  text: response1?.error || "Unknown error",
-                                  icon: "warning",
-                                  dangerMode: true,
-                                });
-                              }
-                            })
-                            .then((data) => {
-                              if (data !== undefined && !errorFromAPI) {
-                                document.querySelector("html").innerHTML = data;
-                                document.f1.submit();
-                              }
-                            })
-                            .then(() => {
-                              if (!errorFromAPI) {
-                                this.setState({
-                                  loading: false,
-                                });
-                              }
-                            })
-                            .catch((error) => {
-                              console.log(error);
-                            });
-                    }
-                  }
-                })
-                .catch((error) => {
-                  console.log(error);
-                });
-            }
-          } else {
-            var valueErr = document.getElementsByClassName("err");
-            for (var i = 0; i < valueErr.length; i++) {
-              valueErr[i].innerText = "";
-            }
-
-            if (!this.state.name) {
-              valueErr = document.getElementsByClassName("err_name1");
-              valueErr[0].innerText = "This Field is Required";
-              swal({
-                title: "Error",
-                text: "Please Enter Name.",
-                icon: "warning",
-                dangerMode: true,
-              });
-            }
-            if (!this.state.deliveryslot) {
-              valueErr = document.getElementsByClassName("err_deliveryslot");
-              valueErr[0].innerText = this.state.selectedaddress
-                ? this.state.noDeliverySlots
-                  ? "We are currently not delivering in your area."
-                  : "Please select a delivery slot."
-                : "Please add Shipping Details.";
-              swal({
-                title: "Error",
-                text: this.state.selectedaddress
-                  ? this.state.noDeliverySlots
-                    ? "We are currently not delivering in your area."
-                    : "Please select a delivery slot."
-                  : "Please add Shipping Details.",
-                icon: "warning",
-                dangerMode: true,
-              });
-            }
-            if (!this.state.email) {
-              valueErr = document.getElementsByClassName("err_email1");
-              valueErr[0].innerText = "This Field is Required";
-              swal({
-                title: "Error",
-                text: "Please enter email.",
-                icon: "warning",
-                dangerMode: true,
-              });
-            }
-            if (!this.state.selectedaddress) {
-              valueErr = document.getElementsByClassName("err_address");
-              valueErr[0].innerText =
-                "Please select an address or add a new one";
-              swal({
-                title: "Error",
-                text: "Please select an address or add a new one.",
-                icon: "warning",
-                dangerMode: true,
-              });
-            } else if (this.state.selectedaddress) {
-              valueErr = document.getElementsByClassName("err_address");
-              valueErr[0].innerText = "";
-            }
-            if (
-              this.state.giftingContent.status &&
-              !this.state.selectedgiftingaddress
-            ) {
-              valueErr = document.getElementsByClassName("err_giftingaddress");
-              valueErr[0].innerText =
-                "Please select a gifting address or add a new One";
-              swal({
-                title: "Error",
-                text: "Please select a gifting address or add a new one.",
-                icon: "warning",
-                dangerMode: true,
-              });
-            }
             this.setState({
-              loading: false,
+              loading: true,
             });
+            await ApiRequest(
+              data,
+              "/get/addtocart/" + this.props.user_details._id,
+              "GET"
+            )
+              .then((res) => {
+                if (res.data.data.outOfStock.length !== 0) {
+                  this.setState({
+                    loading: false,
+                  });
+                  swal({
+                    title: "Please note!",
+                    text: `${res.data.data.outOfStock.join(
+                      ", "
+                    )} is currently out of stock.`,
+                    icon: "warning",
+                    successMode: true,
+                  }).then(() => this.props.history.push("/cart"));
+                } else {
+                  localStorage.setItem(
+                    "status",
+                    Boolean(res.data.data.subscribe)
+                  );
+                  cart_id = res.data.data.AddToCartId;
+                  const requestData = this.makePlaceOrderData(
+                    { AddToCartId: res.data.data.AddToCartId },
+                    "normal",
+                    "wallet_credit"
+                  );
+                  this.PlaceOrder_OFFLINE(requestData, "normal");
+                }
+              })
+              .catch((error) => {
+                console.log(error);
+              });
           }
         }
       } else {
-        swal({
-          title: "Error",
-          text: "Please complete gifting form or deselect gifting status.",
-          icon: "warning",
-          dangerMode: true,
-        });
+        const data = {};
+        var cart_id = "";
+        if (
+          this.props.user_details._id &&
+          this.state.selectedaddress &&
+          this.state.deliveryslot &&
+          ((this.state.giftingContent.status &&
+            this.state.selectedgiftingaddress) ||
+            !this.state.giftingContent.status)
+        ) {
+          if (this.state.selectedaddress.houseNo) {
+            this.setState({
+              loading: true,
+            });
+            await ApiRequest(
+              data,
+              "/get/addtocart/" + this.props.user_details._id,
+              "GET"
+            )
+              .then((res) => {
+                if (res.data.data.outOfStock.length !== 0) {
+                  this.setState({
+                    loading: false,
+                  });
+                  swal({
+                    title: "Please note!",
+                    text: `${res.data.data.outOfStock.join(
+                      ", "
+                    )} is currently out of stock.`,
+                    icon: "warning",
+                    successMode: true,
+                  }).then(() => this.props.history.push("/cart"));
+                } else {
+                  localStorage.setItem(
+                    "status",
+                    Boolean(res.data.data.subscribe)
+                  );
+                  cart_id = res.data.data.AddToCartId;
+                  const requestData = this.makePlaceOrderData(
+                    { AddToCartId: res.data.data.AddToCartId },
+                    "normal",
+                    "cod_online"
+                  );
+                  {
+                    this.state.cashStatus === true
+                      ? this.PlaceOrder_OFFLINE(requestData, "normal")
+                      : this.state.razorpayStatus
+                      ? this.PlaceOrder_RAZORPAY(requestData, "normal")
+                      : this.PlaceOrder_PAYTM(requestData, "normal");
+                  }
+                }
+              })
+              .catch((error) => {
+                console.log(error);
+              });
+          }
+        }
       }
     }
+  };
+
+  truncateToDecimals = (num, dec = 2) => {
+    const calcDec = Math.pow(10, dec);
+    return Math.trunc(num * calcDec) / calcDec;
   };
 
   getplaces_edit = (e) => {
@@ -4147,6 +3503,7 @@ class Checkout extends React.Component {
     const calcDec = Math.pow(10, dec);
     return Math.trunc(num * calcDec) / calcDec;
   };
+
   closeCustomerPopup = () => {
     this.setState({
       customerProfileModal: false,
@@ -4155,6 +3512,7 @@ class Checkout extends React.Component {
       contact: this.props.user_details.contactNumber,
     });
   };
+
   clearAddress = () => {
     this.setState({
       street_address: null,
@@ -4164,9 +3522,11 @@ class Checkout extends React.Component {
       searchKey: null,
     });
   };
+
   purchaseROAS(value) {
     fbq("track", "Purchase", { currency: "INR", value: value });
   }
+
   render() {
     const localRegionDetails = JSON.parse(
       localStorage.getItem("regionDetails")
@@ -4187,6 +3547,7 @@ class Checkout extends React.Component {
     const preOrderStatus = this.state.cart_data.find(
       (item) => item.preOrder == true
     );
+    console.log(this.state.cart_data);
     return (
       <>
         {this.state.compopupstatus == false ? (
@@ -4601,18 +3962,50 @@ class Checkout extends React.Component {
                       <h2>Payment Method</h2>
                       <div className="payment-detail">
                         <ul>
-                          <li>
-                            <label className="click-redio">
-                              <input
-                                type="radio"
-                                checked={this.state.payStatus ? "checked" : ""}
-                                name="pay"
-                                onClick={(val) => this._handlePaymentMode(val)}
-                              />
-                              <span className="p-custom-btn"></span>
-                              <span className="checkmark">Pay online</span>
-                            </label>
-                          </li>
+                          {this.state.paytmShow ? (
+                            <li>
+                              <label className="click-redio">
+                                <input
+                                  type="radio"
+                                  checked={
+                                    this.state.payStatus ? "checked" : ""
+                                  }
+                                  name="pay"
+                                  onClick={(val) =>
+                                    this._handlePaymentMode(val)
+                                  }
+                                />
+                                <span className="p-custom-btn"></span>
+                                <span className="checkmark">
+                                  Pay with Paytm
+                                </span>
+                              </label>
+                            </li>
+                          ) : (
+                            ""
+                          )}
+                          {this.state.razorpayShow ? (
+                            <li>
+                              <label className="click-redio">
+                                <input
+                                  type="radio"
+                                  checked={
+                                    this.state.razorpayStatus ? "checked" : ""
+                                  }
+                                  name="razorpay"
+                                  onClick={(val) =>
+                                    this._handlePaymentMode(val)
+                                  }
+                                />
+                                <span className="p-custom-btn"></span>
+                                <span className="checkmark">
+                                  Pay with Razorpay
+                                </span>
+                              </label>
+                            </li>
+                          ) : (
+                            ""
+                          )}
                           {this.state.creditPaymentOnOff ? (
                             <li>
                               <label className="click-redio">
@@ -5191,7 +4584,7 @@ class Checkout extends React.Component {
                             <tr>
                               <td className="pointer">
                                 <div className="cart_itm_image">
-                                  {/* {JSON.parse(localStorage.getItem("freeproduct")).BookingQuantity} */}
+                                  {/* {JSON.parse(localStorage.getItem("freeproduct")).bookingQuantity} */}
                                   <img
                                     src={
                                       imageUrl +

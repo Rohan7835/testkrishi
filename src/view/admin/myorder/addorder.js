@@ -1035,7 +1035,7 @@ export default class Addorder extends Component {
               all_products.push({
                 value: item._id,
                 name: item.product_name,
-                AvailableQuantity: +item.AvailableQuantity.$numberDecimal,
+                availableQuantity: +item.availableQuantity,
                 TypeOfProduct: item.TypeOfProduct,
               });
             }
@@ -1606,7 +1606,7 @@ export default class Addorder extends Component {
     localProducts = localProducts.map((product) => {
       if (product.TypeOfProduct === "group") {
         if (prod.groupSlug === product.groupSlug) {
-          let av = +product.AvailableQuantity.$numberDecimal;
+          let av = +product.availableQuantity;
           av = product.packet_size
             ? +av / +product.packet_size
             : +av / (+product.unitQuantity || 1);
@@ -1621,7 +1621,7 @@ export default class Addorder extends Component {
         }
       } else {
         if (prod.product_unique_id === product.product_unique_id) {
-          let av = +product.AvailableQuantity.$numberDecimal;
+          let av = +product.availableQuantity;
           av = product.packet_size
             ? +av / +product.packet_size
             : +av / (+product.unitQuantity || 1);

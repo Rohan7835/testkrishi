@@ -6,7 +6,6 @@ import Adminheader from "../admin/elements/admin_header";
 import Adminsiderbar from "../admin/elements/admin_sidebar";
 import Footer from "../admin/elements/footer";
 
-
 export default class fivebestseller extends Component {
   constructor() {
     super();
@@ -176,7 +175,7 @@ export default class fivebestseller extends Component {
                                       </td>
                                       <td>{item.NoOfCat}</td>
                                       <td>{item.NoOfSale}</td>
-                                      {/* <td>{item.CatDetail.BookingQuantity}</td> */}
+                                      {/* <td>{item.CatDetail.bookingQuantity}</td> */}
                                       {item.CatDetail ? (
                                         <td>
                                           <Moment format="DD/MM/YYYY hh:mm:ss A">

@@ -224,10 +224,14 @@ function GroupItem({
               <div className="grp-head-na">
                 <p className="pr-group-name">
                   {item.product.product_name}{" "}
-                  {withPackage ? (
-                    <span>{`${item.package.packetLabel}`}</span>
+                  {item.product.soldInRegion ? (
+                    withPackage ? (
+                      <span>{`${item.package.packetLabel}`}</span>
+                    ) : (
+                      <span>{`${item.product.unitQuantity} ${label}`}</span>
+                    )
                   ) : (
-                    <span>{`${item.product.unitQuantity} ${label}`}</span>
+                    <span>{`${item.package.packetLabel}`}</span>
                   )}
                 </p>
               </div>

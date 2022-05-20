@@ -1017,6 +1017,10 @@ form.add_product_new .single-col {
 }
 .add_product_new .productvariant {
   width: 100%;
+  margin:20px 10px;
+  border: 1px solid #e0e0e0;
+  padding: 10px;
+  border-radius: 5px;
 }
 .simple_package {
   width: 100%;
@@ -3940,7 +3944,7 @@ h4.margin-bottom-4 {
   .group_sets.view-product-group-set
   .group_product
   .form-group {
-  width: 24% !important;
+  width: 16% !important;
 }
 .inner_details_admin
   .group_sets.view-product-group-set
@@ -3957,7 +3961,7 @@ h4.margin-bottom-4 {
   span {
   border-bottom: 1px solid #d2d2d2;
   display: block;
-  height: 35px;
+  min-height: 35px;
 }
 
 .popup-arrow-select .modal-right-bx select {
@@ -4679,4 +4683,28 @@ h4.margin-bottom-4 {
   right:20px;
   width:200px;
   padding:10px
+}
+.view-inven-product-card-section{
+  margin-top:60px;
+  padding:20px;
+}
+.view-inven-product-card{
+  padding:10px;
+  margin:5px;
+  border:1px solid #ececec;
+  border-radius:4px;
+  width:50%;
+}
+.inven-heading{
+  color:#febc15;
+  font-weight:700;
+  margin-bottom:10px;
+}
+.view-inven-product-card li{
+  list-style:none;
+  text-transform:capitalize;
+  padding:10px 0px;
+  border-bottom:1px solid rgb(217 217 217);
+  display: flex;
+  justify-content: space-between;
 }

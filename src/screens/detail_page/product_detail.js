@@ -102,15 +102,14 @@ class Product_details extends React.Component {
           }
           this.setState({
             product_data: res.data.data[0],
-            TotalRating: res.data.data[0].TotalRating,
-            TotalReview: res.data.data[0].TotalReview,
+            ratings: res.data.data[0].ratings,
+            reviewsCount: res.data.data[0].reviewsCount,
             product_name: res.data.data[0].product_name,
             relatedProducts: res.data.data[0].relatedProduct,
             product_id: res.data.data[0]._id,
-            allReviews:
-              res.data.data[0].reviewArray.filter((r, i) => i < 3) || [],
+            allReviews: res.data.data[0].reviews?.filter((r, i) => i < 3) || [],
             initialReviews:
-              res.data.data[0].reviewArray.filter((r, i) => i >= 3) || [],
+              res.data.data[0].reviews?.filter((r, i) => i >= 3) || [],
           });
           let categories = [];
           if (res.data.data[0].product_categories.length !== 0) {
@@ -183,7 +182,7 @@ class Product_details extends React.Component {
           this.state.relatedProducts.map((product) => {
             let price = 0;
             let priceIndex;
-            if (product.product_id.TypeOfProduct === "simple") {
+            if (product.product_id?.TypeOfProduct === "simple") {
               product.product_id.simpleData[0].package[0] &&
                 product.product_id.simpleData[0].package.forEach(
                   (pck, inde) => {
@@ -209,7 +208,7 @@ class Product_details extends React.Component {
                 );
             }
 
-            if (product.product_id.simpleData[0]) {
+            if (product.product_id?.simpleData[0]) {
               product.product_id.simpleData[0].package[0]
                 ? product.product_id.simpleData[0].package.map((pck, index) => {
                     let userPrice = 0;
@@ -330,7 +329,6 @@ class Product_details extends React.Component {
     var itm = this.state.product_data;
     const dataInCart1 = [...this.props.dataInCart];
     var related = [...this.state.relatedProducts];
-    console.log("related", related);
     //looping throught cart and pushing them in cartData array with its packages quantity and normal quantity
     dataInCart1.forEach((item) => {
       var quantity = 0;
@@ -427,19 +425,21 @@ class Product_details extends React.Component {
         }
       }
     } else {
-      if (this.state.product_data.simpleData[0].package[0]) {
-        this.state.product_data.simpleData[0].package.map((pck, index) => {
+      if (this.state.product_data.simpleData[0]) {
+        if (this.state.product_data.simpleData[0].package[0]) {
+          this.state.product_data.simpleData[0].package.map((pck, index) => {
+            this.setState({ quantity: 0 });
+            return (pck.quantity = 0);
+          });
+        } else {
+          this.state.product_data.simpleData[0].userQuantity = 0;
           this.setState({ quantity: 0 });
-          return (pck.quantity = 0);
-        });
-      } else {
-        this.state.product_data.simpleData[0].userQuantity = 0;
-        this.setState({ quantity: 0 });
+        }
       }
     }
     Array.isArray(related) &&
       related.map((iteem) => {
-        let itm = iteem.product_id;
+        let itm = iteem.product_id || {};
         //looping thorught all products and adding quantity to each product from cart
         if (cartData.length > 0) {
           if (
@@ -574,6 +574,7 @@ class Product_details extends React.Component {
       this.calculateQuantityInCart();
     }
   }
+
   componentDidMount() {
     let requestData = {};
     ApiRequest(requestData, "/storehey/getSetting", "GET")
@@ -636,7 +637,7 @@ class Product_details extends React.Component {
 
   sendCartDataToApi = async (realTimeCart, selectedItem) => {
     await sendCartDataToAPI(
-      this.props.dataInCart,
+      realTimeCart.length > 0 ? realTimeCart : this.props.dataInCart,
       this.props.user_details,
       this.props.addToCart
     )
@@ -864,7 +865,7 @@ class Product_details extends React.Component {
       });
     }
     await sendCartDataToAPI(
-      realTimeCart,
+      [selectedItem],
       this.props.user_details,
       this.props.addToCart
     )
@@ -884,8 +885,7 @@ class Product_details extends React.Component {
     var quantityInCart = 0;
     var cartSelectedId = [];
 
-    let availableLocalQuantity =
-      selectedItem.simpleData[0].availQuantity.$numberDecimal;
+    let availableLocalQuantity = selectedItem.simpleData[0].availableQuantity;
 
     let name = selectedItem.product_name;
     if (this.state.product_data.TypeOfProduct === "simple") {
@@ -937,8 +937,8 @@ class Product_details extends React.Component {
                     availableLocalQuantity =
                       +availableLocalQuantity / +itmitm.packet_size;
                     if (
-                      availableLocalQuantity >
-                      selectedItem.simpleData[0].package[indind].quantity
+                      +availableLocalQuantity >=
+                      +selectedItem.simpleData[0].package[indind].quantity + 1
                     ) {
                       selectedItem.simpleData[0].package[indind].quantity =
                         itmitm.quantity + 1;
@@ -950,7 +950,9 @@ class Product_details extends React.Component {
                           "You can not add " +
                           name +
                           " more than " +
-                          availableLocalQuantity,
+                          selectedItem.simpleData[0]?.availableQuantity +
+                          " " +
+                          selectedItem.unitMeasurement?.name,
                         icon: "warning",
                       });
                     }
@@ -998,18 +1000,20 @@ class Product_details extends React.Component {
               if (itm._id === selectedProductId) {
                 this.setState({
                   quantity:
-                    availableLocalQuantity > itm.simpleData[0].userQuantity
+                    availableLocalQuantity >= itm.simpleData[0].userQuantity + 1
                       ? quantityInCart + 1
                       : quantityInCart,
                 });
 
-                return availableLocalQuantity > itm.simpleData[0].userQuantity
+                return availableLocalQuantity >=
+                  itm.simpleData[0].userQuantity + 1
                   ? (itm.simpleData[0].userQuantity = quantityInCart + 1)
                   : (itm.simpleData[0].userQuantity = quantityInCart);
               }
             });
             if (
-              availableLocalQuantity > selectedItem.simpleData[0].userQuantity
+              availableLocalQuantity >=
+              selectedItem.simpleData[0].userQuantity + 1
             ) {
               selectedItem.simpleData[0].userQuantity = quantityInCart + 1;
             } else {
@@ -1019,7 +1023,9 @@ class Product_details extends React.Component {
                   "You can not add " +
                   name +
                   " more than " +
-                  availableLocalQuantity,
+                  selectedItem.simpleData[0]?.availableQuantity +
+                  " " +
+                  selectedItem.unitMeasurement?.name,
                 icon: "warning",
               });
             }
@@ -1051,7 +1057,7 @@ class Product_details extends React.Component {
         // openCart: true,
         cartItems: this.props.dataInCart ? this.props.dataInCart : [],
       });
-      this.sendCartDataToApi(realTimeCart, selectedItem);
+      this.sendCartDataToApi([selectedItem], selectedItem);
     }, 100);
     this.forceUpdate();
   };
@@ -1097,8 +1103,7 @@ class Product_details extends React.Component {
         ? selectedItem.simpleData[0].package.filter((pck) => pck.selected)
         : "";
 
-    let availableLocalQuantity =
-      selectedItem.simpleData[0].availQuantity.$numberDecimal;
+    let availableLocalQuantity = selectedItem.simpleData[0].availableQuantity;
 
     let name = selectedItem.product_name;
 
@@ -1148,8 +1153,8 @@ class Product_details extends React.Component {
                   availableLocalQuantity =
                     +availableLocalQuantity / +itmitm.packet_size;
                   if (
-                    availableLocalQuantity >
-                    selectedItem.simpleData[0].package[indind].quantity
+                    availableLocalQuantity >=
+                    selectedItem.simpleData[0].package[indind].quantity + 1
                   ) {
                     selectedItem.simpleData[0].package[indind].quantity =
                       itmitm.quantity + 1;
@@ -1161,7 +1166,9 @@ class Product_details extends React.Component {
                         "You can not add " +
                         name +
                         " more than " +
-                        availableLocalQuantity.toFixed(),
+                        selectedItem.simpleData[0]?.availableQuantity +
+                        " " +
+                        selectedItem.unitMeasurement?.name,
                       icon: "warning",
                     });
                   }
@@ -1205,13 +1212,15 @@ class Product_details extends React.Component {
           already_cart = true;
           realTimeCart.map((itm) => {
             if (itm._id === selectedItem._id) {
-              return availableLocalQuantity > itm.simpleData[0].userQuantity
+              return availableLocalQuantity >=
+                itm.simpleData[0].userQuantity + 1
                 ? (itm.simpleData[0].userQuantity = quantityInCart + 1)
                 : (itm.simpleData[0].userQuantity = quantityInCart);
             }
           });
           if (
-            availableLocalQuantity > selectedItem.simpleData[0].userQuantity
+            availableLocalQuantity >=
+            selectedItem.simpleData[0].userQuantity + 1
           ) {
             selectedItem.simpleData[0].userQuantity = quantityInCart + 1;
           } else {
@@ -1221,7 +1230,9 @@ class Product_details extends React.Component {
                 "You can not add " +
                 name +
                 " more than " +
-                availableLocalQuantity,
+                selectedItem.simpleData[0]?.availableQuantity +
+                " " +
+                selectedItem.unitMeasurement?.name,
               icon: "warning",
             });
           }
@@ -1255,7 +1266,7 @@ class Product_details extends React.Component {
         cartItems: this.props.dataInCart ? this.props.dataInCart : [],
         // openCart: true,
       });
-      this.sendCartDataToApi();
+      this.sendCartDataToApi([selectedItem]); 
     }, 50);
     this.forceUpdate();
   };
@@ -1383,12 +1394,11 @@ class Product_details extends React.Component {
       .then((res) => {
         if (res.status === 201 || res.status === 200) {
           this.setState({
-            allReviews:
-              res.data.data[0].reviewArray.filter((r, i) => i < 3) || [],
+            allReviews: res.data.data[0].reviews.filter((r, i) => i < 3) || [],
             initialReviews:
-              res.data.data[0].reviewArray.filter((r, i) => i >= 3) || [],
-            TotalRating: res.data.data[0].TotalRating,
-            TotalReview: res.data.data[0].TotalReview,
+              res.data.data[0].reviews.filter((r, i) => i >= 3) || [],
+            ratings: res.data.data[0].ratings,
+            reviewsCount: res.data.data[0].reviewsCount,
           });
         } else {
         }
@@ -1954,11 +1964,11 @@ class Product_details extends React.Component {
                           fullSymbol="fa fa-star fa-2x"
                           fractions={2}
                           readonly={true}
-                          initialRating={this.state.TotalRating || 0}
+                          initialRating={this.state.ratings || 0}
                         />
 
-                        {product_data.TotalReview ? (
-                          <p>({this.state.TotalReview} reviews)</p>
+                        {product_data.reviewsCount ? (
+                          <p>({this.state.reviewsCount} reviews)</p>
                         ) : (
                           <p>No reviews yet</p>
                         )}
@@ -2049,7 +2059,7 @@ class Product_details extends React.Component {
                       ? this.state.relatedProducts.map((item, ix) => {
                           let price = null;
                           var quantityshow = 0;
-                          if (item.product_id.TypeOfProduct === "simple") {
+                          if (item.product_id?.TypeOfProduct === "simple") {
                             if (item.product_id.simpleData[0].package[0]) {
                               item.product_id.simpleData[0].package.map(
                                 (pck, index) => {
@@ -2517,7 +2527,7 @@ class Product_details extends React.Component {
                               )
                             );
                           }
-                          if (item.product_id.TypeOfProduct === "group") {
+                          if (item.product_id?.TypeOfProduct === "group") {
                             if (item.product_id) {
                               return (
                                 <div

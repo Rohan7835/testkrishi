@@ -26,19 +26,19 @@ function getCartData(user_details, addToCart) {
             purchaseTax: item.product_id.purchaseTax,
             hsnCode: item.product_id.hsnCode,
             priceAfterDiscount: "",
-            unitMeasurement: item.unitMeasurement,
+            unitMeasurement:
+              item.unitMeasurement || item.product_id.unitMeasurement,
             TypeOfProduct: item.product_id.TypeOfProduct,
             SKUCode: item.product_id.SKUCode,
             __v: item.product_id.__v,
             created_at: item.product_id.created_at,
             status: item.product_id.status,
             hsnCode: item.product_id.hsnCode,
-            inhouseQuantity: +item.product_id.inhouseQuantity?.$numberDecimal,
-            lostQuantity: +item.product_id.lostQuantity?.$numberDecimal,
-            BookingQuantity: +item.product_id.BookingQuantity?.$numberDecimal,
-            productQuantity: +item.product_id.productQuantity?.$numberDecimal,
-            AvailableQuantity:
-              +item.product_id.AvailableQuantity?.$numberDecimal,
+            inhouseQuantity: +item.product_id.inhouseQuantity,
+            lostQuantity: +item.product_id.lostQuantity,
+            bookingQuantity: +item.product_id.bookingQuantity,
+            productQuantity: +item.product_id.productQuantity,
+            availableQuantity: +item.product_id.availableQuantity,
             slug: item.slug,
             ProductRegion: item.product_id.ProductRegion,
             relatedProduct: item.product_id.relatedProduct,
@@ -73,8 +73,8 @@ function getCartData(user_details, addToCart) {
                             Retail_price: item.simpleItem.Retail_price,
                           },
                         ],
-                        availQuantity:
-                          item.product_id.simpleData[0].availQuantity,
+                        availableQuantity:
+                          item.product_id.simpleData[0].availableQuantity,
                       },
                     ]
                   : [
@@ -91,8 +91,8 @@ function getCartData(user_details, addToCart) {
                           item.product_id.simpleData[0].RegionB2BPrice,
                         RegionRetailPrice:
                           item.product_id.simpleData[0].RegionRetailPrice,
-                        availQuantity:
-                          item.product_id.simpleData[0].availQuantity,
+                        availableQuantity:
+                          item.product_id.simpleData[0].availableQuantity,
                       },
                     ]
                 : [],
@@ -155,6 +155,7 @@ function sendCartDataToAPI(cart, user_details, addToCart) {
               productItemId: data._id,
               TypeOfProduct: item.TypeOfProduct,
               packet_size: data.packet_size,
+              unitMeasurement: item.unitMeasurement,
               packetLabel: data.packetLabel,
               qty: data.quantity,
               price: localPrice,
@@ -214,8 +215,7 @@ function sendCartDataToAPI(cart, user_details, addToCart) {
                 packet_size: null,
                 packetLabel: null,
                 unitQuantity: item.unitQuantity,
-                unitMeasurement:
-                  item.unitMeasurement.name || item.unitMeasurement,
+                unitMeasurement: item.unitMeasurement,
                 qty: item.simpleData[0].userQuantity,
                 price: localPrice,
                 totalprice: item.simpleData[0].userQuantity * localPrice,
@@ -232,6 +232,7 @@ function sendCartDataToAPI(cart, user_details, addToCart) {
         ...item,
         product_id: item._id,
         qty: item.qty,
+        unique_id: item.unique_id || "",
         totalprice: item.qty * item.price,
         without_package: true,
       });

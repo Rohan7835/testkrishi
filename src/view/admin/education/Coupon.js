@@ -299,25 +299,31 @@ export default class Coupon extends Component {
         valueErr[0].innerText = "Amount Should be Numeric";
       }
     }
+
     if (this.state.couponValue <= 0) {
       ststuss = true;
       valueErr = document.getElementsByClassName("err_couponValue");
       valueErr[0].innerText = "Should be greater than 0";
     }
+
     if (!discount) {
+      ststuss = true;
       valueErr = document.getElementsByClassName("err_discount");
       valueErr[0].innerText = "This Field is Required";
     }
 
     if (!start_date) {
+      ststuss = true;
       valueErr = document.getElementsByClassName("err_start_date");
       valueErr[0].innerText = "This Field is Required";
     }
     if (!end_date) {
+      ststuss = true;
       valueErr = document.getElementsByClassName("err_end_date");
       valueErr[0].innerText = "This Field is Required";
     }
     if (!coupon_code) {
+      ststuss = true;
       valueErr = document.getElementsByClassName("err_coupon_code");
       valueErr[0].innerText = "This Field is Required";
     }
@@ -352,7 +358,7 @@ export default class Coupon extends Component {
         valueErr[0].innerText = "This Field is Required";
       }
       data.append("couponValue", couponValue);
-      data.append("discountLocation", this.state.discountLocation);
+      data.append("discountLocation", "product");
       data.append("name", name);
       data.append("description", description);
       data.append("image", Image);
@@ -1033,7 +1039,7 @@ export default class Coupon extends Component {
                                   </div>
                                   <div className="modal-right-bx">
                                     <input
-                                      type="text"
+                                      type="number"
                                       name="couponValue"
                                       className="form-control"
                                       autoComplete="off"
@@ -1728,7 +1734,7 @@ export default class Coupon extends Component {
                                 ) : (
                                   ""
                                 )}
-                                <div className="form-group">
+                                {/* <div className="form-group">
                                   <div className="modal-left-bx">
                                     <label>
                                       Discount Location{" "}
@@ -1746,7 +1752,7 @@ export default class Coupon extends Component {
                                       <option value="product">Product</option>
                                     </select>
                                   </div>
-                                </div>
+                                </div> */}
 
                                 {this.state.discount === "product" ? (
                                   <div className="form-group">

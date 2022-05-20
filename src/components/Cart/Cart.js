@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { withRouter } from "react-router";
-import { Link } from "react-router-dom";
+import { Link, Redirect } from "react-router-dom";
 import swal from "sweetalert";
 import { ApiRequest } from "../../apiServices/ApiRequest";
 import "../../assets/css/cart.css";
@@ -29,6 +29,7 @@ const Cart = ({
     deliveryInfo.MOQ === "yes" ? +deliveryInfo.MOQ_Charges || 0 : 0
   );
   const [loading, setLoading] = useState(false);
+  const [proceedStatus, setProceedStatus] = useState(false);
 
   var totalPrice = 0;
 
@@ -48,11 +49,36 @@ const Cart = ({
 
   //removing deleted item from items state
   const removeItemFromCart = async (removedItem) => {
+    let selectedItem = {}
+    dataInCart.map((itm) => {
+      if (itm === removedItem) {
+        if (itm.TypeOfProduct === "simple") {
+          itm.simpleData[0].package[0]
+            ? itm.simpleData[0].package.map((pck) => {
+                if (pck.selected) {
+                    pck.quantity = 0;
+                }
+              })
+            : 
+              (itm.simpleData[0].userQuantity =0);
+        } else {
+          if (+itm.qty) {
+            (itm.qty = 0);
+          }
+        }
+        selectedItem = itm
+      }
+    });
+    
     const newItemsArray = dataInCart.filter((itm) => {
       if (itm !== removedItem) {
         return itm;
       }
     });
+    
+    if (document.querySelector(".quantity-error")) {
+      document.querySelector(".quantity-error").innerHTML = "";
+    }
     addToCart([]);
     addToCart(newItemsArray);
     quantityChange(!cartItemQuantity);
@@ -62,7 +88,7 @@ const Cart = ({
         ? JSON.stringify(newItemsArray)
         : JSON.stringify([newItemsArray])
     );
-    await sendCartDataToAPI(newItemsArray, user_details, addToCart)
+    await sendCartDataToAPI([selectedItem], user_details, addToCart)
       .then((res) => {})
       .catch((error) => {
         console.log(error);
@@ -77,6 +103,9 @@ const Cart = ({
 
   const increaseQuantity = async (i) => {
     setLoading(true);
+    if (document.querySelector(".quantity-error")) {
+      document.querySelector(".quantity-error").innerHTML = "";
+    }
     let err;
     let errorsPresent = false;
     var localDataInCart = [...dataInCart];
@@ -97,12 +126,13 @@ const Cart = ({
     } else {
       err = document.querySelector("#" + i.slug);
     }
+    let selectedItem = {};
     localDataInCart.map((itm) => {
       if (itm === i) {
         var avail = itm.simpleData[0]
-          ? typeof itm.simpleData[0].availQuantity === "object"
-            ? +itm.simpleData[0].availQuantity.$numberDecimal
-            : +itm.simpleData[0].availQuantity
+          ? typeof itm.simpleData[0].availableQuantity === "object"
+            ? +itm.simpleData[0].availableQuantity
+            : +itm.simpleData[0].availableQuantity
           : 0;
         itm.TypeOfProduct === "simple"
           ? itm.simpleData[0].package[0]
@@ -113,8 +143,11 @@ const Cart = ({
                     pck.quantity = pck.quantity + 1;
                   } else {
                     pck.quantity = pck.quantity;
-                    err.innerHTML = `${avail} Units currently in
-                    stock`;
+                    err.innerHTML = `You can not add ${
+                      itm.product_name
+                    } more than ${+itm.simpleData[0]?.availableQuantity} ${
+                      itm.unitMeasurement?.name
+                    }`;
                     err.style.display = "block";
                     errorsPresent = true;
                   }
@@ -124,10 +157,11 @@ const Cart = ({
             ? (itm.simpleData[0].userQuantity += 1)
             : (err.style.display = "block")
           : (itm.qty = itm.qty + 1);
+        selectedItem = itm;
       }
     });
     if (!errorsPresent) {
-      await sendCartDataToAPI(localDataInCart, user_details, addToCart)
+      await sendCartDataToAPI([selectedItem], user_details, addToCart)
         .then((res) => {
           if (res.status === 200 || res.status === 201) {
             addToCart([]);
@@ -137,15 +171,28 @@ const Cart = ({
             }, 50);
             localStorage.setItem("cartItem", JSON.stringify(localDataInCart));
           } else {
-            swal({
-              title: "Error",
-              text: res.data.data,
-              icon: "warning",
-            });
+            if (document.querySelector(".quantity-error")) {
+              document.querySelector(".quantity-error").innerHTML =
+                "You can not add " + res.data.data.join("");
+            }
             if (i.TypeOfProduct === "group") {
               localDataInCart.map((itm) => {
                 if (itm === i) {
                   itm.TypeOfProduct !== "simple" && (itm.qty = itm.qty - 1);
+                }
+              });
+            } else if (i.TypeOfProduct === "simple") {
+              localDataInCart.map((itm) => {
+                if (itm === i) {
+                  itm.TypeOfProduct === "simple"
+                    ? itm.simpleData[0].package[0]
+                      ? itm.simpleData[0].package.forEach((pck) => {
+                          if (pck.selected) {
+                            pck.quantity = pck.quantity - 1;
+                          }
+                        })
+                      : (itm.simpleData[0].userQuantity = 1)
+                    : (itm.qty = itm.qty);
                 }
               });
             }
@@ -169,6 +216,10 @@ const Cart = ({
 
   const decreaseQuantity = async (i) => {
     setLoading(true);
+    if (document.querySelector(".quantity-error")) {
+      document.querySelector(".quantity-error").innerHTML = "";
+    }
+    let selectedItem = {}
     dataInCart.map((itm) => {
       if (itm === i) {
         if (itm.TypeOfProduct === "simple") {
@@ -183,10 +234,9 @@ const Cart = ({
             : itm.simpleData[0].userQuantity !== 1 &&
               (itm.simpleData[0].userQuantity -= 1);
         } else {
-          if (itm.qty !== 1) {
-            return (itm.qty = itm.qty - 1);
-          }
+            itm.qty = itm.qty - 1
         }
+        selectedItem = itm
       }
     });
     addToCart([]);
@@ -194,7 +244,7 @@ const Cart = ({
     quantityChange(!cartItemQuantity);
     localStorage.setItem("cartItem", JSON.stringify(dataInCart));
 
-    await sendCartDataToAPI(dataInCart, user_details, addToCart)
+    await sendCartDataToAPI([selectedItem], user_details, addToCart)
       .then((res) => {
         setLoading(false);
       })
@@ -224,6 +274,50 @@ const Cart = ({
 
   const hideCartAll = () => {
     hideCart();
+  };
+
+  // useEffect(() => {
+  if (proceedStatus) {
+    return <Redirect to="/cart" />;
+  }
+  // }, [proceedStatus]);
+
+  const proceedToCart = () => {
+    if (user_details._id) {
+      ApiRequest({}, "/get/addtocart/" + user_details._id, "GET")
+        .then((res) => {
+          if (res.data.allErrors.length > 0) {
+            if (document.querySelector(".quantity-error")) {
+              document.querySelector(".quantity-error").innerHTML =
+                "You can not add " + res.data.allErrors.join("");
+            }
+          } else {
+            if (res.status === 201 || res.status === 200) {
+              if (res.data.data.priceChanged) {
+                swal({
+                  title: "Price Changed!",
+                  text: "Prices of items are changed. Your cart will be refreshed.",
+                  icon: "warning",
+                }).then(() => {
+                  setProceedStatus(true);
+                });
+              } else {
+                setProceedStatus(true);
+              }
+            } else {
+              swal({
+                title: "Error!",
+                // text: "Prices of items are changed. Your cart will be refreshed.",
+                icon: "warning",
+              });
+            }
+            // hideCartAll();
+          }
+        })
+        .catch((err) => console.log(err));
+    } else {
+      setProceedStatus(true);
+    }
   };
 
   return (
@@ -460,8 +554,7 @@ const Cart = ({
                           : itm.slug
                       }
                     >
-                      {itm.AvailableQuantity.$numberDecimal} Units currently in
-                      stock
+                      {itm.availableQuantity} Units currently in stock
                     </span>
                   </div>
                   <div
@@ -482,7 +575,7 @@ const Cart = ({
             <tr>
               <td className="pointer">
                 <div className="cart_itm_image">
-                  {/* {JSON.parse(localStorage.getItem("freeproduct")).BookingQuantity} */}
+                  {/* {JSON.parse(localStorage.getItem("freeproduct")).bookingQuantity} */}
                   <img
                     src={
                       imageUrl +
@@ -514,6 +607,7 @@ const Cart = ({
             </tr>
           ) : null}
         </div>
+        <p style={{ color: "red" }} className="quantity-error"></p>
         {dataInCart.length > 0 && totalPrice < +minimumOrderValue ? (
           <p style={{ color: "red" }}>
             Min Order Value should be ₹{+minimumOrderValue}
@@ -523,17 +617,17 @@ const Cart = ({
         )}
         {dataInCart.length > 0 ? (
           totalPrice >= +minimumOrderValue ? (
-            <Link to="/cart">
-              <button
-                className="proceed-cart-section"
-                onClick={hideCartAll}
-                style={{ cursor: "pointer" }}
-              >
-                <p>Proceed to checkout</p>
-                <p>₹{totalPrice}</p>
-              </button>
-            </Link>
+            // <Link to="/cart">
+            <button
+              className="proceed-cart-section"
+              onClick={proceedToCart}
+              style={{ cursor: "pointer" }}
+            >
+              <p>Proceed to checkout</p>
+              <p>₹{totalPrice}</p>
+            </button>
           ) : (
+            // </Link>
             <button
               className="proceed-cart-section"
               style={{ cursor: "no-drop" }}

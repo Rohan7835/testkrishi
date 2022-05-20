@@ -853,7 +853,6 @@ export default class orderdetails extends Component {
           this.setState({
             product: res.data.data,
           });
-        } else {
         }
       })
       .catch((error) => {
@@ -1881,7 +1880,10 @@ export default class orderdetails extends Component {
                                       >
                                         {item.userType ? item.userType : ""}
                                       </td>
-                                      <td>{item.total_payment}</td>
+                                      <td>
+                                        {item.total_payment &&
+                                          item.total_payment.toFixed(2)}
+                                      </td>
                                       <td>{item.paymentmethod}</td>
                                       <td>{item.billType}</td>
                                       <td>{item.billingCompany?.name}</td>
@@ -2047,7 +2049,10 @@ export default class orderdetails extends Component {
                                       >
                                         {item.userType ? item.userType : ""}
                                       </td>
-                                      <td>{item.total_payment}</td>
+                                      <td>
+                                        {item.total_payment &&
+                                          item.total_payment.toFixed(2)}
+                                      </td>
                                       <td>{item.paymentmethod}</td>
                                       <td>{item.billType}</td>
                                       <td>{item.billingCompany?.name}</td>
@@ -2225,7 +2230,10 @@ export default class orderdetails extends Component {
                                       >
                                         {item.userType ? item.userType : ""}
                                       </td>
-                                      <td>{item.total_payment}</td>
+                                      <td>
+                                        {item.total_payment &&
+                                          item.total_payment.toFixed(2)}
+                                      </td>
                                       <td>{item.paymentmethod}</td>
                                       <td>{item.payment}</td>
                                       <td>{item.billType}</td>
@@ -2431,7 +2439,10 @@ export default class orderdetails extends Component {
                                       >
                                         {item.userType ? item.userType : ""}
                                       </td>
-                                      <td>{item.total_payment}</td>
+                                      <td>
+                                        {item.total_payment &&
+                                          item.total_payment.toFixed(2)}
+                                      </td>
                                       <td>{item.paymentmethod}</td>
                                       <td>{item.billType}</td>
                                       <td>{item.billingCompany?.name}</td>
@@ -2571,7 +2582,10 @@ export default class orderdetails extends Component {
                                       >
                                         {item.userType ? item.userType : ""}
                                       </td>
-                                      <td>{item.total_payment}</td>
+                                      <td>
+                                        {item.total_payment &&
+                                          item.total_payment.toFixed(2)}
+                                      </td>
                                       <td>{item.paymentmethod}</td>
                                       <td>{item.billType}</td>
                                       <td>{item.billingCompany?.name}</td>
@@ -2708,7 +2722,10 @@ export default class orderdetails extends Component {
                                       >
                                         {item.userType ? item.userType : ""}
                                       </td>
-                                      <td>{item.total_payment}</td>
+                                      <td>
+                                        {item.total_payment &&
+                                          item.total_payment.toFixed(2)}
+                                      </td>
                                       <td>{item.paymentmethod}</td>
                                       <td>{item.billType}</td>
                                       <td>{item.billingCompany?.name}</td>
@@ -2822,7 +2839,10 @@ export default class orderdetails extends Component {
                                       >
                                         {item.userType ? item.userType : ""}
                                       </td>
-                                      <td>{item.total_payment}</td>
+                                      <td>
+                                        {item.total_payment &&
+                                          item.total_payment.toFixed(2)}
+                                      </td>
                                       <td>{item.paymentmethod}</td>
                                       <td>{item.billType}</td>
                                       <td>{item.billingCompany?.name}</td>
@@ -2923,7 +2943,10 @@ export default class orderdetails extends Component {
                                       >
                                         {item.userType ? item.userType : ""}
                                       </td>
-                                      <td>{item.total_payment}</td>
+                                      <td>
+                                        {item.total_payment &&
+                                          item.total_payment.toFixed(2)}
+                                      </td>
                                       <td>{item.paymentmethod}</td>
                                       <td>{item.billType}</td>
                                       <td>{item.billingCompany?.name}</td>

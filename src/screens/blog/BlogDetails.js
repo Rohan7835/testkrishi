@@ -394,8 +394,7 @@ function BlogDetails(props) {
         ? selectedItem.simpleData[0].package.filter((pck) => pck.selected)
         : "";
 
-    let availableLocalQuantity =
-      selectedItem.simpleData[0].availQuantity.$numberDecimal;
+    let availableLocalQuantity = selectedItem.simpleData[0].availableQuantity;
 
     let name = selectedItem.product_name;
 
@@ -445,8 +444,8 @@ function BlogDetails(props) {
                   availableLocalQuantity =
                     +availableLocalQuantity / +itmitm.packet_size;
                   if (
-                    availableLocalQuantity >
-                    selectedItem.simpleData[0].package[indind].quantity
+                    availableLocalQuantity >=
+                    selectedItem.simpleData[0].package[indind].quantity + 1
                   ) {
                     selectedItem.simpleData[0].package[indind].quantity =
                       itmitm.quantity + 1;
@@ -458,7 +457,9 @@ function BlogDetails(props) {
                         "You can not add " +
                         name +
                         " more than " +
-                        availableLocalQuantity.toFixed(),
+                        selectedItem.simpleData[0]?.availableQuantity +
+                        " " +
+                        selectedItem.unitMeasurement?.name,
                       icon: "warning",
                     });
                   }
@@ -508,7 +509,8 @@ function BlogDetails(props) {
             }
           });
           if (
-            availableLocalQuantity > selectedItem.simpleData[0].userQuantity
+            availableLocalQuantity >=
+            selectedItem.simpleData[0].userQuantity + 1
           ) {
             selectedItem.simpleData[0].userQuantity = quantityInCart + 1;
           } else {
@@ -518,7 +520,9 @@ function BlogDetails(props) {
                 "You can not add " +
                 name +
                 " more than " +
-                availableLocalQuantity,
+                selectedItem.simpleData[0]?.availableQuantity +
+                " " +
+                selectedItem.unitMeasurement?.name,
               icon: "warning",
             });
           }
@@ -545,7 +549,7 @@ function BlogDetails(props) {
       props.addToCart(realTimeCart);
     }
 
-    await sendCartDataToAPI(realTimeCart, props.user_details, props.addToCart)
+    await sendCartDataToAPI([selectedItem], props.user_details, props.addToCart)
       .then((res) => {
         if (res.status === 400 || res.status === 401) {
           if (res.data.message === "error") {
@@ -736,7 +740,7 @@ function BlogDetails(props) {
       });
     }
 
-    await sendCartDataToAPI(realTimeCart, props.user_details, props.addToCart)
+    await sendCartDataToAPI([selectedItem], props.user_details, props.addToCart)
       .then((res) => {})
       .catch((err) => console.log(err));
   };

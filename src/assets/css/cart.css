@@ -1253,18 +1253,7 @@ span.informat {
   padding: 5px !important;
 }
 .searchLoadingrel {
-  animation: spinner2 1s linear infinite;
-  display: inline;
-  height: 20px;
-  width: 20px;
-}
-@keyframes spinner2 {
-  from {
-    transform: rotateZ(0deg);
-  }
-  to {
-    transform: rotateZ(360deg);
-  }
+  animation: spinner 1s linear infinite;           
 }
 
 .right-group-product .group-cart-item {

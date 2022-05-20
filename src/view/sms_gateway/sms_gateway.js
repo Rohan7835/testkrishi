@@ -753,7 +753,7 @@ class sms_gateway extends React.Component {
                                 className="form-control"
                                 onChange={this.changePaymentMethod}
                               >
-                                <option value="">Select Payment Method</option>
+                                <option value="">Select sms gateway</option>
                                 <option value="aws_sms">AWS SMS</option>
                                 <option value="sms_alert">SMS Alert</option>
                               </select>

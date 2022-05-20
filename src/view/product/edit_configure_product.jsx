@@ -23,7 +23,7 @@ function Edit_Configured(props) {
       mrp: "",
       variantSKUcode: "",
       image: "",
-      availQuantity: 0,
+      availableQuantity: 0,
       bookingQuantity: 0,
       inhouseQuantity: 0,
       lostQuantity: 0,
@@ -171,11 +171,11 @@ function Edit_Configured(props) {
                       : ""}
                     <div className="form-group">
                       <div className="modal-left-bx">
-                        <label>Select Region </label>
+                        <label>Select Region </label> 
                       </div>
                       <div className="modal-right-bx">
-                        <label>{item.region.name}</label>
-                        {!item.region.name && <SelectSearch
+                       {item.region._id && <label>{item.region.name}</label>}
+                        { !item.region._id && <SelectSearch
                           placeholder="Choose Region"
                           options={sub_region_data.map(a => {
                             return {...a,name:a.label}
@@ -205,7 +205,7 @@ function Edit_Configured(props) {
                         <label>Selling Price (incl. gst)</label>
                       </div>
                       <div className="modal-right-bx">
-                        <input
+                        <input    
                           type="number"
                           value={item.selling_price ? item.selling_price : ""}
                           name="selling_price"

@@ -31,6 +31,9 @@ class paymentkeys extends React.Component {
       status: false,
       adminStatus: false,
       frontendStatus: false,
+      production_txn_url: "",
+      staging: false,
+      staging_txn_url: "",
     };
     this.handleChangeStatus = this.handleChangeStatus.bind(this);
     this.handleChangeloyality = this.handleChangeloyality.bind(this);
@@ -72,24 +75,30 @@ class paymentkeys extends React.Component {
     });
   }
   update = (dt) => {
+    var errorStatus = false;
     var name = dt.name;
     var frontendStatus = dt.frontendStatus;
     var adminStatus = dt.adminStatus;
+    var staging = dt.staging;
     var valueErr = document.getElementsByClassName("err");
     for (var i = 0; i < valueErr.length; i++) {
       valueErr[i].innerText = "";
     }
     if (!name) {
+      errorStatus = true;
       valueErr = document.getElementsByClassName("err_name");
-      swal({
-        title: "Error",
-        text: "Name is required",
-        icon: "warning",
-      });
-    } else {
-      valueErr[0].innerText = "";
-      var data = {};
-      var errorStatus = false;
+      valueErr[0].innerText = "This field is required";
+    }
+
+    {
+      var data = {
+        _id: dt._id,
+        name,
+        keys: {},
+        frontendStatus,
+        adminStatus,
+        staging,
+      };
       if (name === "Razorpay") {
         var keyid = dt.keys.keyid || "";
         var secretid = dt.keys.secretid || "";
@@ -103,13 +112,7 @@ class paymentkeys extends React.Component {
           valueErr[0].innerText = "This Field is Required";
           errorStatus = true;
         }
-        data = {
-          _id: dt._id,
-          name,
-          keys: { keyid, secretid },
-          frontendStatus,
-          adminStatus,
-        };
+        data.keys = { keyid, secretid };
       } else if (name === "Paypal") {
         var clientid = dt.keys.clientid || "";
         var secretcode = dt.keys.secretcode || "";
@@ -123,18 +126,28 @@ class paymentkeys extends React.Component {
           valueErr[0].innerText = "This Field is Required";
           errorStatus = true;
         }
-        data = {
-          _id: dt._id,
-          name,
-          keys: { clientid, secretcode },
-          frontendStatus,
-          adminStatus,
-        };
+        data.keys = { clientid, secretcode };
       } else if (name === "Paytm") {
         var merchantid = dt.keys.merchantid || "";
         var key = dt.keys.key || "";
-        var url = dt.keys.url || "";
+        // var url = dt.keys.url || "";
         var website = dt.keys.website || "";
+        var production_txn_url = dt.production_txn_url;
+        var staging_txn_url = dt.staging_txn_url;
+        if (!production_txn_url) {
+          valueErr = document.getElementsByClassName(
+            "err_edit_production_txn_url"
+          );
+          errorStatus = true;
+          valueErr[0].innerText = "This field is required";
+        }
+        if (!staging_txn_url) {
+          valueErr = document.getElementsByClassName(
+            "err_edit_staging_txn_url"
+          );
+          errorStatus = true;
+          valueErr[0].innerText = "This field is required";
+        }
         if (!merchantid) {
           valueErr = document.getElementsByClassName("err_editmerchantid");
           valueErr[0].innerText = "This Field is Required";
@@ -145,22 +158,23 @@ class paymentkeys extends React.Component {
           valueErr[0].innerText = "This Field is Required";
           errorStatus = true;
         }
-        if (!url) {
-          valueErr = document.getElementsByClassName("err_editurl");
-          valueErr[0].innerText = "This Field is Required";
-          errorStatus = true;
-        }
+        // if (!url) {
+        //   valueErr = document.getElementsByClassName("err_editurl");
+        //   valueErr[0].innerText = "This Field is Required";
+        //   errorStatus = true;
+        // }
         if (!website) {
           valueErr = document.getElementsByClassName("err_editwebsite");
           valueErr[0].innerText = "This Field is Required";
           errorStatus = true;
         }
-        data = {
-          _id: dt._id,
-          name,
-          keys: { merchantid, key, url, website },
-          frontendStatus,
-          adminStatus,
+        data.keys = {
+          merchantid,
+          key,
+          // url,
+          website,
+          production_txn_url,
+          staging_txn_url,
         };
       } else if (name === "Stripe") {
         var keyid = dt.keys.keyid || "";
@@ -175,15 +189,9 @@ class paymentkeys extends React.Component {
           valueErr[0].innerText = "This Field is Required";
           errorStatus = true;
         }
-        data = {
-          _id: dt._id,
-          name,
-          keys: {
-            keyid,
-            secretid,
-          },
-          frontendStatus,
-          adminStatus,
+        data.keys = {
+          keyid,
+          secretid,
         };
       }
       if (!errorStatus) {
@@ -192,7 +200,6 @@ class paymentkeys extends React.Component {
             if (res.status === 201 || res.status === 200) {
               swal({
                 title: "Details Updated",
-                // text: "Are you sure that you want to leave this page?",
                 icon: "success",
                 dangerMode: false,
               });
@@ -263,20 +270,30 @@ class paymentkeys extends React.Component {
     });
   };
   addkey = () => {
+    var errorStatus = false;
     var name = this.state.name;
-    var status = this.state.status;
+    // var status = this.state.status;
     var frontendStatus = this.state.frontendStatus;
     var adminStatus = this.state.adminStatus;
+    var staging = this.state.staging;
+    var production_txn_url = this.state.production_txn_url;
+    var staging_txn_url = this.state.staging_txn_url;
+
     var valueErr = document.getElementsByClassName("err");
 
     if (!name) {
       valueErr = document.getElementsByClassName("err_name");
       valueErr[0].innerText = "This Field is Required";
-    } else {
-      valueErr = document.getElementsByClassName("err_name");
-      valueErr[0].innerText = "";
-      var data = {};
-      var errorStatus = false;
+      errorStatus = true;
+    }
+
+    {
+      var data = {
+        name,
+        frontendStatus,
+        adminStatus,
+        staging,
+      };
       if (name === "Razorpay") {
         var keyid = this.state.keyid || "";
         var secretid = this.state.secretid || "";
@@ -290,13 +307,8 @@ class paymentkeys extends React.Component {
           valueErr[0].innerText = "This Field is Required";
           errorStatus = true;
         }
-        data = {
-          name,
-          keyid,
-          secretid,
-          frontendStatus,
-          adminStatus,
-        };
+        data.keyid = keyid;
+        data.secretid = secretid;
       } else if (name === "Paypal") {
         var clientid = this.state.clientid || "";
         var secretcode = this.state.secretcode || "";
@@ -310,47 +322,51 @@ class paymentkeys extends React.Component {
           valueErr[0].innerText = "This Field is Required";
           errorStatus = true;
         }
-        data = {
-          name,
-          clientid,
-          secretcode,
-          frontendStatus,
-          adminStatus,
-        };
+
+        data.clientid = clientid;
+
+        data.secretcode = secretcode;
       } else if (name === "Paytm") {
         var merchantid = this.state.merchantid || "";
         var key = this.state.key || "";
-        var url = this.state.url || "";
+        // var url = this.state.url || "";
         var website = this.state.website || "";
         if (!merchantid) {
           valueErr = document.getElementsByClassName("err_merchantid");
           valueErr[0].innerText = "This Field is Required";
           errorStatus = true;
         }
+        if (!production_txn_url) {
+          valueErr = document.getElementsByClassName("err_production_txn_url");
+          errorStatus = true;
+          valueErr[0].innerText = "This field is required";
+        }
+        if (!staging_txn_url) {
+          valueErr = document.getElementsByClassName("err_staging_txn_url");
+          errorStatus = true;
+          valueErr[0].innerText = "This field is required";
+        }
         if (!key) {
           valueErr = document.getElementsByClassName("err_key");
           valueErr[0].innerText = "This Field is Required";
           errorStatus = true;
         }
-        if (!url) {
-          valueErr = document.getElementsByClassName("err_url");
-          valueErr[0].innerText = "This Field is Required";
-          errorStatus = true;
-        }
+        // if (!url) {
+        //   valueErr = document.getElementsByClassName("err_url");
+        //   valueErr[0].innerText = "This Field is Required";
+        //   errorStatus = true;
+        // }
         if (!website) {
           valueErr = document.getElementsByClassName("err_website");
           valueErr[0].innerText = "This Field is Required";
           errorStatus = true;
         }
-        data = {
-          name,
-          merchantid,
-          key,
-          url,
-          website,
-          frontendStatus,
-          adminStatus,
-        };
+        data.merchantid = merchantid;
+        data.key = key;
+        // data.url = url;
+        data.website = website;
+        data.production_txn_url = production_txn_url;
+        data.staging_txn_url = staging_txn_url;
       } else if (name === "Stripe") {
         var keyid = this.state.keyid || "";
         var secretid = this.state.secretid || "";
@@ -364,13 +380,8 @@ class paymentkeys extends React.Component {
           valueErr[0].innerText = "This Field is Required";
           errorStatus = true;
         }
-        data = {
-          name,
-          keyid,
-          secretid,
-          frontendStatus,
-          adminStatus,
-        };
+        data.keyid = keyid;
+        data.secretid = secretid;
       }
 
       setTimeout(() => {
@@ -425,6 +436,7 @@ class paymentkeys extends React.Component {
         console.log(error);
       });
   }
+
   GetPaymentKeys() {
     let data = {};
     AdminApiRequest(data, "/admin/payment/gateway/getAll", "GET")
@@ -466,7 +478,12 @@ class paymentkeys extends React.Component {
 
   handleChange(e, _id) {
     let tempStatus = false;
-    if (e.target.name === "name" || e.target.name === "status") {
+    if (
+      e.target.name === "name" ||
+      e.target.name === "status" ||
+      e.target.name === "production_txn_url" ||
+      e.target.name === "staging_txn_url"
+    ) {
       tempStatus = true;
     }
     const data = [...this.state.allKeys];
@@ -517,7 +534,7 @@ class paymentkeys extends React.Component {
                             <i className="fa fa-plus"></i> Add
                           </button>
                         </div>
-                        <div className="payment-setting mt-5 d-flex justify-content-start align-items-center">
+                        <div className="payment-setting mt-5 d-flex justify-content-start align-items-start">
                           {this.state.allKeys.length > 0
                             ? this.state.allKeys.map((key) => {
                                 return (
@@ -533,7 +550,7 @@ class paymentkeys extends React.Component {
                                         <input
                                           type="text"
                                           name="name"
-                                          className="form-control border-bottom-gray"
+                                          className="form-control"
                                           placeholder="Enter name"
                                           onChange={(ev) =>
                                             this.handleChange(ev, key._id)
@@ -545,6 +562,55 @@ class paymentkeys extends React.Component {
 
                                     {key.name === "Paytm" ? (
                                       <>
+                                        <div className="form-group mt-5">
+                                          <div className="modal-left-bx">
+                                            <label>
+                                              Production URL
+                                              <span className="asterisk">
+                                                *
+                                              </span>
+                                            </label>
+                                          </div>
+                                          <div className="modal-right-bx">
+                                            <input
+                                              type="text"
+                                              name="production_txn_url"
+                                              className="form-control"
+                                              placeholder="Enter Production URL"
+                                              onChange={(ev) =>
+                                                this.handleChange(ev, key._id)
+                                              }
+                                              value={
+                                                key.keys.production_txn_url
+                                              }
+                                            />
+                                            <span className="err err_edit_production_txn_url"></span>
+                                          </div>{" "}
+                                        </div>
+                                        <div className="form-group mt-5">
+                                          <div className="modal-left-bx">
+                                            <label>
+                                              Staging URL
+                                              <span className="asterisk">
+                                                *
+                                              </span>
+                                            </label>
+                                          </div>
+                                          <div className="modal-right-bx">
+                                            <input
+                                              type="text"
+                                              name="staging_txn_url"
+                                              className="form-control"
+                                              placeholder="Enter Staging URL"
+                                              onChange={(ev) =>
+                                                this.handleChange(ev, key._id)
+                                              }
+                                              value={key.keys.staging_txn_url}
+                                            />
+                                            <span className="err err_edit_staging_txn_url"></span>
+                                          </div>{" "}
+                                        </div>
+
                                         <div className="form-group">
                                           <div className="modal-left-bx">
                                             <label>
@@ -593,7 +659,7 @@ class paymentkeys extends React.Component {
                                             <span className="err err_editkey"></span>
                                           </div>
                                         </div>
-                                        <div className="form-group">
+                                        {/* <div className="form-group">
                                           <div className="modal-left-bx">
                                             <label>
                                               URL{" "}
@@ -617,6 +683,7 @@ class paymentkeys extends React.Component {
                                             <span className="err err_editurl"></span>
                                           </div>
                                         </div>
+                                         */}
                                         <div className="form-group">
                                           <div className="modal-left-bx">
                                             <label>
@@ -809,6 +876,26 @@ class paymentkeys extends React.Component {
                                           </div>{" "}
                                         </div>
                                       </div>
+
+                                      <div className="d-flex justify-content-between">
+                                        <div className="form-group">
+                                          <div className="modal-left-bx">
+                                            <label>Staging Status</label>
+                                          </div>
+                                          <div className="modal-right-bx">
+                                            <Switch
+                                              onChange={(e) =>
+                                                this.handleChangeStatus(
+                                                  e,
+                                                  key._id,
+                                                  "staging"
+                                                )
+                                              }
+                                              checked={key.staging}
+                                            />
+                                          </div>{" "}
+                                        </div>
+                                      </div>
                                     </div>
                                     <div className="form-group mt-3">
                                       <div className="modal-right-bx d-flex justify-content-between">
@@ -847,16 +934,6 @@ class paymentkeys extends React.Component {
                               })
                             : ""}
                         </div>
-                        {/* <div className="form-group">
-                          <button
-                            type="button"
-                            className="submit fill-btn"
-                            onClick={() => this.update()}
-                          >
-                            <span className="button-text">Update</span>
-                            <span className="button-overlay"></span>
-                          </button>
-                        </div> */}
                       </div>
                     </div>
                   </div>
@@ -910,8 +987,46 @@ class paymentkeys extends React.Component {
                               <span className="err err_name"></span>
                             </div>
                           </div>
+
                           {this.state.name === "Paytm" ? (
                             <>
+                              <div className="form-group">
+                                <div className="modal-left-bx">
+                                  <label>
+                                    Production URL
+                                    <span className="asterisk">*</span>
+                                  </label>
+                                </div>
+                                <div className="modal-right-bx">
+                                  <input
+                                    type="text"
+                                    name="production_txn_url"
+                                    className="form-control"
+                                    placeholder="Enter Production URL"
+                                    onChange={this.formHandler}
+                                  />
+                                  <span className="err err_production_txn_url"></span>
+                                </div>{" "}
+                              </div>
+                              <div className="form-group">
+                                <div className="modal-left-bx">
+                                  <label>
+                                    Staging URL
+                                    <span className="asterisk">*</span>
+                                  </label>
+                                </div>
+                                <div className="modal-right-bx">
+                                  <input
+                                    type="text"
+                                    name="staging_txn_url"
+                                    className="form-control"
+                                    placeholder="Enter Staging URL"
+                                    onChange={this.formHandler}
+                                  />
+                                  <span className="err err_staging_txn_url"></span>
+                                </div>{" "}
+                              </div>
+
                               <div className="form-group">
                                 <div className="modal-left-bx">
                                   <label>
@@ -949,7 +1064,7 @@ class paymentkeys extends React.Component {
                                   <span className="err err_key"></span>
                                 </div>
                               </div>
-                              <div className="form-group">
+                              {/* <div className="form-group">
                                 <div className="modal-left-bx">
                                   <label>
                                     URL <span className="asterisk">*</span>
@@ -967,6 +1082,7 @@ class paymentkeys extends React.Component {
                                   <span className="err err_url"></span>
                                 </div>
                               </div>
+                              */}
                               <div className="form-group">
                                 <div className="modal-left-bx">
                                   <label>
@@ -1213,6 +1329,22 @@ class paymentkeys extends React.Component {
                                     this.setState({ frontendStatus: ev })
                                   }
                                   checked={this.state.frontendStatus}
+                                  id="normal-switch"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="form-group">
+                              <div className="modal-left-bx">
+                                <label>Staging Status</label>
+                              </div>
+                              <div className="modal-right-bx">
+                                <Switch
+                                  name="status"
+                                  onChange={(ev) =>
+                                    this.setState({ staging: ev })
+                                  }
+                                  checked={this.state.staging}
                                   id="normal-switch"
                                 />
                               </div>

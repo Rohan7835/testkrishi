@@ -76,11 +76,19 @@ export default class EditInventory extends Component {
           (MultipleArray[index].product_quantity =
             MultipleArray[index].product_quantity + +item.quantity)
       );
+
       if (MultipleArray[index].regionalData[ind]) {
-        MultipleArray[index].regionalData[ind].total_amount =
-          e.target.value === ""
-            ? 0
-            : +e.target.value * MultipleArray[index].product_quantity;
+        MultipleArray[index].regionalData.forEach((m, i) => {
+          MultipleArray[index].regionalData[i].total_amount =
+            e.target.value === ""
+              ? 0
+              : +e.target.value *
+                +MultipleArray[index].regionalData[i].quantity;
+        });
+        // MultipleArray[index].regionalData[ind].total_amount =
+        //   e.target.value === ""
+        //     ? 0
+        //     : +e.target.value * MultipleArray[index].product_quantity;
       }
       // total calculation
       var cpgst =
@@ -100,7 +108,9 @@ export default class EditInventory extends Component {
         MultipleArray[index].gst;
     }
     if (type === "variant") {
-      MultipleArray[index].regionalData[ind].variant = e.target.value;
+      MultipleArray[index].regionalData[ind].variant_name =
+        e.target.value || "";
+      MultipleArray[index].variant_name = e.target.value || "";
     }
     if (type === "quantity") {
       let diff =
@@ -108,7 +118,7 @@ export default class EditInventory extends Component {
         (+MultipleArray[index].regionalData[ind].initial_product_quantity || 0);
 
       MultipleArray[index].regionalData[ind].quantity = +e.target.value;
-      MultipleArray[index].regionalData[ind].availQuantity =
+      MultipleArray[index].regionalData[ind].availableQuantity =
         (+MultipleArray[index].regionalData[ind].initial_availQuantity || 0) +
         diff;
 
@@ -116,10 +126,10 @@ export default class EditInventory extends Component {
       let ava = 0;
       MultipleArray[index].regionalData.map((item, index) => {
         abc = abc + +item.quantity;
-        ava = ava + +item.availQuantity;
+        ava = ava + +item.availableQuantity;
       });
       MultipleArray[index].product_quantity = abc;
-      MultipleArray[index].AvailableQuantity = ava;
+      MultipleArray[index].availableQuantity = ava;
       // product_quantity;
       var a =
         MultipleArray[index].product_costPrice ||
@@ -169,6 +179,7 @@ export default class EditInventory extends Component {
       InvoiceAmount: InvoiceAmount,
       loading: false,
     });
+    this.forceUpdate();
     setTimeout(() => {
       console.log(MultipleArray);
     }, 0);
@@ -182,7 +193,7 @@ export default class EditInventory extends Component {
         product_name: "",
         product_costPrice: 0,
         product_quantity: 0,
-        BookingQuantity: 0,
+        bookingQuantity: 0,
         returnQuantity: 0,
         inhouseQuantity: 0,
         lostQuantity: 0,
@@ -190,7 +201,7 @@ export default class EditInventory extends Component {
         gst: 0,
         singlepricewithoutgst: 0,
         invoice_without_gst: 0,
-        AvailableQuantity: 0,
+        availableQuantity: 0,
         product_expiry: "",
         prodType: "",
         product_measurment: "",
@@ -210,7 +221,7 @@ export default class EditInventory extends Component {
       data[ind].regionalData.push({
         region: "",
         quantity: 0,
-        availQuantity: 0,
+        availableQuantity: 0,
         bookingQuantity: 0,
         inhouseQuantity: 0,
         returnQuantity: 0,
@@ -223,7 +234,7 @@ export default class EditInventory extends Component {
       data[ind].regionalData.push({
         region: "",
         quantity: "",
-        variant: "",
+        variant_name: "",
         variant_data: [],
         cost_price: "",
         total_amount: "",
@@ -290,45 +301,20 @@ export default class EditInventory extends Component {
     });
     let data = MultipleArray;
     data[index].regionalData[ind].region = valu.value;
+    if (data[index].configurableData?.length > 0) {
+      let newVariants = [];
+      data[index].configurableData.forEach((a) => {
+        if (a.region._id === valu.value) {
+          newVariants.push({ value: a.variant_name, name: a.variant_name });
+        }
+      });
+      console.log(newVariants);
+      data[index].variants = newVariants;
+    }
     var reData = {
       product_id: MultipleArray[index].product,
       region_id: valu.value,
     };
-    // AdminApiRequest(reData, "/admin/getConProductByRegion", "POST")
-    //   .then((res) => {
-    //     if (res.status === 201 || res.status === 200) {
-    //       final_ddda = [];
-    //       res.data.data.configurableData.forEach((item, index) => {
-    //         var daat = [];
-    //         item.variant_id.forEach((data, indexing) => {
-    //           daat.push(
-    //             data.variantId.item.filter(
-    //               (item1) => item1._id === data.variantItem
-    //             )[0]
-    //           );
-    //         });
-    //         var new_fiu_data = "";
-    //         daat.forEach((itemqw, indexqw) => {
-    //           new_fiu_data =
-    //             indexqw === 0
-    //               ? new_fiu_data + itemqw.item_name
-    //               : new_fiu_data + " " + itemqw.item_name;
-    //         });
-    //         final_ddda.push({ _id: item._id, item: new_fiu_data });
-    //         MultipleArray[index].regionalData[ind].variant_data = final_ddda;
-    //       });
-    //     } else {
-    //       swal({
-    //         title: "Network Issue",
-    //         // text: "Are you sure that you want to leave this page?",
-    //         icon: "warning",
-    //         dangerMode: true,
-    //       });
-    //     }
-    //   })
-    //   .catch((error) => {
-    //     console.log(error);
-    //   });
     this.setState({
       loading: false,
     });
@@ -371,22 +357,21 @@ export default class EditInventory extends Component {
       time: time,
     });
   };
-
-  onChange112(valu, index) {
+  onChange112(valu, index, callFrom) {
     const requestData = {};
     AdminApiRequest(requestData, "/admin/product/" + valu.value, "GET")
       .then((res) => {
         if (res.status === 201 || res.status === 200) {
-          // MultipleArray[index].AvailableQuantity =
-          //   +res.data.data.AvailableQuantity.$numberDecimal;
-          // MultipleArray[index].BookingQuantity =
-          //   +res.data.data.BookingQuantity.$numberDecimal;
+          // MultipleArray[index].availableQuantity =
+          //   +res.data.data.availableQuantity ;
+          // MultipleArray[index].bookingQuantity =
+          //   +res.data.data.bookingQuantity ;
           // MultipleArray[index].returnQuantity =
-          //   +res.data.data.returnQuantity.$numberDecimal;
+          //   +res.data.data.returnQuantity ;
           // MultipleArray[index].inhouseQuantity =
-          //   +res.data.data.inhouseQuantity.$numberDecimal;
+          //   +res.data.data.inhouseQuantity ;
           // MultipleArray[index].lostQuantity =
-          //   +res.data.data.lostQuantity.$numberDecimal;
+          //   +res.data.data.lostQuantity ;
           MultipleArray[index].product_name = res.data.data.product_name;
           MultipleArray[index].product = res.data.data._id;
           MultipleArray[index].prodType = res.data.data.TypeOfProduct;
@@ -394,23 +379,76 @@ export default class EditInventory extends Component {
             res.data.data.purchaseTax && +res.data.data.purchaseTax.totalTax
               ? +res.data.data.purchaseTax.totalTax
               : 0;
+          if (callFrom === "onchange") {
+            MultipleArray[index].regionalData =
+              res.data.data.TypeOfProduct === "simple"
+                ? [
+                    {
+                      region: "",
+                      quantity: "",
+                      cost_price: 0,
+                      total_amount: 0,
+                      expiration: "",
+                    },
+                  ]
+                : [
+                    {
+                      region: "",
+                      quantity: "",
+                      variant_name: "",
+                      seleted_variant: "",
+                      variant_data: [],
+                      cost_price: 0,
+                      total_amount: 0,
+                      expiration: "",
+                    },
+                  ];
+          } else {
+            if (res.data.data.TypeOfProduct !== "simple") {
+              let newVariants = [];
+              res.data.data.configurableData.forEach((a) => {
+                if (
+                  a.region._id === MultipleArray[index].regionalData[0].region
+                ) {
+                  newVariants.push({
+                    value: a.variant_name,
+                    name: a.variant_name,
+                  });
+                }
+              });
+              MultipleArray[index].variants = newVariants;
+            }
+          }
           MultipleArray[index].singlepricewithoutgst = 0;
           MultipleArray[index].batchID = res.data.data.batchID;
+          // MultipleArray[index].variants = [];
+          MultipleArray[index].configurableData =
+            res.data.data.configurableData;
           MultipleArray[index].product_measurment =
             res.data.data.unitMeasurement.name;
           var new_data = [];
           res.data.data.TypeOfProduct === "simple"
             ? res.data.data.simpleData.forEach((item, index) => {
-                new_data.push({
-                  value: item.region._id,
-                  name: item.region.name,
-                });
+                if (
+                  new_data.filter((a) => a.value === item.region._id).length > 0
+                ) {
+                } else {
+                  new_data.push({
+                    value: item.region._id,
+                    name: item.region.name,
+                  });
+                }
               })
             : res.data.data.configurableData.forEach((item, index) => {
-                new_data.push({
-                  value: item.region._id,
-                  name: item.region.name,
-                });
+                if (
+                  new_data.filter((a) => a.value === item.region._id).length > 0
+                ) {
+                } else {
+                  new_data.push({
+                    value: item.region._id,
+                    name: item.region.name,
+                  });
+                }
               });
           let a = "single_product" + index;
           let abab = "regiondata" + index;
@@ -539,7 +577,7 @@ export default class EditInventory extends Component {
           );
           valueErr[0].innerText = "Field Required";
         }
-        if (!daat.quantity) {
+        if (!daat.quantity && daat.quantity !== 0) {
           status = true;
           valueErr = document.getElementsByClassName(
             "err_quantity" + index + indes
@@ -551,12 +589,12 @@ export default class EditInventory extends Component {
             "err_quantity" + index + indes
           );
           valueErr[0].innerText = "Enter Numeric Digit";
-        } else if (daat.quantity <= 0) {
+        } else if (daat.quantity < 0) {
           status = true;
           valueErr = document.getElementsByClassName(
             "err_quantity" + index + indes
           );
-          valueErr[0].innerText = "Number Should be greater than 0";
+          valueErr[0].innerText = "Number Should be positive";
         } else if (
           daat.quantity <
           +daat.initial_product_quantity - +daat.initial_availQuantity
@@ -569,8 +607,9 @@ export default class EditInventory extends Component {
             "Number Should be greater than " +
             (+daat.initial_product_quantity - +daat.initial_availQuantity);
         }
-        if (daat.prodType === "configurable") {
-          if (!daat.variant) {
+        if (item.prodType === "configurable") {
+          if (!item.variant_name) {
+            status = true;
             valueErr = document.getElementsByClassName(
               "err_variant" + index + indes
             );
@@ -709,55 +748,53 @@ export default class EditInventory extends Component {
       .then((res) => {
         if (res.status === 201 || res.status === 200) {
           this.setState({
-            invoice_number: res.data.data.InvoiceNumber,
-            _id: res.data.data._id,
-            InvoiceAmount: res.data.data.InvoiceAmount,
-            invoice_date: new Date(res.data.data.InvoiceDate),
-            due_date: new Date(res.data.data.InvoiceDueDate),
-            supplier: res.data.data.supplier_id
-              ? res.data.data.supplier_id._id
+            invoice_number: res.data.data[0].InvoiceNumber,
+            _id: res.data.data[0]._id,
+            InvoiceAmount: res.data.data[0].InvoiceAmount,
+            invoice_date: new Date(res.data.data[0].InvoiceDate),
+            due_date: new Date(res.data.data[0].InvoiceDueDate),
+            supplier: res.data.data[0].supplier_id
+              ? res.data.data[0].supplier_id._id
               : "",
-            gst: res.data.data.gst,
-            invoice_without_gst: res.data.data.invoice_without_gst,
-            startDate: new Date(res.data.data.Date),
-            time: res.data.data.Time,
+            gst: res.data.data[0].gst,
+            invoice_without_gst: res.data.data[0].invoice_without_gst,
+            startDate: new Date(res.data.data[0].Date),
+            time: res.data.data[0].Time,
           });
           this.forceUpdate();
-          res.data.data.productData.forEach((item, index) => {
-            this.onChange112({ value: item.product_id._id }, index);
+          res.data.data[0].inventoryItems.forEach((item, index) => {
             var dtta = [];
-            item.simpleData.forEach((itm, ind) => {
-              dtta.push({
-                region: itm.region._id,
-                quantity: itm.quantity.$numberDecimal || 0,
-                cost_price: itm.costPrice || 0,
-                availQuantity: itm.availQuantity.$numberDecimal || 0,
-                initial_availQuantity: itm.availQuantity.$numberDecimal || 0,
-                bookingQuantity: itm.bookingQuantity.$numberDecimal || 0,
-                initial_product_quantity:
-                  item.product_quantity.$numberDecimal || 0,
-                inhouseQuantity: itm.inhouseQuantity.$numberDecimal || 0,
-                returnQuantity: itm.returnQuantity.$numberDecimal || 0,
-                lostQuantity: itm.lostQuantity.$numberDecimal || 0,
-                total_amount: itm.total_amount || 0,
-                expiration:
-                  itm.ExpirationDate === null ? "" : itm.ExpirationDate,
-              });
+            // item.product_region.forEach((itm, ind) => {
+            dtta.push({
+              region: item.region,
+              quantity: item.productQuantity || 0,
+              cost_price: item.product_costPrice || 0,
+              availableQuantity: item.availableQuantity || 0,
+              initial_availQuantity: item.availableQuantity || 0,
+              bookingQuantity: item.bookingQuantity || 0,
+              initial_product_quantity: item.productQuantity || 0,
+              inhouseQuantity: item.inhouseQuantity || 0,
+              returnQuantity: item.returnQuantity || 0,
+              lostQuantity: item.lostQuantity || 0,
+              total_amount: item.itemTotalPrice || 0,
+              expiration:
+                item.ExpirationDate === null ? "" : item.ExpirationDate,
             });
+            // });
+            console.log(dtta);
             console.log(":::::===>>", item.configurableData);
-            item.configurableData.forEach((itm, ind) => {
+            item.configurableData?.forEach((itm, ind) => {
               dtta.push({
                 region: itm.region._id,
-                quantity: itm.quantity.$numberDecimal || 0,
+                quantity: itm.quantity || 0,
                 cost_price: itm.costPrice || 0,
-                availQuantity: itm.availQuantity.$numberDecimal || 0,
-                initial_availQuantity: itm.availQuantity.$numberDecimal || 0,
-                bookingQuantity: itm.bookingQuantity.$numberDecimal || 0,
-                initial_product_quantity:
-                  item.product_quantity.$numberDecimal || 0,
-                inhouseQuantity: itm.inhouseQuantity.$numberDecimal || 0,
-                returnQuantity: itm.returnQuantity.$numberDecimal || 0,
-                lostQuantity: itm.lostQuantity.$numberDecimal || 0,
+                availableQuantity: itm.availableQuantity || 0,
+                initial_availQuantity: itm.availableQuantity || 0,
+                bookingQuantity: itm.bookingQuantity || 0,
+                initial_product_quantity: item.product_quantity || 0,
+                inhouseQuantity: itm.inhouseQuantity || 0,
+                returnQuantity: itm.returnQuantity || 0,
+                lostQuantity: itm.lostQuantity || 0,
                 total_amount: itm.total_amount || 0,
                 variant_name: itm.variant_name,
                 // variant:"",
@@ -766,30 +803,30 @@ export default class EditInventory extends Component {
               });
             });
             MultipleArray.push({
-              product: item.product_id._id,
+              _id: item._id,
+              product: item.product_id,
               prodType: item.TypeOfProduct,
               product_name: item.product_name,
               product_costPrice: item.product_costPrice || 0,
-              totalAvailableQuantity:
-                +item.product_id.AvailableQuantity.$numberDecimal || 0,
-              AvailableQuantity: +item.AvailableQuantity.$numberDecimal || 0,
-              BookingQuantity: +item.BookingQuantity.$numberDecimal || 0,
-              returnQuantity: +item.returnQuantity.$numberDecimal || 0,
-              inhouseQuantity: +item.inhouseQuantity.$numberDecimal || 0,
-              lostQuantity: +item.lostQuantity.$numberDecimal || 0,
-              product_quantity: +item.product_quantity.$numberDecimal || 0,
-              initial_product_quantity:
-                +item.product_quantity.$numberDecimal || 0,
+              totalAvailableQuantity: +item.availableQuantity || 0,
+              availableQuantity: +item.availableQuantity || 0,
+              bookingQuantity: +item.bookingQuantity || 0,
+              returnQuantity: +item.returnQuantity || 0,
+              inhouseQuantity: +item.inhouseQuantity || 0,
+              lostQuantity: +item.lostQuantity || 0,
+              product_quantity: +item.productQuantity || 0,
+              initial_product_quantity: +item.productQuantity || 0,
               product_expiry: item.product_expiry
                 ? new Date(item.product_expiry)
                 : "",
               product_measurment: item.product_measurment,
               batchID: item.batchID,
               regionalData: dtta,
+              variant_name: item.variant_name,
               gst: +item.gst,
               invoice_without_gst: +item.invoice_without_gst,
             });
-            item.simpleData.forEach((item1, index) => {
+            item.simpleData?.forEach((item1, index) => {
               var new_data = [];
               new_data.push({
                 value: item1.region._id,
@@ -800,6 +837,7 @@ export default class EditInventory extends Component {
                 [abab]: new_data,
               });
             });
+            this.onChange112({ value: item.product_id }, index, "onload");
           });
           this.forceUpdate();
         } else {
@@ -871,7 +909,34 @@ export default class EditInventory extends Component {
       loading: false,
     });
   }
-
+  removeProductAPI = (id, index) => {
+    AdminApiRequest({ _id: id }, "/admin/DeleteOneInventoryItem", "POST")
+      .then((res) => {
+        if (res.status === 201 || res.status === 200) {
+          if (res.data.message === "error") {
+            swal({
+              title: res.data.data || "You cannot delete this item.",
+              // text: "Are you sure that you want to leave this page?",
+              icon: "warning",
+              dangerMode: true,
+            });
+          } else {
+            this.removeproduct("Remove", index);
+          }
+        } else {
+          swal({
+            title: "Network Issue",
+            // text: "Are you sure that you want to leave this page?",
+            icon: "warning",
+            dangerMode: true,
+          });
+        }
+        this.forceUpdate();
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
   render() {
     console.log("::::::::::::", MultipleArray);
     return (
@@ -1045,7 +1110,7 @@ export default class EditInventory extends Component {
                                         placeholder="Search Product"
                                         options={this.state.all_product}
                                         onChange={(e) =>
-                                          this.onChange112(e, index)
+                                          this.onChange112(e, index, "onchange")
                                         }
                                         className="select-search"
                                         value={item.product}
@@ -1113,7 +1178,9 @@ export default class EditInventory extends Component {
                                 <i
                                   className="fa fa-times"
                                   onClick={() =>
-                                    this.removeproduct("Remove", index)
+                                    item._id
+                                      ? this.removeProductAPI(item._id, index)
+                                      : this.removeproduct("Remove", index)
                                   }
                                   aria-hidden="true"
                                 ></i>
@@ -1171,8 +1238,8 @@ export default class EditInventory extends Component {
                                             </label>
                                           </div>
                                           <div className="modal-right-bx">
-                                            {it.variant_name}
-                                            {/*<select
+                                            {/* {item.variant_name} */}
+                                            <select
                                               name={"variant" + index}
                                               className="form-control"
                                               onChange={(e) =>
@@ -1180,17 +1247,18 @@ export default class EditInventory extends Component {
                                                   e,
                                                   index,
                                                   ind,
-                                                  "variant"~
+                                                  "variant"
                                                 )
                                               }
+                                              value={item.variant_name}
                                             >
                                               <option value="">
                                                 Select Variant
                                               </option>
-                                              {it.variant_data.map((dta) => {
+                                              {item.variants?.map((dta) => {
                                                 return (
-                                                  <option value={dta._id}>
-                                                    {dta.item}
+                                                  <option value={dta.value}>
+                                                    {dta.name}
                                                   </option>
                                                 );
                                               })}
@@ -1199,7 +1267,7 @@ export default class EditInventory extends Component {
                                               className={
                                                 "err err_variant" + index + ind
                                               }
-                                            ></span>*/}
+                                            ></span>
                                           </div>
                                         </div>
                                       ) : null}
@@ -1220,7 +1288,7 @@ export default class EditInventory extends Component {
                                             autoComplete="off"
                                             name={"quantity" + index}
                                             className="form-control"
-                                            value={it.quantity || ""}
+                                            value={it.quantity}
                                             onChange={(e) =>
                                               this.formHandler1(
                                                 e,
@@ -1371,7 +1439,7 @@ export default class EditInventory extends Component {
                                         )}
                                       </div>
                                        */}
-                                      <i
+                                      {/* <i
                                         className="fa fa-times"
                                         onClick={() =>
                                           this.removeregion(
@@ -1381,12 +1449,12 @@ export default class EditInventory extends Component {
                                           )
                                         }
                                         aria-hidden="true"
-                                      ></i>
+                                      ></i> */}
                                     </div>
                                   );
                                 })}
                               </div>
-                              {item.product ? (
+                              {/* {item.product ? (
                                 <>
                                   <button
                                     type="button"
@@ -1407,7 +1475,7 @@ export default class EditInventory extends Component {
                                 </>
                               ) : (
                                 ""
-                              )}
+                              )} */}
                             </div>
                           );
                         })}

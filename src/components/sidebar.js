@@ -19,6 +19,7 @@ function Sidebar({
   selectedCategory,
   dataInCart,
   closeMobileDropdown,
+  productCount,
 }) {
   const [sidebar_menu, setting_menu] = useState([]);
   const [subscription_pop_up, setSubscription_pop_up] = useState(false);
@@ -76,7 +77,9 @@ function Sidebar({
       ? "Bearer " + localStorage.getItem("_jw_token")
       : "";
     let statusFromApi = JSON.parse(localStorage.getItem("status"));
-    const subStatus = JSON.parse(localStorage.getItem("status"));
+    const subStatus = localStorage.getItem("status")
+      ? JSON.parse(localStorage.getItem("status"))
+      : false;
     if (user_details._id) {
       ApiRequest(
         { _id: user_details._id },
@@ -88,7 +91,7 @@ function Sidebar({
           statusFromApi = res.data.data.subscribeToggle
             ? res.data.data.subscribeToggle
             : false;
-          if (subStatus !== statusFromApi) {
+          if (subStatus != statusFromApi) {
             changeHeaderStatus(statusFromApi);
             setStatus(statusFromApi);
           }
@@ -177,11 +180,14 @@ function Sidebar({
       product_categories: e,
       RegionId: JSON.parse(localStorage.getItem("selectedRegionId")),
       subscribe: localStorage.getItem("status"),
+      skip: 0,
+      //limit: 3,
     };
     category === "mainCategory"
       ? ApiRequest(requestData, "/searchProduct", "POST")
           .then((res) => {
             if (res.status === 201 || res.status === 200) {
+              productCount(res.data.count);
               setAllFilterProducts(res.data.data);
               topTenListOpen(false);
               selectedCategory(val.target.innerText);
@@ -205,6 +211,7 @@ function Sidebar({
       : ApiRequest(requestData, "/searchProduct", "POST")
           .then((res) => {
             if (res.status === 201 || res.status === 200) {
+              productCount(res.data.count);
               setAllFilterProducts(res.data.data);
               topTenListOpen(false);
               selectedCategory(val.target.innerText);
@@ -236,10 +243,13 @@ function Sidebar({
         product_categories: sessionStorage.getItem("catId"),
         RegionId: JSON.parse(localStorage.getItem("selectedRegionId")),
         subscribe: localStorage.getItem("status"),
+        skip: 0,
+        //limit: 3,
       };
       ApiRequest(requestData, "/searchProduct", "POST")
         .then((res) => {
           if (res.status === 201 || res.status === 200) {
+            productCount(res.data.count);
             setAllFilterProducts(res.data.data);
             topTenListOpen(false);
           } else {

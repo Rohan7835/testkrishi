@@ -799,6 +799,12 @@ export default class addproduct extends Component {
         valueErr = document.getElementsByClassName("err_simple_region");
         valueErr[0].innerText = "Please add a region.";
       }
+    } else if (this.state.type_product === "group") {
+      if (!grouparray || grouparray[0].sets.length === 0) {
+        simple_status = false;
+        valueErr = document.getElementsByClassName("err_group_region");
+        valueErr[0].innerText = "Please select a product.";
+      }
     }
     MultipleArray.forEach((item, index) => {
       if (!item.region) {
@@ -954,6 +960,35 @@ export default class addproduct extends Component {
         });
       }
     } else {
+      if (this.state.type_product === "group") {
+        grouparray.forEach((grp, index) => {
+          grp.sets.forEach((grpset, ind) => {
+            if (!grpset.product) {
+              simple_status = false;
+              valueErr = document.getElementsByClassName(
+                "err_product_group" + index + ind
+              );
+              valueErr[0].innerText = "This Field is Required.";
+            }
+            if (!grpset.package) {
+              simple_status = false;
+              valueErr = document.getElementsByClassName(
+                "err_package_group" + index + ind
+              );
+              valueErr[0].innerText = "This Field is Required.";
+            }
+            if (+grpset.setminqty > +grpset.setmaxqty) {
+              simple_status = false;
+              valueErr = document.getElementsByClassName(
+                "err_qty_group" + index + ind
+              );
+              valueErr[0].innerText =
+                "Minimum quantity should not be greater than maximum quantity.";
+            }
+          });
+        });
+        console.log(grouparray);
+      }
       var product_data =
         this.state.type_product === "group" ? grouparray : MultipleArray;
     }
@@ -1076,7 +1111,11 @@ export default class addproduct extends Component {
       data.append("productThreshold", productThreshold ? productThreshold : "");
       data.append(
         "productSubscription",
-        productSubscription ? productSubscription : ""
+        productSubscription
+          ? this.state.preorderstatus
+            ? "yes"
+            : productSubscription
+          : ""
       );
       data.append("RegionTax", RegionTax ? JSON.stringify(RegionTax) : "");
       data.append("groupRegions", grp_arry ? JSON.stringify(grp_arry) : "");
@@ -1222,27 +1261,27 @@ export default class addproduct extends Component {
         console.log(error);
       });
 
-    await AdminApiRequest(requestData, "/admin/allproductCategory", "GET")
-      .then((res) => {
-        if (res.status === 201 || res.status === 200) {
-          maincategory = [];
-          this.setState({ allactivedata: res.data.data });
-          let actdata = res.data.data[0].filter((item) => item.status === true);
-          actdata.forEach((item, index) => {
-            maincategory.push({ value: item._id, name: item.category_name });
-          });
-        } else {
-          swal({
-            title: "Network Issue",
-            // text: "Are you sure that you want to leave this page?",
-            icon: "warning",
-            dangerMode: true,
-          });
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    // await AdminApiRequest(requestData, "/admin/allproductCategory", "GET")
+    //   .then((res) => {
+    //     if (res.status === 201 || res.status === 200) {
+    //       maincategory = [];
+    //       this.setState({ allactivedata: res.data.data });
+    //       let actdata = res.data.data[0].filter((item) => item.status === true);
+    //       actdata.forEach((item, index) => {
+    //         maincategory.push({ value: item._id, name: item.category_name });
+    //       });
+    //     } else {
+    //       swal({
+    //         title: "Network Issue",
+    //         // text: "Are you sure that you want to leave this page?",
+    //         icon: "warning",
+    //         dangerMode: true,
+    //       });
+    //     }
+    //   })
+    //   .catch((error) => {
+    //     console.log(error);
+    //   });
     activeproduct = [];
     await AdminApiRequest(requestData, "/admin/product/active", "GET")
       .then((res) => {
@@ -2886,7 +2925,7 @@ export default class addproduct extends Component {
                               <div className="form-group">
                                 <div className="modal-left-bx">
                                   <label>Group Base Price</label>
-                                  <span className="asterisk">*</span>
+                                  {/* <span className="asterisk">*</span> */}
                                 </div>
                                 <div className="modal-right-bx">
                                   <input
@@ -2897,302 +2936,327 @@ export default class addproduct extends Component {
                                     onChange={this.formHandler}
                                   />
 
-                                  <span className="err err_main_region"></span>
+                                  <span className="err err_group_base_price"></span>
                                 </div>
                               </div>
                               {grouparray &&
                                 grouparray.map((item2, index2) => (
-                                  <div className="group_sets ">
-                                    <div className="sets_part">
-                                      <div className="form-group">
-                                        <div className="modal-left-bx">
-                                          <label>Name</label>
+                                  <>
+                                    {" "}
+                                    <div className="group_sets ">
+                                      <div className="sets_part">
+                                        <div className="form-group">
+                                          <div className="modal-left-bx">
+                                            <label>Name</label>
+                                          </div>
+                                          <div className="modal-right-bx">
+                                            <input
+                                              type="text"
+                                              value={item2.name}
+                                              className="form-control"
+                                              placeholder="Enter Name"
+                                              onChange={(ev) =>
+                                                this.setformhandler(
+                                                  ev,
+                                                  index2,
+                                                  0,
+                                                  "name"
+                                                )
+                                              }
+                                            />
+                                            <span
+                                              className={
+                                                "err err_name" + index2
+                                              }
+                                            ></span>
+                                          </div>
                                         </div>
-                                        <div className="modal-right-bx">
-                                          <input
-                                            type="text"
-                                            value={item2.name}
-                                            className="form-control"
-                                            placeholder="Enter Name"
-                                            onChange={(ev) =>
-                                              this.setformhandler(
-                                                ev,
-                                                index2,
-                                                0,
-                                                "name"
-                                              )
-                                            }
-                                          />
-                                          <span
-                                            className={"err err_name" + index2}
-                                          ></span>
+                                        <div className="form-group">
+                                          <div className="modal-left-bx">
+                                            <label>Min QTY Limit</label>
+                                          </div>
+                                          <div className="modal-right-bx">
+                                            <input
+                                              type="number"
+                                              value={item2.minqty}
+                                              className="form-control"
+                                              placeholder="Set Min QTY Limit"
+                                              onChange={(ev) =>
+                                                this.setformhandler(
+                                                  ev,
+                                                  index2,
+                                                  0,
+                                                  "minqty"
+                                                )
+                                              }
+                                            />
+                                            <span
+                                              className={
+                                                "err err_minqty" + index2
+                                              }
+                                            ></span>
+                                          </div>
                                         </div>
+                                        <div className="form-group">
+                                          <div className="modal-left-bx">
+                                            <label>Max QTY Limit</label>
+                                          </div>
+                                          <div className="modal-right-bx">
+                                            <input
+                                              type="number"
+                                              value={item2.maxqty}
+                                              className="form-control"
+                                              placeholder="Set Max QTY Limit"
+                                              onChange={(ev) =>
+                                                this.setformhandler(
+                                                  ev,
+                                                  index2,
+                                                  0,
+                                                  "maxqty"
+                                                )
+                                              }
+                                            />
+                                            <span
+                                              className={
+                                                "err err_maxqty" + index2
+                                              }
+                                            ></span>
+                                          </div>
+                                        </div>
+                                        <i
+                                          className="fa fa-times"
+                                          onClick={() =>
+                                            this.removemainset(
+                                              "Remove",
+                                              index2,
+                                              0
+                                            )
+                                          }
+                                          aria-hidden="true"
+                                        ></i>
                                       </div>
-                                      <div className="form-group">
-                                        <div className="modal-left-bx">
-                                          <label>Min QTY Limit</label>
-                                        </div>
-                                        <div className="modal-right-bx">
-                                          <input
-                                            type="number"
-                                            value={item2.minqty}
-                                            className="form-control"
-                                            placeholder="Set Min QTY Limit"
-                                            onChange={(ev) =>
-                                              this.setformhandler(
-                                                ev,
-                                                index2,
-                                                0,
-                                                "minqty"
-                                              )
-                                            }
-                                          />
-                                          <span
-                                            className={
-                                              "err err_minqty" + index2
-                                            }
-                                          ></span>
-                                        </div>
-                                      </div>
-                                      <div className="form-group">
-                                        <div className="modal-left-bx">
-                                          <label>Max QTY Limit</label>
-                                        </div>
-                                        <div className="modal-right-bx">
-                                          <input
-                                            type="number"
-                                            value={item2.maxqty}
-                                            className="form-control"
-                                            placeholder="Set Max QTY Limit"
-                                            onChange={(ev) =>
-                                              this.setformhandler(
-                                                ev,
-                                                index2,
-                                                0,
-                                                "maxqty"
-                                              )
-                                            }
-                                          />
-                                          <span
-                                            className={
-                                              "err err_maxqty" + index2
-                                            }
-                                          ></span>
-                                        </div>
-                                      </div>
-                                      <i
-                                        className="fa fa-times"
-                                        onClick={() =>
-                                          this.removemainset(
-                                            "Remove",
-                                            index2,
-                                            0
-                                          )
-                                        }
-                                        aria-hidden="true"
-                                      ></i>
-                                    </div>
-                                    {item2.sets &&
-                                      item2.sets.map((itm21, ind21) => (
-                                        <div className="group_product product-package-block-wrap">
-                                          <div className="form-group">
-                                            <div className="modal-left-bx">
-                                              <label>Product Name</label>
-                                              <span className="asterisk">
-                                                *
-                                              </span>
-                                            </div>
-                                            <div className="modal-right-bx">
-                                              <SelectSearch
-                                                placeholder="Search Product"
-                                                options={this.state.all_product}
-                                                onChange={(e) =>
-                                                  this.onChange112(
-                                                    e,
+                                      {item2.sets &&
+                                        item2.sets.map((itm21, ind21) => (
+                                          <>
+                                            <div className="group_product product-package-block-wrap">
+                                              <div className="form-group">
+                                                <div className="modal-left-bx">
+                                                  <label>Product Name</label>
+                                                  <span className="asterisk">
+                                                    *
+                                                  </span>
+                                                </div>
+                                                <div className="modal-right-bx">
+                                                  <SelectSearch
+                                                    placeholder="Search Product"
+                                                    options={
+                                                      this.state.all_product
+                                                    }
+                                                    onChange={(e) =>
+                                                      this.onChange112(
+                                                        e,
+                                                        index2,
+                                                        ind21
+                                                      )
+                                                    }
+                                                    className="select-search"
+                                                    value={itm21.product}
+                                                  />
+                                                  <span
+                                                    className={
+                                                      "err err_product_group" +
+                                                      index2 +
+                                                      ind21
+                                                    }
+                                                  ></span>
+                                                </div>
+                                              </div>
+
+                                              <div className="form-group">
+                                                <div className="modal-left-bx">
+                                                  <label>Package</label>
+                                                </div>
+                                                <div className="modal-right-bx">
+                                                  <select
+                                                    onChange={(ev) =>
+                                                      this.setformhandler(
+                                                        ev,
+                                                        index2,
+                                                        ind21,
+                                                        "package"
+                                                      )
+                                                    }
+                                                  >
+                                                    <option value="">
+                                                      Select Package
+                                                    </option>
+                                                    {itm21.package_items &&
+                                                      itm21.package_items.map(
+                                                        (item1212) => (
+                                                          <option
+                                                            value={
+                                                              item1212.packet_size
+                                                            }
+                                                          >
+                                                            {
+                                                              item1212.packetLabel
+                                                            }
+                                                          </option>
+                                                        )
+                                                      )}
+                                                  </select>
+                                                  <span
+                                                    className={
+                                                      "err err_package_group" +
+                                                      index2 +
+                                                      ind21
+                                                    }
+                                                  ></span>
+                                                </div>
+                                              </div>
+
+                                              <div className="form-group">
+                                                <div className="modal-left-bx">
+                                                  <label>Min Qty</label>
+                                                  <span className="asterisk">
+                                                    *
+                                                  </span>
+                                                </div>
+                                                <div className="modal-right-bx">
+                                                  <input
+                                                    type="number"
+                                                    value={itm21.setminqty}
+                                                    className="form-control"
+                                                    placeholder="Enter Min Qty"
+                                                    onChange={(ev) =>
+                                                      this.setformhandler(
+                                                        ev,
+                                                        index2,
+                                                        ind21,
+                                                        "setminqty"
+                                                      )
+                                                    }
+                                                  />
+                                                  <span
+                                                    className={
+                                                      "err err_setminqty" +
+                                                      index2 +
+                                                      ind21
+                                                    }
+                                                  ></span>
+                                                </div>
+                                              </div>
+
+                                              <div className="form-group">
+                                                <div className="modal-left-bx">
+                                                  <label>Max Qty</label>
+                                                  <span className="asterisk">
+                                                    *
+                                                  </span>
+                                                </div>
+                                                <div className="modal-right-bx">
+                                                  <input
+                                                    type="number"
+                                                    value={itm21.setmaxqty}
+                                                    className="form-control"
+                                                    placeholder="Enter Max Qty"
+                                                    onChange={(ev) =>
+                                                      this.setformhandler(
+                                                        ev,
+                                                        index2,
+                                                        ind21,
+                                                        "setmaxqty"
+                                                      )
+                                                    }
+                                                  />
+                                                  <span
+                                                    className={
+                                                      "err err_setmaxqty" +
+                                                      index2 +
+                                                      ind21
+                                                    }
+                                                  ></span>
+                                                </div>
+                                              </div>
+
+                                              <div className="form-group">
+                                                <div className="modal-left-bx">
+                                                  <label>Pre-Set Qty</label>
+                                                  <span className="asterisk">
+                                                    *
+                                                  </span>
+                                                </div>
+                                                <div className="modal-right-bx">
+                                                  <input
+                                                    type="number"
+                                                    value={itm21.preset}
+                                                    className="form-control"
+                                                    placeholder="Enter Pre-Set Qty"
+                                                    onChange={(ev) =>
+                                                      this.setformhandler(
+                                                        ev,
+                                                        index2,
+                                                        ind21,
+                                                        "preset"
+                                                      )
+                                                    }
+                                                  />
+                                                  <span
+                                                    className={
+                                                      "err err_preset" +
+                                                      index2 +
+                                                      ind21
+                                                    }
+                                                  ></span>
+                                                </div>
+                                              </div>
+                                              <div className="form-group">
+                                                <div className="modal-left-bx">
+                                                  <label>Priority</label>
+                                                  <span className="asterisk">
+                                                    *
+                                                  </span>
+                                                </div>
+                                                <div className="modal-right-bx">
+                                                  <input
+                                                    type="number"
+                                                    value={itm21.priority}
+                                                    className="form-control"
+                                                    placeholder="Enter priority"
+                                                    onChange={(ev) =>
+                                                      this.setformhandler(
+                                                        ev,
+                                                        index2,
+                                                        ind21,
+                                                        "priority"
+                                                      )
+                                                    }
+                                                  />
+                                                </div>
+                                              </div>
+
+                                              <i
+                                                className="fa fa-times"
+                                                onClick={() =>
+                                                  this.removeset(
+                                                    "Remove",
                                                     index2,
                                                     ind21
                                                   )
                                                 }
-                                                className="select-search"
-                                                value={itm21.product}
-                                              />
-                                              <span
-                                                className={
-                                                  "err err_product" +
-                                                  index2 +
-                                                  ind21
-                                                }
-                                              ></span>
+                                                aria-hidden="true"
+                                              ></i>
                                             </div>
-                                          </div>
-
-                                          <div className="form-group">
-                                            <div className="modal-left-bx">
-                                              <label>Package</label>
-                                            </div>
-                                            <div className="modal-right-bx">
-                                              <select
-                                                onChange={(ev) =>
-                                                  this.setformhandler(
-                                                    ev,
-                                                    index2,
-                                                    ind21,
-                                                    "package"
-                                                  )
-                                                }
-                                              >
-                                                <option value="">
-                                                  Select Package
-                                                </option>
-                                                {itm21.package_items &&
-                                                  itm21.package_items.map(
-                                                    (item1212) => (
-                                                      <option
-                                                        value={
-                                                          item1212.packet_size
-                                                        }
-                                                      >
-                                                        {item1212.packetLabel}
-                                                      </option>
-                                                    )
-                                                  )}
-                                              </select>
-                                            </div>
-                                          </div>
-
-                                          <div className="form-group">
-                                            <div className="modal-left-bx">
-                                              <label>Min Qty</label>
-                                              <span className="asterisk">
-                                                *
-                                              </span>
-                                            </div>
-                                            <div className="modal-right-bx">
-                                              <input
-                                                type="number"
-                                                value={itm21.setminqty}
-                                                className="form-control"
-                                                placeholder="Enter Min Qty"
-                                                onChange={(ev) =>
-                                                  this.setformhandler(
-                                                    ev,
-                                                    index2,
-                                                    ind21,
-                                                    "setminqty"
-                                                  )
-                                                }
-                                              />
-                                              <span
-                                                className={
-                                                  "err err_setminqty" +
-                                                  index2 +
-                                                  ind21
-                                                }
-                                              ></span>
-                                            </div>
-                                          </div>
-
-                                          <div className="form-group">
-                                            <div className="modal-left-bx">
-                                              <label>Max Qty</label>
-                                              <span className="asterisk">
-                                                *
-                                              </span>
-                                            </div>
-                                            <div className="modal-right-bx">
-                                              <input
-                                                type="number"
-                                                value={itm21.setmaxqty}
-                                                className="form-control"
-                                                placeholder="Enter Max Qty"
-                                                onChange={(ev) =>
-                                                  this.setformhandler(
-                                                    ev,
-                                                    index2,
-                                                    ind21,
-                                                    "setmaxqty"
-                                                  )
-                                                }
-                                              />
-                                              <span
-                                                className={
-                                                  "err err_setmaxqty" +
-                                                  index2 +
-                                                  ind21
-                                                }
-                                              ></span>
-                                            </div>
-                                          </div>
-
-                                          <div className="form-group">
-                                            <div className="modal-left-bx">
-                                              <label>Pre-Set Qty</label>
-                                              <span className="asterisk">
-                                                *
-                                              </span>
-                                            </div>
-                                            <div className="modal-right-bx">
-                                              <input
-                                                type="number"
-                                                value={itm21.preset}
-                                                className="form-control"
-                                                placeholder="Enter Pre-Set Qty"
-                                                onChange={(ev) =>
-                                                  this.setformhandler(
-                                                    ev,
-                                                    index2,
-                                                    ind21,
-                                                    "preset"
-                                                  )
-                                                }
-                                              />
-                                              <span
-                                                className={
-                                                  "err err_preset" +
-                                                  index2 +
-                                                  ind21
-                                                }
-                                              ></span>
-                                            </div>
-                                          </div>
-                                          <div className="form-group">
-                                            <div className="modal-left-bx">
-                                              <label>Priority</label>
-                                              <span className="asterisk">
-                                                *
-                                              </span>
-                                            </div>
-                                            <div className="modal-right-bx">
-                                              <input
-                                                type="number"
-                                                value={itm21.priority}
-                                                className="form-control"
-                                                placeholder="Enter priority"
-                                                onChange={(ev) =>
-                                                  this.setformhandler(
-                                                    ev,
-                                                    index2,
-                                                    ind21,
-                                                    "priority"
-                                                  )
-                                                }
-                                              />
-                                            </div>
-                                          </div>
-
-                                          <i
-                                            className="fa fa-times"
-                                            onClick={() =>
-                                              this.removeset(
-                                                "Remove",
-                                                index2,
+                                            <div
+                                              className={
+                                                "err err_qty_group" +
+                                                index2 +
                                                 ind21
-                                              )
-                                            }
-                                            aria-hidden="true"
-                                          ></i>
-                                        </div>
-                                      ))}
+                                              }
+                                            ></div>
+                                          </>
+                                        ))}
+                                    </div>
                                     <div className="form-group">
                                       <div className="add_packaging">
                                         <button
@@ -3208,8 +3272,9 @@ export default class addproduct extends Component {
                                         </button>
                                       </div>
                                     </div>
-                                  </div>
+                                  </>
                                 ))}
+                              <div className="err err_group_region"></div>
                               <div className="form-group">
                                 <div className="add_packaging">
                                   <button
